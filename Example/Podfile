@@ -3,7 +3,7 @@ inhibit_all_warnings!
 
 target 'PSImageEditors' do
 
-  pod 'PSImageEditors', :path => '../'
+pod 'PSImageEditors', :path => '../'
 
   target 'PSImageEditorsTests' do
     inherit! :search_paths

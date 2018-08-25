@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="Z1m-Tf-CiT">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="Z1m-Tf-CiT">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -12,45 +12,84 @@
         <!--PSImageEditors-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="PSViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="yjR-xR-KrU"/>
                         <viewControllerLayoutGuide type="bottom" id="Sz5-Ti-MMy"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                    <view key="view" alpha="0.90000000000000002" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ucd-MX-SwG">
-                                <rect key="frame" x="118" y="244.5" width="139" height="30"/>
-                                <state key="normal" title="preview local  image"/>
+                                <rect key="frame" x="118" y="152" width="139" height="30"/>
+                                <state key="normal" title="preview local  image">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
                                 <connections>
                                     <action selector="previewLocalImageDidClick" destination="BYZ-38-t0r" eventType="touchUpInside" id="LHi-m7-H2h"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LYn-dz-JAv">
-                                <rect key="frame" x="106" y="318.5" width="163" height="30"/>
-                                <state key="normal" title="preview network  image"/>
+                                <rect key="frame" x="106" y="226" width="163" height="30"/>
+                                <state key="normal" title="preview network  image">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
                                 <connections>
                                     <action selector="previewNetworkImageDidClick" destination="BYZ-38-t0r" eventType="touchUpInside" id="p87-oW-L1S"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FBt-wm-BF4">
-                                <rect key="frame" x="134" y="392.5" width="107" height="30"/>
-                                <state key="normal" title="image cropping"/>
+                                <rect key="frame" x="142" y="300" width="91" height="30"/>
+                                <state key="normal" title="coolPreviews">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
                                 <connections>
-                                    <action selector="imageCroppingDidClick" destination="BYZ-38-t0r" eventType="touchUpInside" id="PXl-8v-YkO"/>
+                                    <action selector="coolPreviewsDidClick" destination="BYZ-38-t0r" eventType="touchUpInside" id="BXe-UJ-rgE"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GOY-LN-wlq">
+                                <rect key="frame" x="134" y="522" width="107" height="30"/>
+                                <state key="normal" title="image cropping">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="imageCroppingDidClick" destination="BYZ-38-t0r" eventType="touchUpInside" id="7mC-Fo-mOp"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="df8-fI-kHy">
+                                <rect key="frame" x="115" y="448" width="145" height="30"/>
+                                <state key="normal" title="select album preview">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="selectAlbumPreviewDidClick" destination="BYZ-38-t0r" eventType="touchUpInside" id="CfV-Xn-mlP"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CVC-D2-ECC">
+                                <rect key="frame" x="146.5" y="374" width="82" height="30"/>
+                                <state key="normal" title="filePreviews">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="filePreviewsDidClick" destination="BYZ-38-t0r" eventType="touchUpInside" id="kjz-fw-eaF"/>
                                 </connections>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="FBt-wm-BF4" firstAttribute="top" secondItem="LYn-dz-JAv" secondAttribute="bottom" constant="44" id="3i2-J8-dbz"/>
-                            <constraint firstItem="LYn-dz-JAv" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="EYI-Y0-mvE"/>
-                            <constraint firstItem="FBt-wm-BF4" firstAttribute="centerX" secondItem="ucd-MX-SwG" secondAttribute="centerX" id="P6T-fT-31f"/>
-                            <constraint firstItem="LYn-dz-JAv" firstAttribute="centerX" secondItem="ucd-MX-SwG" secondAttribute="centerX" id="ole-n6-wX0"/>
-                            <constraint firstItem="LYn-dz-JAv" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="pRM-lm-Y2F"/>
-                            <constraint firstItem="LYn-dz-JAv" firstAttribute="top" secondItem="ucd-MX-SwG" secondAttribute="bottom" constant="44" id="vJQ-tX-0u9"/>
+                            <constraint firstItem="LYn-dz-JAv" firstAttribute="top" secondItem="ucd-MX-SwG" secondAttribute="bottom" constant="44" id="1fA-8O-uqv"/>
+                            <constraint firstItem="df8-fI-kHy" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="5GO-ID-QyI"/>
+                            <constraint firstItem="GOY-LN-wlq" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="5mK-uo-feH"/>
+                            <constraint firstItem="df8-fI-kHy" firstAttribute="top" secondItem="CVC-D2-ECC" secondAttribute="bottom" constant="44" id="HtG-kl-Q0J"/>
+                            <constraint firstItem="ucd-MX-SwG" firstAttribute="top" secondItem="yjR-xR-KrU" secondAttribute="bottom" constant="88" id="JbY-rO-ej5"/>
+                            <constraint firstItem="LYn-dz-JAv" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="KBC-DR-kV2"/>
+                            <constraint firstItem="CVC-D2-ECC" firstAttribute="top" secondItem="FBt-wm-BF4" secondAttribute="bottom" constant="44" id="cWX-4X-9d0"/>
+                            <constraint firstItem="GOY-LN-wlq" firstAttribute="top" secondItem="df8-fI-kHy" secondAttribute="bottom" constant="44" id="eaV-9X-lUR"/>
+                            <constraint firstItem="FBt-wm-BF4" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="fJp-ME-sy1"/>
+                            <constraint firstItem="ucd-MX-SwG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="jjZ-VD-rNb"/>
+                            <constraint firstItem="CVC-D2-ECC" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="rg5-DG-nbc"/>
+                            <constraint firstItem="FBt-wm-BF4" firstAttribute="top" secondItem="LYn-dz-JAv" secondAttribute="bottom" constant="44" id="u4h-3g-N82"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="PSImageEditors" id="csA-eg-0od"/>
@@ -62,7 +101,7 @@
         <!--Navigation Controller-->
         <scene sceneID="S2e-dd-Ch6">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Z1m-Tf-CiT" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Z1m-Tf-CiT" customClass="PSNavigationController" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="l0l-Um-JhC">
                         <rect key="frame" x="0.0" y="20" width="375" height="44"/>
