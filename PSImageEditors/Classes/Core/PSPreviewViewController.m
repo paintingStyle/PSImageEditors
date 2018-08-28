@@ -29,7 +29,12 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 @property (nonatomic, strong, readwrite) NSMutableArray<PSImageObject *> *dataSources;
 @property (nonatomic, assign, readwrite) PSImageObject *currentImageObject;
 
+@property (nonatomic, copy) GestureDidClickCallback singleGestureDidClickBlock;
+@property (nonatomic, copy) GestureDidClickCallback longGestureDidClickBlock;
+
 @end
+
+#define DEF_Weakify(object) try{} @finally{} {} __weak __typeof__(object) weak##_##object = object;
 
 @implementation PSPreviewViewController
 
@@ -68,6 +73,17 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 	[super viewDidLoad];
 	[self configUI];
 	[self configData];
+	
+	@weakify(self);
+	self.singleGestureDidClickBlock = ^(PSImageObject *imageObject) {
+		@strongify(self);
+		NSIndexPath *indexPath = [NSIndexPath indexPathForItem:imageObject.index inSection:0];
+		[self collectionView:self.collectionView didSelectItemAtIndexPath:indexPath];
+	};
+	self.longGestureDidClickBlock = ^(PSImageObject *imageObject) {
+		@strongify(self);
+		[self moreButtonDidClick];
+	};
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -122,6 +138,7 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 	[self.collectionView reloadData];
     CGPoint offset = CGPointMake(self.currentIndex *CGRectGetWidth(self.collectionView.frame), 0);
     [self.collectionView setContentOffset:offset animated:NO];
+	[self scrollViewDidScroll:self.collectionView]; // 设置索引初始值
 }
 
 - (void)moreButtonDidClick {
@@ -140,22 +157,17 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 }
 
 - (void)saveCurrentImageToPhotosAlbum {
-    
-    if ([PSImageEditorsHelper checkAlbumIsAvailableViewController:self]) {
-        if (self.currentImageObject.url) {
-            [PSImageEditorsHelper imageDataWithImageURL:self.currentImageObject.url completion:^(NSData *data) {
-                [PSImageEditorsHelper saveToPhotosAlbumWithImageData:data completionHandler:^(BOOL success) {
-                    [self saveToPhotosAlbumSuccess:success];
-                }];
-            }];
-        }else {
-            NSData *data = self.currentImageObject.GIFImage ? self.currentImageObject.GIFImage.data:
-            UIImageJPEGRepresentation(self.currentImageObject.image, 1.0f);
-            [PSImageEditorsHelper saveToPhotosAlbumWithImageData:data completionHandler:^(BOOL success) {
-                [self saveToPhotosAlbumSuccess:success];
-            }];
-        }
-    }
+	
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		[PSImageEditorsHelper checkAlbumAvailableWithViewController:self
+															handler:^(BOOL available) {
+				NSData *data = self.currentImageObject.GIFImage ? self.currentImageObject.GIFImage.data:
+				UIImageJPEGRepresentation(self.currentImageObject.image, 1.0f);
+				[PSImageEditorsHelper saveToPhotosAlbumWithImageData:data completionHandler:^(BOOL success) {
+					[self saveToPhotosAlbumSuccess:success];
+				}];
+	   }];
+	});
 }
 
 - (void)saveToPhotosAlbumSuccess:(BOOL)success {
@@ -181,6 +193,8 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 	PSPreviewViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:
 							   kReusableCellIdentifier forIndexPath:indexPath];
 	PSImageObject *imageObject = self.dataSources[indexPath.item];
+	cell.singleGestureDidClickBlock = self.singleGestureDidClickBlock;
+	cell.longGestureDidClickBlock = self.longGestureDidClickBlock;
 	cell.imageObject = imageObject;
 	
 	return cell;
@@ -211,6 +225,11 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
     self.currentImageObject = self.dataSources[index];
     self.navigationItem.title = [NSString stringWithFormat:@"%ld/%ld",
                                  index +1,self.dataSources.count];
+	
+	if (self.delegate && [self.delegate respondsToSelector:
+						  @selector(previewViewController:didScrollAtImageObject:)]) {
+		[self.delegate previewViewController:self didScrollAtImageObject:self.currentImageObject];
+	}
 }
 
 #pragma mark - InitAndLayout
@@ -229,7 +248,7 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 	self.collectionView.delegate = self;
 	self.collectionView.dataSource = self;
 	[self.view addSubview:self.collectionView];
-	PS_SCROLLVIEWINSETS_NO(self.collectionView);
+	PS_SCROLLVIEW_INSETS_NO(self.collectionView);
 
     UIButton *moreButton = [[UIButton alloc] init];
     [moreButton setFrame:CGRectMake(0, 0, 44, 44)];

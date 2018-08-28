@@ -18,6 +18,16 @@
 	#import "UIImageView+WebCache.h"
 #endif
 
+#define PS_Is_GIFTypeWithData(data)\
+({\
+BOOL result = NO;\
+if(!data) result = NO;\
+uint8_t c;\
+[data getBytes:&c length:1];\
+if(c == 0x47) result = YES;\
+(result);\
+})
+
 #define iPhone_X ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
 
 #define PS_LAYOUT_W(v) ceil(((v)/375.0f * [UIScreen mainScreen].bounds.size.width))
@@ -39,10 +49,26 @@
 #define PS_PLACEHOLDER_COLOR PS_HEX_COLOR(F1F4F6)
 #define PS_IMAGE(x) [UIImage PS_personalCardImageNamed:x]
 
+#ifndef weakify
+#if __has_feature(objc_arc)
+	#define weakify(x) autoreleasepool{} __weak __typeof__(x) __weak_##x##__ = x;
+#else
+	#define weakify(x) autoreleasepool{} __block __typeof__(x) __block_##x##__ = x;
+#endif
+#endif
+
+#ifndef strongify
+#if __has_feature(objc_arc)
+	#define strongify(x) try{} @finally{} __typeof__(x)x = __weak_##x##__;
+#else
+	#define strongify(x) try{} @finally{} __typeof__(x)x = __block_##x##__;
+#endif
+#endif
+
 /**
  关闭视图的自带间距
  */
-#define PS_SCROLLVIEWINSETS_NO(scrollView)\
+#define PS_SCROLLVIEW_INSETS_NO(scrollView)\
 if(@available(iOS 11.0, *)) {\
 scrollView.contentInsetAdjustmentBehavior =\
 UIScrollViewContentInsetAdjustmentNever;\

@@ -7,6 +7,7 @@
 //
 
 #import "PSNavigationController.h"
+#import <UIImage+PSImageEditors.h>
 
 #define UIColorFromRGBA(rgbValue, alphaValue) [UIColor \
 colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 \
@@ -40,7 +41,7 @@ alpha:alphaValue]
         UIButton *btn = [[UIButton alloc] init];
         [btn setFrame:CGRectMake(0, 0, 44, 44)];
         btn.contentEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-        [btn setImage:[UIImage imageNamed:@"btn_navBar_back"]  forState:UIControlStateNormal];
+        [btn setImage:[UIImage ps_imageNamed:@"btn_navBar_back"] forState:UIControlStateNormal];
         [btn setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
         [btn addTarget:self action:@selector(backButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
         viewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:btn];

@@ -6,6 +6,7 @@
 //
 
 #import "PSBottomToolBar.h"
+#import "PSImageObject.h"
 
 @interface PSBottomToolBar()
 
@@ -14,6 +15,21 @@
 @end
 
 @implementation PSBottomToolBar
+
+- (void)setImageObject:(PSImageObject *)imageObject {
+	
+	_imageObject = imageObject;
+	
+	self.titleLabel.text = [NSString stringWithFormat:@"原图(%@)",
+							imageObject.originSize];
+	
+	@weakify(self);
+	_imageObject.fetchOriginSizeBlock = ^(NSString * _Nonnull originSize) {
+		@strongify(self);
+		self.titleLabel.text = [NSString stringWithFormat:@"原图(%@)",
+								imageObject.originSize];
+	};
+}
 
 - (instancetype)initWithType:(PSBottomToolType)type {
     
@@ -38,9 +54,19 @@
             default:
                 break;
         }
-        DEBUG_VIEW(self);
     }
     return self;
+}
+
+- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation {
+	
+	[UIView animateWithDuration:(animation ? 0.15:0) animations:^{
+		if (show) {
+			self.transform = CGAffineTransformIdentity;
+		}else{
+			self.transform = CGAffineTransformMakeTranslation(0, 50);
+		}
+	}];
 }
 
 - (void)configDefaultUI {
@@ -50,12 +76,13 @@
     self.titleLabel.textAlignment = NSTextAlignmentCenter;
     self.titleLabel.font = [UIFont systemFontOfSize:17.0f];
     [self addSubview:self.titleLabel];
-    
+	
     [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.center.equalTo(self);
+		make.height.equalTo(@20);
+		make.left.equalTo(@15);
+		make.right.equalTo(@(-15));
     }];
-    
-    self.titleLabel.text = @"原图(638KB)";
 }
 
 - (void)configPreviewUI {

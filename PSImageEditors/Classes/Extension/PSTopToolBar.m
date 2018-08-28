@@ -37,6 +37,8 @@
 
 @interface PSTopToolBar()
 
+@property (nonatomic, assign) PSTopToolType type;
+
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UIButton *backButton;
 @property (nonatomic, strong) UIButton *moreButton;
@@ -45,9 +47,16 @@
 
 @implementation PSTopToolBar
 
+- (void)setTitle:(NSString *)title {
+	
+	_title = title;
+	self.titleLabel.text = title;
+}
+
 - (instancetype)initWithType:(PSTopToolType)type {
     
     if (self = [super init]) {
+		self.type = type;
         self.backgroundColor = [UIColor colorWithWhite:0 alpha:0.6f];
         switch (type) {
             case PSTopToolTypeDefault:
@@ -69,12 +78,18 @@
     return self;
 }
 
-- (void)backButtonDidClick {
-    
-}
-
-- (void)moreButtonDidClick {
-    
+- (void)buttonDidClickSender:(UIButton *)btn {
+	
+	PSTopToolEvent event;
+	if (btn == self.backButton) {
+		event = PSTopToolEventBack;
+	}else if (btn == self.moreButton) {
+		event = PSTopToolEventMore;
+	}
+	if (self.delegate && [self.delegate respondsToSelector:
+						  @selector(topToolBarType:event:)]) {
+		[self.delegate topToolBarType:self.type event:event];
+	}
 }
 
 - (void)configDefaultUI {
@@ -82,10 +97,10 @@
     self.backButton = [[UIButton alloc] init];
     [self.backButton setFrame:CGRectMake(0, 0, 44, 44)];
     self.backButton.contentEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-    [self.backButton setImage:[UIImage ps_imageNamed:@"btn_previewView_more"]
+    [self.backButton setImage:[UIImage ps_imageNamed:@"btn_navBar_back"]
                      forState:UIControlStateNormal];
     [self.backButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
-    [self.backButton addTarget:self action:@selector(backButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
+	[self.backButton addTarget:self action:@selector(buttonDidClickSender:) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:self.backButton];
     
     self.moreButton = [[UIButton alloc] init];
@@ -94,7 +109,7 @@
     [self.moreButton setImage:[UIImage ps_imageNamed:@"btn_previewView_more"]
                      forState:UIControlStateNormal];
     [self.moreButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentRight];
-    [self.moreButton addTarget:self action:@selector(moreButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
+	[self.moreButton addTarget:self action:@selector(buttonDidClickSender:) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:self.moreButton];
     
     self.titleLabel = [[UILabel alloc] init];
@@ -124,9 +139,18 @@
         make.right.equalTo(self.moreButton.mas_left).offset(-15);
         make.centerY.equalTo(self).offset(PS_STATUS_BAR_H *0.5);
     }];
-    
-    self.titleLabel.text = @"3/6";
    // DEBUG_VIEW(self);
+}
+
+- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation {
+	
+	[UIView animateWithDuration:(animation ? 0.15:0) animations:^{
+		if (show) {
+			self.transform = CGAffineTransformIdentity;
+		}else{
+			self.transform = CGAffineTransformMakeTranslation(0, -PS_NAV_BAR_H);
+		}
+	}];
 }
 
 - (void)configPreviewUI {

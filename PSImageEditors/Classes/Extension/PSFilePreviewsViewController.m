@@ -10,10 +10,14 @@
 #import "PSBottomToolBar.h"
 #import "PSActionSheet.h"
 
-@interface PSFilePreviewsViewController ()<PSPreviewViewControllerDelegate>
+@interface PSFilePreviewsViewController ()
+<PSPreviewViewControllerDelegate,
+PSTopToolBarDelegate>
 
 @property (nonatomic, strong) PSTopToolBar *topToolBar;
 @property (nonatomic, strong) PSBottomToolBar *bottomToolBar;
+
+@property (nonatomic, assign, getter=isShowToolBar) BOOL showToolBar;
 
 @end
 
@@ -45,7 +49,7 @@
     [super configData];
 }
 
-- (void)morebuttonDidClick {
+- (void)showMoreActionSheet {
     
     [PSActionSheet sheetWithActionTitles:@[@"发给送朋友",
                                            @"保存到手机",
@@ -74,24 +78,35 @@
 
 - (void)previewViewController:(PSPreviewViewController *)controller
      didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
-    
-    BOOL hidden = !self.topToolBar.hidden;
-    
-    [self.topToolBar mas_updateConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(self.view).offset(hidden ? -PS_NAV_BAR_H:0);
-    }];
-    [self.bottomToolBar mas_updateConstraints:^(MASConstraintMaker *make) {
-        make.bottom.equalTo(self.view).offset(hidden ? 50:0);
-    }];
-    
-    [UIView animateWithDuration:0.25f
-                          delay:0
-                        options:UIViewAnimationOptionCurveLinear
-                     animations:^{
-                         self.topToolBar.hidden = hidden;
-                         self.bottomToolBar.hidden = hidden;
-                         [self.view layoutIfNeeded];
-                     } completion:nil];
+	
+	self.showToolBar = !self.showToolBar;
+
+	[self.topToolBar setToolBarShow:self.showToolBar animation:YES];
+	[self.bottomToolBar setToolBarShow:self.showToolBar animation:YES];
+}
+
+- (void)previewViewController:(PSPreviewViewController *)controller
+	   didScrollAtImageObject:(PSImageObject *)object {
+	
+	self.topToolBar.title = self.navigationItem.title;
+	self.topToolBar.imageObject = object;
+	self.bottomToolBar.imageObject = object;
+}
+
+#pragma mark - PSTopToolBarDelegate
+
+- (void)topToolBarType:(PSTopToolType)type event:(PSTopToolEvent)event {
+	
+	switch (event) {
+		case PSTopToolEventBack:
+			[self.navigationController popViewControllerAnimated:YES];
+			break;
+		case PSTopToolEventMore:
+			[self showMoreActionSheet];
+			break;
+		default:
+			break;
+	}
 }
 
 #pragma mark - InitAndLayout
@@ -101,8 +116,10 @@
     [super configUI];
     self.delegate = self;
     self.clickShowNavigationBar = NO;
+	self.showToolBar = YES;
    
     self.topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolTypeDefault];
+	self.topToolBar.delegate = self;
     [self.view addSubview:self.topToolBar];
     [self.topToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
        

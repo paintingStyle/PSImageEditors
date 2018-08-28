@@ -6,6 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
+@class PSImageObject;
 
 typedef NS_ENUM(NSUInteger, PSBottomToolType) {
     
@@ -18,6 +19,10 @@ typedef NS_ENUM(NSUInteger, PSBottomToolType) {
 
 @interface PSBottomToolBar : UIView
 
+@property (nonatomic, strong) PSImageObject *imageObject;
+
 - (instancetype)initWithType:(PSBottomToolType)type;
+
+- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation;
 
 @end

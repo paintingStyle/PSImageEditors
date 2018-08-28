@@ -11,6 +11,35 @@
 
 @implementation PSImageEditorsHelper
 
++ (UIImage *)imageByScalingToSize:(CGSize)targetSize
+					  sourceImage:(UIImage *)image {
+	
+	UIImage *newImage = nil;
+	
+	CGFloat targetWidth = ceilf(targetSize.width);
+	CGFloat targetHeight = ceilf(targetSize.height);
+	
+	CGFloat scaledWidth = targetWidth;
+	CGFloat scaledHeight = targetHeight;
+	
+	CGPoint thumbnailPoint = CGPointMake(0.0,0.0);
+	
+	UIGraphicsBeginImageContextWithOptions(targetSize, NO, [[UIScreen mainScreen] scale]);
+	CGRect thumbnailRect = CGRectZero;
+	thumbnailRect.origin = thumbnailPoint;
+	thumbnailRect.size.width = scaledWidth;
+	thumbnailRect.size.height = scaledHeight;
+	[image drawInRect:thumbnailRect];
+	newImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	if (newImage == nil) {
+		NSLog(@"Could not scale image");
+	}
+	
+	return newImage;
+}
+
 + (UIImage *)imageWithColor:(UIColor *)color {
 	
 	CGRect rect = CGRectMake(0, 0, 1, 1);
@@ -39,34 +68,83 @@
     components[3] = alpha;
 }
 
-+ (BOOL)checkAlbumIsAvailableViewController:(UIViewController *)controller {
++ (NSString *)fileSizeWithByteSize:(NSInteger)byteSize {
+	
+	if (byteSize <=0) { return @"0KB"; }
+	
+	NSDecimalNumber *decimalNumber = [[NSDecimalNumber alloc] initWithString:[NSString stringWithFormat:@"%ld",byteSize]];
+	CGFloat byteSizeFloatValue = [decimalNumber floatValue];
+	
+	// 注意iOS中的字节之间的换算是1000不是1024
+	CGFloat ratio = 1000.00;
+	
+	if (byteSizeFloatValue < ratio) {
+		
+		// 小于1k
+		return [NSString stringWithFormat:@"%ldB",(long)byteSize];
+		
+	}else if (byteSizeFloatValue < ratio * ratio){
+		
+		// 小于1m
+		CGFloat aFloat = byteSize/ratio;
+		return [NSString stringWithFormat:@"%.0fKB",aFloat];
+		
+	}else if (byteSizeFloatValue < ratio * ratio * ratio){
+		
+		// 小于1G
+		CGFloat aFloat = byteSize/(ratio * ratio);
+		return [NSString stringWithFormat:@"%.1fM",aFloat];
+		
+	}else{
+		
+		CGFloat aFloat = byteSize/(ratio*ratio*ratio);
+		return [NSString stringWithFormat:@"%.1fG",aFloat];
+	}
+}
+
++ (void)checkAlbumAvailableWithViewController:(UIViewController *)controller
+									  handler:(void(^)(BOOL available))handler {
     
     // 判断相册是否可以打开
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
         
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:@"相册不可用" preferredStyle:UIAlertControllerStyleAlert];
         [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
-        
         [controller presentViewController:alertController animated:YES completion:nil];
-        return NO;
+		if (handler) { handler(NO); }
     }
-    
     // 判断相册权限
     PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
-    if (status == PHAuthorizationStatusRestricted ||
-        status == PHAuthorizationStatusDenied) {
-        //无权限 引导去开启
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:@"相册权限受限 请在设备的\"设置-隐私-相册\"中允许访问相册" preferredStyle:UIAlertControllerStyleAlert];
-        [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
-            if ([[UIApplication sharedApplication]canOpenURL:url]) {
-                [[UIApplication sharedApplication] openURL:url options:@{}  completionHandler:nil];
-            }
-        }]];
-        [controller presentViewController:alertController animated:YES completion:nil];
-        return NO;
+	
+	if (status == PHAuthorizationStatusAuthorized) { // 有权限
+		 if (handler) { handler(YES); }
+	}else if (status == PHAuthorizationStatusNotDetermined) { // 还没有申请权限
+		[PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+			if (status == PHAuthorizationStatusAuthorized) { // 有权限
+				if (handler) { handler(YES); }
+			}else if(status == PHAuthorizationStatusRestricted || // 无权限 引导去开启
+					 status == PHAuthorizationStatusDenied) {
+				[self showPhotoLibraryLimitedAlertWithController:controller];
+				if (handler) { handler(NO); }
+			}
+		}];
+	}else if (status == PHAuthorizationStatusRestricted || // 无权限 引导去开启
+        	  status == PHAuthorizationStatusDenied) {
+        [self showPhotoLibraryLimitedAlertWithController:controller];
+		if (handler) { handler(NO); }
     }
-    return YES;
+}
+
++ (void)showPhotoLibraryLimitedAlertWithController:(UIViewController *)controller {
+	
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:@"相册权限受限 请在设备的\"设置-隐私-相册\"中允许访问相册" preferredStyle:UIAlertControllerStyleAlert];
+	[alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+		NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+		if ([[UIApplication sharedApplication]canOpenURL:url]) {
+			[[UIApplication sharedApplication] openURL:url options:@{}  completionHandler:nil];
+		}
+	}]];
+	[controller presentViewController:alertController animated:YES completion:nil];
 }
 
 + (void)saveToPhotosAlbumWithImageData:(NSData *)data completionHandler:(void(^)(BOOL success))handler {

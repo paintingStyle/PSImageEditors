@@ -9,11 +9,17 @@
 
 @interface PSImageEditorsHelper : NSObject
 
++ (UIImage *)imageByScalingToSize:(CGSize)targetSize
+					  sourceImage:(UIImage *)image;
+
 + (UIImage *)imageWithColor:(UIColor *)color;
+
++ (NSString *)fileSizeWithByteSize:(NSInteger)byteSize;
 
 + (void)rgbComponents:(CGFloat [4])components color:(UIColor *)color;
 
-+ (BOOL)checkAlbumIsAvailableViewController:(UIViewController *)controller;
++ (void)checkAlbumAvailableWithViewController:(UIViewController *)controller
+									  handler:(void(^)(BOOL available))handler;
 
 + (void)saveToPhotosAlbumWithImageData:(NSData *)data completionHandler:(void(^)(BOOL success))handler;
 

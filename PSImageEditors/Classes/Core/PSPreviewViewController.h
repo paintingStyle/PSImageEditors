@@ -13,8 +13,13 @@
 
 @optional
 
+/// 点击图片
 - (void)previewViewController:(PSPreviewViewController *)controller
      didSelectItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/// 滚动视图
+- (void)previewViewController:(PSPreviewViewController *)controller
+	   didScrollAtImageObject:(PSImageObject *)object;
 
 @end
 

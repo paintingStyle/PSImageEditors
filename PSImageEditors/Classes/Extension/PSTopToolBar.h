@@ -6,6 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
+@class PSImageObject;
 
 typedef NS_ENUM(NSUInteger, PSTopToolType) {
     
@@ -15,8 +16,30 @@ typedef NS_ENUM(NSUInteger, PSTopToolType) {
     PSTopToolTypeCancelAndDoneIcon, /**< 取消与完成图标样式  */
 };
 
+typedef NS_ENUM(NSUInteger, PSTopToolEvent) {
+	
+	PSTopToolEventBack = 0,
+	PSTopToolEventMore,
+};
+
+@protocol PSTopToolBarDelegate<NSObject>
+
+@optional
+
+- (void)topToolBarType:(PSTopToolType)type event:(PSTopToolEvent)event;
+
+@end
+
 @interface PSTopToolBar : UIView
 
+@property (nonatomic, weak) id<PSTopToolBarDelegate> delegate;
+
+@property (nonatomic, copy) NSString *title;
+
+@property (nonatomic, strong) PSImageObject *imageObject;
+
 - (instancetype)initWithType:(PSTopToolType)type;
+
+- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation;
 
 @end
