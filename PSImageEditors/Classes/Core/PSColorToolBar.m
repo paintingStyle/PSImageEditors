@@ -30,6 +30,12 @@
 
 @implementation PSColorToolBar
 
+- (void)setRevocation:(BOOL)revocation {
+    
+    _revocation = revocation;
+    self.revocationButton.enabled = revocation;
+}
+
 - (instancetype)initWithType:(PSColorToolBarType)type {
 	
 	if (self = [super init]) {
@@ -89,6 +95,8 @@
 			make.bottom.equalTo(self);
 			make.height.equalTo(@1);
 		}];
+    
+        self.redButton.isUse = YES;
 	}
 	return self;
 }
@@ -97,7 +105,7 @@
 	
 	[UIView animateWithDuration:(animation ? 0.15:0) animations:^{
 		self.alpha = (show ? 1.0f:0.0f);
-	}];
+    }];
 }
 
 - (void)colorFullButtonDidClick:(PSColorFullButton *)sender {
@@ -110,6 +118,10 @@
 			button.isUse = NO;
 		}
 	}
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(colorToolBarDidSelectColor:)]) {
+        [self.delegate colorToolBarDidSelectColor:self.currentColor];
+    }
 }
 
 - (PSColorFullButton *)blueButton {

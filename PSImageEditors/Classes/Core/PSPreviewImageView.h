@@ -13,6 +13,7 @@ typedef void(^GestureDidClickCallback)(void);
 @interface PSPreviewImageView : UIView
 
 @property (nonatomic, strong) UIImage *image;
+@property (nonatomic, strong) FLAnimatedImageView *imageView;
 
 @property (nonatomic, copy) GestureDidClickCallback singleGestureDidClickBlock;
 @property (nonatomic, copy) GestureDidClickCallback longGestureDidClickBlock;

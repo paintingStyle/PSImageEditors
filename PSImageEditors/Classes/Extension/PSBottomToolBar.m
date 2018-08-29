@@ -126,8 +126,6 @@
 
 - (void)buttonDidClickSender:(UIButton *)btn {
 	
-	[self resetButtons];
-	
 	PSBottomToolEvent event;
 	if (btn == self.brushButton) {
 		event = PSBottomToolEventBrush;
@@ -158,7 +156,7 @@
 	if (self.type == PSBottomToolTypeEditor) {
 		for (UIView *view in self.subviews) {
 			if ([view isKindOfClass:[UIButton class]]) {
-				((UIButton *)self.subviews).selected = NO;
+				((UIButton *)view).selected = NO;
 			}
 		}
 	}

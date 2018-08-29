@@ -10,10 +10,12 @@
 #import "PSBottomToolBar.h"
 #import "PSColorToolBar.h"
 #import "PSPreviewImageView.h"
+#import "PSDrawingBoard.h"
 
 @interface PSEditorViewController ()
 <PSTopToolBarDelegate,
-PSBottomToolBarDelegate> {
+PSBottomToolBarDelegate,
+PSColorToolBarDelegate> {
 	BOOL _navigationBarHidden;
 }
 
@@ -23,6 +25,9 @@ PSBottomToolBarDelegate> {
 @property (nonatomic, strong) PSTopToolBar *topToolBar;
 @property (nonatomic, strong) PSBottomToolBar *bottomToolBar;
 @property (nonatomic, strong) PSColorToolBar *colorToolBar;
+
+@property (nonatomic, strong) PSDrawingBoard *drawingBoard;
+@property (nonatomic, strong) UIImageView *drawingView;
 
 @end
 
@@ -46,10 +51,34 @@ PSBottomToolBarDelegate> {
 	@weakify(self);
 	self.imageView.singleGestureDidClickBlock = ^{
 		@strongify(self);
-		BOOL show = !self.topToolBar.show;
+		BOOL show = !self.topToolBar.isShow;
 		[self.topToolBar setToolBarShow:show animation:YES];
 		[self.bottomToolBar setToolBarShow:show animation:YES];
+        if (self.bottomToolBar.isEditor) {
+            [self.colorToolBar setToolBarShow:show animation:YES];
+        }
 	};
+    
+    self.drawingBoard.currentColor = [UIColor purpleColor];
+    self.drawingBoard.imageView = self.imageView;
+    self.drawingBoard.drawingView = self.drawingView;
+     self.imageView.imageView.userInteractionEnabled = YES;
+    
+    self.drawingBoard.pathWidth = 5.0f;
+    [self.drawingBoard setup];
+    
+    self.drawingBoard.drawToolStatus = ^(BOOL canPrev) {
+        @strongify(self);
+        self.colorToolBar.revocation = canPrev;
+    };
+    self.drawingBoard.drawingCallback = ^(BOOL isDrawing) {
+        @strongify(self);
+        
+    };
+    self.drawingBoard.drawingDidTap = ^(void) {
+        @strongify(self);
+       
+    };
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -75,6 +104,13 @@ PSBottomToolBarDelegate> {
 #pragma mark - Method
 
 #pragma mark - Delegate
+
+#pragma mark - PSColorToolBarDelegate
+
+- (void)colorToolBarDidSelectColor:(UIColor *)color {
+    
+    self.drawingBoard.currentColor = color;
+}
 
 #pragma mark - PSTopToolBarDelegate
 
@@ -123,6 +159,16 @@ PSBottomToolBarDelegate> {
 	[self.imageView mas_makeConstraints:^(MASConstraintMaker *make) {
 		make.edges.equalTo(self.view);
 	}];
+    
+    self.drawingView = [[UIImageView alloc] initWithFrame:self.imageView.superview.frame];
+    self.drawingView.contentMode = UIViewContentModeCenter;
+    self.drawingView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleTopMargin;
+    [self.imageView addSubview:self.drawingView];
+   // self.drawingView.userInteractionEnabled = YES;
+    [self.drawingView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self.view);
+    }];
+    
 	
 	self.topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolTypeCancelAndDoneText];
 	self.topToolBar.delegate = self;
@@ -145,6 +191,7 @@ PSBottomToolBarDelegate> {
 	}];
 	
 	self.colorToolBar = [[PSColorToolBar alloc] initWithType:PSColorToolBarTypeColor];
+    self.colorToolBar.delegate = self;
 	[self.colorToolBar setToolBarShow:NO animation:NO];
 	[self.view addSubview:self.colorToolBar];
 	[self.colorToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -156,5 +203,14 @@ PSBottomToolBarDelegate> {
 }
 
 #pragma mark - Getter/Setter
+
+- (PSDrawingBoard *)drawingBoard {
+    
+    return LAZY_LOAD(_drawingBoard, ({
+        
+        _drawingBoard = [[PSDrawingBoard alloc] init];
+        _drawingBoard;
+    }));
+}
 
 @end

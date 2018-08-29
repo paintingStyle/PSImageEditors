@@ -5,14 +5,36 @@
 //  Created by rsf on 2018/8/29.
 //
 
-#import <Foundation/Foundation.h>
+#import "PSBaseDrawingBoard.h"
+@class PSDrawingPath;
 
-@interface PSDrawingBoard : NSObject
+@interface PSDrawingBoard : PSBaseDrawingBoard
 
-- (void)setup;
-- (void)cleanup;
+@property (nonatomic, copy) void (^drawToolStatus)(BOOL canPrev);
+@property (nonatomic, copy) void (^drawingCallback)(BOOL isDrawing);
+@property (nonatomic, copy) void (^drawingDidTap)(void);
+@property (nonatomic, strong) NSMutableArray<PSDrawingPath *> *allLineMutableArray;
+@property (nonatomic, assign) CGFloat pathWidth;
 
-- (void)executeWithCompletionBlock:(void(^)(UIImage *image, NSError *error, NSDictionary *userInfo))completionBlock;
+/// 撤销
+- (void)backToLastDraw;
+- (void)drawLine;
+
+@end
+
+@interface PSDrawingPath : NSObject
+
+@property (nonatomic, strong) CAShapeLayer *shape;
+
+/// 画笔颜色
+@property (nonatomic, strong) UIColor *pathColor;
+
++ (instancetype)pathToPoint:(CGPoint)beginPoint pathWidth:(CGFloat)pathWidth;
+
+/// 画
+- (void)pathLineToPoint:(CGPoint)movePoint;
+/// 绘制
+- (void)drawPath;
 
 @end
 

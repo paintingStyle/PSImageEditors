@@ -12,7 +12,6 @@
 
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) UIView *containerView;
-@property (nonatomic, strong) FLAnimatedImageView *imageView;
 
 @end
 
