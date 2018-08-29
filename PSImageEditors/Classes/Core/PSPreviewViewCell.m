@@ -71,8 +71,11 @@
 	self.loadFailedView.hidden = hidden;
 	if (hidden) {
 		[self.contentView sendSubviewToBack:self.loadFailedView];
+		self.imageView.image = nil;
+		self.imageView.animatedImage = nil;
 	}else{
 		[self.contentView bringSubviewToFront:self.loadFailedView];
+		[self processingImageDisplay];
 	}
 }
 
@@ -180,6 +183,8 @@
 			make.width.equalTo(_scrollView);
 		}];
 		
+		// 在UIViewContentModeScaleAspectFit之后，获取已经调整大小图像的宽度
+		//imageView.clipsToBounds = true
 		// TODO: 需要计算_imageView的大小，动态调整_containerView的高度
 		_imageView = [[FLAnimatedImageView alloc] initWithFrame:CGRectZero];
 		_imageView.contentMode = UIViewContentModeScaleAspectFit;

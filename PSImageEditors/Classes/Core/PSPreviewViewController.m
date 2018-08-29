@@ -15,8 +15,7 @@
 static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 
 @interface PSPreviewViewController ()
-<UICollectionViewDelegate,UICollectionViewDataSource,UIScrollViewDelegate>  {
-    
+<UICollectionViewDelegate,UICollectionViewDataSource,UIScrollViewDelegate> {
     BOOL _navigationBarHidden;
 }
 

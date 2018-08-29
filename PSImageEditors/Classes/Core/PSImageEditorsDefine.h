@@ -49,6 +49,14 @@ if(c == 0x47) result = YES;\
 #define PS_PLACEHOLDER_COLOR PS_HEX_COLOR(F1F4F6)
 #define PS_IMAGE(x) [UIImage PS_personalCardImageNamed:x]
 
+#define PSColorFromRGBA(hexValue, alphaValue) [UIColor \
+colorWithRed:((float)((hexValue & 0xFF0000) >> 16))/255.0 \
+green:((float)((hexValue & 0x00FF00) >> 8))/255.0 \
+blue:((float)(hexValue & 0x0000FF))/255.0 \
+alpha:alphaValue]
+
+#define PSColorFromRGB(rgbValue) PSColorFromRGBA(rgbValue, 1.0)
+
 #ifndef weakify
 #if __has_feature(objc_arc)
 	#define weakify(x) autoreleasepool{} __weak __typeof__(x) __weak_##x##__ = x;

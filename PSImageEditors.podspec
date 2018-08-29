@@ -16,6 +16,7 @@ Pod::Spec.new do |s|
     #import <Masonry/Masonry.h>
     #import "PSImageEditorsDefine.h"
     #import "UIImage+PSImageEditors.h"
+	#import "UIColor+PSImageEditors.h"
     EOS
     s.prefix_header_contents = prefix_header_contents
 

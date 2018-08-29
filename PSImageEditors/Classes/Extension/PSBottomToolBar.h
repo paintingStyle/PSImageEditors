@@ -14,12 +14,33 @@ typedef NS_ENUM(NSUInteger, PSBottomToolType) {
     PSBottomToolTypePreview,    /**< 相册图片预览样式  */
     PSBottomToolTypeEditor,    /**< 编辑样式  */
     PSBottomToolTypeDelete,   /**< 拖动删除标样式  */
-    PSBottomToolTypeCut      /**< 裁剪样式  */
+    PSBottomToolTypeClipping /**< 裁剪样式  */
 };
+
+typedef NS_ENUM(NSUInteger, PSBottomToolEvent) {
+	
+	PSBottomToolEventBrush = 0,
+	PSBottomToolEventText,
+	PSBottomToolEventMosaic,
+	PSBottomToolEventClipping,
+};
+
+@protocol PSBottomToolBarDelegate<NSObject>
+
+@optional
+
+- (void)bottomToolBarType:(PSBottomToolType)type event:(PSBottomToolEvent)event;
+
+@end
 
 @interface PSBottomToolBar : UIView
 
+@property (nonatomic, weak) id<PSBottomToolBarDelegate> delegate;
+
 @property (nonatomic, strong) PSImageObject *imageObject;
+
+/// 是否处于编辑模式
+@property (nonatomic, assign, getter=isEditor) BOOL editor;
 
 - (instancetype)initWithType:(PSBottomToolType)type;
 

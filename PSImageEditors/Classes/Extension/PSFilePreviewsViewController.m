@@ -6,9 +6,11 @@
 //
 
 #import "PSFilePreviewsViewController.h"
+#import "PSEditorViewController.h"
 #import "PSTopToolBar.h"
 #import "PSBottomToolBar.h"
 #import "PSActionSheet.h"
+#import "PSImageObject.h"
 
 @interface PSFilePreviewsViewController ()
 <PSPreviewViewControllerDelegate,
@@ -32,14 +34,18 @@ PSTopToolBarDelegate>
     [self configData];
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    
-    [super viewWillAppear:animated];
+- (void)viewDidAppear:(BOOL)animated {
+	
+	[super viewDidAppear:animated];
+	[self.topToolBar setToolBarShow:YES animation:YES];
+	[self.bottomToolBar setToolBarShow:YES animation:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
-    
-    [super viewWillDisappear:animated];
+	
+	[super viewWillDisappear:animated];
+	[self.topToolBar setToolBarShow:NO animation:YES];
+	[self.bottomToolBar setToolBarShow:NO animation:YES];
 }
 
 #pragma mark - Method
@@ -64,12 +70,20 @@ PSTopToolBarDelegate>
                                          [self saveCurrentImageToPhotosAlbum];
                                          break;
                                          case 2:
+										 [self jumpEditorViewController];
                                          break;
                                      default:
                                          break;
                                  }
                              }];
     
+}
+
+- (void)jumpEditorViewController {
+	
+	UIImage *image = self.currentImageObject.GIFImage ? self.currentImageObject.GIFImage.posterImage:self.currentImageObject.image;
+	PSEditorViewController *controller = [[PSEditorViewController alloc] initWithImage:image];
+	[self.navigationController pushViewController:controller animated:YES];
 }
 
 #pragma mark - Delegate
@@ -132,7 +146,7 @@ PSTopToolBarDelegate>
     [self.bottomToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
         
         make.left.bottom.right.equalTo(self.view);
-        make.height.equalTo(@(50));
+        make.height.equalTo(@PS_TAB_BAR_H);
     }];
 }
 

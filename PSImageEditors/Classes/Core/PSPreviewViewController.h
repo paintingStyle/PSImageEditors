@@ -71,4 +71,3 @@
 - (void)saveCurrentImageToPhotosAlbum;
 
 @end
-

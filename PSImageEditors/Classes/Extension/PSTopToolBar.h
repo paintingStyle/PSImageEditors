@@ -20,6 +20,9 @@ typedef NS_ENUM(NSUInteger, PSTopToolEvent) {
 	
 	PSTopToolEventBack = 0,
 	PSTopToolEventMore,
+	PSTopToolEventCancel,
+	PSTopToolEventDone,
+	
 };
 
 @protocol PSTopToolBarDelegate<NSObject>
@@ -33,6 +36,8 @@ typedef NS_ENUM(NSUInteger, PSTopToolEvent) {
 @interface PSTopToolBar : UIView
 
 @property (nonatomic, weak) id<PSTopToolBarDelegate> delegate;
+
+@property (nonatomic, assign, getter=isShow) BOOL show;
 
 @property (nonatomic, copy) NSString *title;
 
