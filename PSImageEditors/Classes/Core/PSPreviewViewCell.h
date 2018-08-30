@@ -6,17 +6,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "PSPreviewImageView.h"
 #import "PSImageObject.h"
 
-typedef void(^GestureDidClickCallback)(PSImageObject *imageObject);
+typedef void(^GestureCallbackBlock)(PSImageObject *imageObject);
 
 @interface PSPreviewViewCell : UICollectionViewCell
 
+@property (nonatomic, strong, readonly) PSPreviewImageView *imageView;
 @property (nonatomic, strong) PSImageObject *imageObject;
-
-@property (nonatomic, copy) GestureDidClickCallback singleGestureDidClickBlock;
-
-@property (nonatomic, copy) GestureDidClickCallback longGestureDidClickBlock;
 
 @end
 

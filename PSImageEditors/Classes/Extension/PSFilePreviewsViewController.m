@@ -146,7 +146,7 @@ PSTopToolBarDelegate>
     [self.bottomToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
         
         make.left.bottom.right.equalTo(self.view);
-        make.height.equalTo(@PS_TAB_BAR_H);
+        make.height.equalTo(@(PSBottomToolBarHeight));
     }];
 }
 

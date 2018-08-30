@@ -6,8 +6,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "PSExpandClickAreaButton.h"
 
-@interface PSColorFullButton : UIButton
+@interface PSColorFullButton : PSExpandClickAreaButton
 
 // 绘制需要获取到self.bounds
 @property (nonatomic, assign) CGFloat radius;

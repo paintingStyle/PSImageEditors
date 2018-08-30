@@ -57,10 +57,9 @@
 }
 
 - (IBAction)filePreviewsDidClick {
-    
-    PSFilePreviewsViewController *controller = [[PSFilePreviewsViewController alloc] initWithURLs:self.urls
-                                                                                     currentIndex:0];
-    [self.navigationController pushViewController:controller animated:YES];
+	
+	PSFilePreviewsViewController *controller = [[PSFilePreviewsViewController alloc] initWithImages:self.images currentIndex:0];
+	[self.navigationController pushViewController:controller animated:YES];
 }
 
 - (IBAction)selectAlbumPreviewDidClick {

@@ -13,12 +13,12 @@
 @property (nonatomic, copy) void (^drawToolStatus)(BOOL canPrev);
 @property (nonatomic, copy) void (^drawingCallback)(BOOL isDrawing);
 @property (nonatomic, copy) void (^drawingDidTap)(void);
-@property (nonatomic, strong) NSMutableArray<PSDrawingPath *> *allLineMutableArray;
+
+@property (nonatomic, strong, readonly) NSMutableArray<PSDrawingPath *> *drawingPaths;
 @property (nonatomic, assign) CGFloat pathWidth;
 
 /// 撤销
-- (void)backToLastDraw;
-- (void)drawLine;
+- (void)revocation;
 
 @end
 

@@ -7,6 +7,7 @@
 
 #import <UIKit/UIKit.h>
 #import "PSColorFullButton.h"
+@class PSColorToolBar;
 
 typedef NS_ENUM(NSInteger, PSColorToolBarType) {
 	
@@ -14,12 +15,18 @@ typedef NS_ENUM(NSInteger, PSColorToolBarType) {
 	PSColorToolBarTypeText
 };
 
+typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
+	
+	PSColorToolBarEventSelectColor = 0,
+	PSColorToolBarEventRevocation,
+	PSColorToolBarEventSelectText
+};
+
 @protocol PSColorToolBarDelegate<NSObject>
 
 @optional
 
-/// 选中颜色
-- (void)colorToolBarDidSelectColor:(UIColor *)color;
+- (void)colorToolBar:(PSColorToolBar *)toolBar event:(PSColorToolBarEvent)event;
 
 @end
 
@@ -29,6 +36,7 @@ typedef NS_ENUM(NSInteger, PSColorToolBarType) {
 
 @property (nonatomic, weak) id<PSColorToolBarDelegate> delegate;
 
+/// 当前颜色
 @property (nonatomic, strong) UIColor *currentColor;
 
 /// 是否可以撤销

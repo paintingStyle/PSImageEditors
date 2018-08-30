@@ -13,6 +13,8 @@
     CGSize                     _originalImageSize;
 }
 
+@property (nonatomic, strong, readwrite) NSMutableArray<PSDrawingPath *> *drawingPaths;
+
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
 @property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
 
@@ -23,18 +25,17 @@
 - (instancetype)init {
     
     if (self = [super init]) {
-        _allLineMutableArray = [NSMutableArray new];
+        _drawingPaths = [NSMutableArray new];
     }
     return self;
 }
 
-
-- (void)backToLastDraw {
+- (void)revocation {
     
-    [_allLineMutableArray removeLastObject];
+    [_drawingPaths removeLastObject];
     [self drawLine];
     if (self.drawToolStatus) {
-        self.drawToolStatus(_allLineMutableArray.count > 0 ? : NO);
+        self.drawToolStatus(_drawingPaths.count > 0 ? : NO);
     }
 }
 
@@ -63,13 +64,13 @@
         PSDrawingPath *path = [PSDrawingPath pathToPoint:currentDraggingPosition pathWidth:MAX(1, self.pathWidth)];
         path.pathColor         = self.currentColor;
         path.shape.strokeColor = self.currentColor.CGColor;
-        [_allLineMutableArray addObject:path];
+        [_drawingPaths addObject:path];
         
     }
     
     if(sender.state == UIGestureRecognizerStateChanged) {
         // 获得数组中的最后一个UIBezierPath对象(因为我们每次都把UIBezierPath存入到数组最后一个,因此获取时也取最后一个)
-        PSDrawingPath *path = [_allLineMutableArray lastObject];
+        PSDrawingPath *path = [_drawingPaths lastObject];
         [path pathLineToPoint:currentDraggingPosition];//添加点
         [self drawLine];
         
@@ -80,7 +81,7 @@
     
     if (sender.state == UIGestureRecognizerStateEnded) {
         if (self.drawToolStatus) {
-            self.drawToolStatus(_allLineMutableArray.count > 0 ? : NO);
+            self.drawToolStatus(_drawingPaths.count > 0 ? : NO);
         }
         
         if (self.drawingCallback) {
@@ -97,7 +98,7 @@
     CGContextSetAllowsAntialiasing(context, true);
     CGContextSetShouldAntialias(context, true);
     
-    for (PSDrawingPath *path in _allLineMutableArray) {
+    for (PSDrawingPath *path in _drawingPaths) {
         [path drawPath];
     }
     
@@ -107,7 +108,8 @@
 }
 
 - (UIImage *)buildImage {
-    UIGraphicsBeginImageContextWithOptions(_originalImageSize, NO, self.imageView.image.scale);
+	
+	UIGraphicsBeginImageContextWithOptions(_originalImageSize, NO, self.imageView.image.scale);
     [self.imageView.image drawAtPoint:CGPointZero];
     [_drawingView.image drawInRect:CGRectMake(0, 0, _originalImageSize.width, _originalImageSize.height)];
     UIImage *tmp = UIGraphicsGetImageFromCurrentImageContext();
@@ -128,9 +130,6 @@
         self.panGesture.delegate = [PSImageEditorGestureManager instance];
         self.panGesture.maximumNumberOfTouches = 1;
     }
-    if (!self.panGesture.isEnabled) {
-        self.panGesture.enabled = YES;
-    }
     
     //点击手势
     if (!self.tapGesture) {
@@ -140,29 +139,30 @@
         self.tapGesture.numberOfTapsRequired = 1;
         
     }
-    
+	
     [_drawingView addGestureRecognizer:self.panGesture];
     [_drawingView addGestureRecognizer:self.tapGesture];
     _drawingView.userInteractionEnabled = YES;
     _drawingView.layer.shouldRasterize = YES;
     _drawingView.layer.minificationFilter = kCAFilterTrilinear;
-    
-    _drawingView.userInteractionEnabled = YES;
+	
+	self.panGesture.enabled = YES;
+	self.imageView.userInteractionEnabled = YES;
+    self.drawingView.userInteractionEnabled = YES;
     
 //    self.editor.imageView.userInteractionEnabled = YES;
-//    self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 2;
-//    self.editor.scrollView.panGestureRecognizer.delaysTouchesBegan = NO;
-//    self.editor.scrollView.pinchGestureRecognizer.delaysTouchesBegan = NO;
-//
-    //TODO: todo?
-    
+//    self.previewImageView.scrollView.panGestureRecognizer.minimumNumberOfTouches = 2;
+//    self.previewImageView.scrollView.panGestureRecognizer.delaysTouchesBegan = NO;
+//    self.previewImageView.scrollView.pinchGestureRecognizer.delaysTouchesBegan = NO;
 }
 
 - (void)cleanup {
+	
 //    self.editor.imageView.userInteractionEnabled = NO;
-//    self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 1;
+   // self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 1;
     self.panGesture.enabled = NO;
-    //TODO: todo?
+	self.imageView.userInteractionEnabled = NO;
+	_drawingView.userInteractionEnabled = NO;
 }
 
 - (void)executeWithCompletionBlock:(void (^)(UIImage *, NSError *, NSDictionary *))completionBlock

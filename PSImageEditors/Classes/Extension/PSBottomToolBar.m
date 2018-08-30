@@ -74,7 +74,7 @@
 		if (show) {
 			self.transform = CGAffineTransformIdentity;
 		}else{
-			self.transform = CGAffineTransformMakeTranslation(0, PS_TAB_BAR_H);
+			self.transform = CGAffineTransformMakeTranslation(0, PSBottomToolBarHeight);
 		}
 	}];
 }

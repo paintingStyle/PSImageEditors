@@ -26,18 +26,21 @@
 
 - (void)calculateDisplayContentSize {
 	
-	CGSize size = self.GIFImage ? self.GIFImage.size : self.image.size;
+	CGSize  size = self.GIFImage ? self.GIFImage.size : self.image.size;
+	CGFloat imageScale  = size.height/size.width;
+	CGFloat screenScale = PS_SCREEN_H/PS_SCREEN_W;
+	CGFloat w = floorf(size.width /[UIScreen mainScreen].scale);
+	CGFloat h = floorf(size.height /[UIScreen mainScreen].scale);
 	
-	CGFloat w = ceilf(size.width /[UIScreen mainScreen].scale);
-	CGFloat h = ceilf(size.height /[UIScreen mainScreen].scale);
 	if (h >PS_SCREEN_H) { // 超长图高度大于屏幕高度，将图片宽度置换为屏幕宽度，方便用户观看
 		CGFloat fixW = PS_SCREEN_W;
 		CGFloat fixH  = h / (w / fixW);
 		w = fixW;
 		h = fixH;
 		self.scaling = YES;
-	}else {
-		h = PS_SCREEN_H;
+	}else { // 计算与屏幕宽度等比例的屏幕高度
+		w = PS_SCREEN_W;
+		h = floorf(PS_SCREEN_W * imageScale);
 	}
 	CGSize result = CGSizeMake(w, h);
 	self.displayContentSize = result;

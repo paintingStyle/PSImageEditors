@@ -12,6 +12,9 @@
 + (UIImage *)imageByScalingToSize:(CGSize)targetSize
 					  sourceImage:(UIImage *)image;
 
++ (UIImage *)imageCompressForWidth:(UIImage *)image
+					   targetWidth:(CGFloat)width;
+
 + (UIImage *)imageWithColor:(UIColor *)color;
 
 + (NSString *)fileSizeWithByteSize:(NSInteger)byteSize;

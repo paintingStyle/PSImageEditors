@@ -36,9 +36,10 @@
 
 - (void)drawCirle {
 	
-	for (CALayer *layer in self.layer.sublayers) {
+	[self.layer.sublayers enumerateObjectsUsingBlock:^(CALayer *layer, NSUInteger idx, BOOL * _Nonnull stop) {
 		if (!layer.hidden) [layer removeFromSuperlayer];
-	}
+	}];
+	
 	UIGraphicsBeginImageContext(self.bounds.size);
 	CAShapeLayer *layer = [CAShapeLayer layer];
 	layer.frame = self.bounds;

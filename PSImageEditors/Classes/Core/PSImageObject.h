@@ -20,6 +20,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign, getter=isScaling) BOOL scaling;
 
+/// 是否处于编辑模式
+@property (nonatomic, assign, getter=isEditor) BOOL editor;
+
+/// 是否开启双击缩放
+@property (nonatomic, assign, getter=isDoubleClickZoom) BOOL doubleClickZoom;
+
 @property (nonatomic, assign) CGSize displayContentSize;
 
 @property (nonatomic, copy) void(^fetchOriginSizeBlock)(NSString *originSize);

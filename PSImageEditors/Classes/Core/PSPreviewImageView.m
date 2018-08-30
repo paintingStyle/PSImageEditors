@@ -7,23 +7,102 @@
 
 #import "PSPreviewImageView.h"
 #import "PSImageObject.h"
+#import "PSImageEditorsHelper.h"
+#import "PSImageLoadFailedView.h"
 
 @interface PSPreviewImageView ()<UIScrollViewDelegate>
 
-@property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) UIView *containerView;
+@property (nonatomic, strong) UIActivityIndicatorView *indicator;
+@property (nonatomic, strong) PSImageLoadFailedView *loadFailedView;
+
+@property (nonatomic, strong) UITapGestureRecognizer *singleGesture;
+@property (nonatomic, strong) UITapGestureRecognizer *doubleGesture;
+@property (nonatomic, strong) UILongPressGestureRecognizer *longGesture;
 
 @end
 
 @implementation PSPreviewImageView
 
-- (void)setImage:(UIImage *)image {
+- (void)setImageObject:(PSImageObject *)imageObject {
 	
-	_image = image;
-	if ([image isKindOfClass:[FLAnimatedImage class]]) {
-		self.imageView.animatedImage = (FLAnimatedImage *)image;
+	_imageObject = imageObject;
+	
+	if (imageObject.image || imageObject.GIFImage) {
+		NSInteger length = imageObject.GIFImage ? imageObject.GIFImage.data.length
+		:UIImageJPEGRepresentation(imageObject.image, 1.0f).length;
+		self.imageObject.originSize = [PSImageEditorsHelper fileSizeWithByteSize:length];
+		if (imageObject.fetchOriginSizeBlock) {
+			imageObject.fetchOriginSizeBlock(self.imageObject.originSize);
+		}
+		[self processingImageDisplay];
 	}else {
-		self.imageView.image = image;
+		[self.indicator startAnimating];
+		[self.imageView sd_setImageWithURL:imageObject.url completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+			
+			if (error) {
+				[self hiddenLoadFailedImageView:NO];
+				[self.indicator stopAnimating];
+				return;
+			}
+			[PSImageEditorsHelper imageDataWithImageURL:imageURL completion:^(NSData *data) {
+				if (PS_Is_GIFTypeWithData(data)) {
+					imageObject.GIFImage = [FLAnimatedImage animatedImageWithGIFData:data];
+				}else {
+					imageObject.image = image;
+				}
+				self.imageObject.originSize = [PSImageEditorsHelper fileSizeWithByteSize:data.length];
+				if (imageObject.fetchOriginSizeBlock) {
+					imageObject.fetchOriginSizeBlock(self.imageObject.originSize);
+				}
+				[self processingImageDisplay];
+			}];
+			[self.indicator stopAnimating];
+		}];
+	}
+	self.drawingView.hidden = !self.imageObject.isEditor;
+	self.doubleGesture.enabled = self.imageObject.isDoubleClickZoom;
+}
+
+- (void)processingImageDisplay {
+	
+	id image = self.imageObject.GIFImage ? :self.imageObject.image;
+	BOOL isAnimation = [image isKindOfClass:[FLAnimatedImage class]];
+	
+	if (isAnimation) { // GIF图片暂时不缩放
+		self.imageView.animatedImage = image;
+	}else {
+		[self.imageObject calculateDisplayContentSize];
+		[_imageView mas_updateConstraints:^(MASConstraintMaker *make) {
+			make.height.equalTo(@(self.imageObject.displayContentSize.height));
+		}];
+		[self layoutIfNeeded];
+		if (self.imageObject.isScaling) {
+			self.imageView.image = [PSImageEditorsHelper imageByScalingToSize:self.imageObject.displayContentSize
+																  sourceImage:image];
+		}else {
+			self.imageView.image = image;
+			//[self alignCenterImage];
+		}
+	}
+}
+
+- (void)alignCenterImage {
+	
+	CGPoint offest = CGPointMake(0, (self.imageObject.displayContentSize.height -PS_SCREEN_H) *0.5);
+	[self.scrollView setContentOffset:offest animated:NO];
+}
+
+- (void)hiddenLoadFailedImageView:(BOOL)hidden {
+	
+	self.loadFailedView.hidden = hidden;
+	if (hidden) {
+		[self sendSubviewToBack:self.loadFailedView];
+		self.imageView.image = nil;
+		self.imageView.animatedImage = nil;
+	}else{
+		[self bringSubviewToFront:self.loadFailedView];
+		[self processingImageDisplay];
 	}
 }
 
@@ -32,17 +111,16 @@
 	if (self = [super init]) {
 		
 		_scrollView = [[UIScrollView alloc] init];
+		_scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 		_scrollView.delegate = self;
 		_scrollView.minimumZoomScale = 1.0;
 		_scrollView.maximumZoomScale = 3.0f;
 		_scrollView.multipleTouchEnabled = YES;
 		_scrollView.showsHorizontalScrollIndicator = NO;
 		_scrollView.showsVerticalScrollIndicator = NO;
-		//		_scrollView.alwaysBounceVertical = YES;
-		//		_scrollView.alwaysBounceHorizontal = YES;
-		_scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 		_scrollView.delaysContentTouches = NO;
 		_scrollView.scrollsToTop = NO;
+		_scrollView.clipsToBounds = NO;
 		if(@available(iOS 11.0, *)) {
 			_scrollView.contentInsetAdjustmentBehavior =
 			UIScrollViewContentInsetAdjustmentNever;
@@ -60,75 +138,106 @@
 			make.width.equalTo(self.scrollView);
 		}];
 		
-		// 在UIViewContentModeScaleAspectFit之后，获取已经调整大小图像的宽度
-		//imageView.clipsToBounds = true
-		// TODO: 需要计算_imageView的大小，动态调整_containerView的高度
-		_imageView = [[FLAnimatedImageView alloc] initWithFrame:CGRectZero];
-		_imageView.contentMode = UIViewContentModeScaleAspectFit;
+		_imageView = [[FLAnimatedImageView alloc] init];
 		[_containerView addSubview:_imageView];
 		[_imageView mas_makeConstraints:^(MASConstraintMaker *make) {
-			
-			make.left.top.right.equalTo(self.containerView);
+			make.left.right.equalTo(_containerView);
 			make.height.equalTo(@(PS_SCREEN_H));
+			make.centerY.equalTo(_containerView);
+		}];
+		
+		_drawingView = [[UIImageView alloc] init];
+		_drawingView.contentMode = UIViewContentModeCenter;
+		_drawingView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleTopMargin;
+		[_imageView addSubview:_drawingView];
+		[_drawingView mas_makeConstraints:^(MASConstraintMaker *make) {
+			make.edges.equalTo(self.imageView);
+		}];
+		
+		_loadFailedView = [[PSImageLoadFailedView alloc] init];
+		_loadFailedView.hidden = YES;
+		[self sendSubviewToBack:_loadFailedView];
+		[self addSubview:_loadFailedView];
+		[_loadFailedView mas_makeConstraints:^(MASConstraintMaker *make) {
+			make.edges.equalTo(self);
+		}];
+		
+		_indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+		_indicator.hidesWhenStopped = YES;
+		[_containerView addSubview:_indicator];
+		[_containerView bringSubviewToFront:_indicator];
+		[_indicator mas_makeConstraints:^(MASConstraintMaker *make) {
+			make.center.equalTo(self.containerView);
 		}];
 		
 		[_containerView mas_makeConstraints:^(MASConstraintMaker *make) {
-			make.bottom.equalTo(self.imageView);
+			make.height.equalTo(self.imageView).priorityLow();
+			make.height.equalTo(@(PS_SCREEN_H));
 		}];
 		
-		UITapGestureRecognizer *singleGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleGestureClicked)];
-		[_scrollView addGestureRecognizer:singleGesture];
+		_singleGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleGestureClicked)];
+		[_scrollView addGestureRecognizer:_singleGesture];
 		
-		UITapGestureRecognizer *doubleGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleGestureClicked:)];
-		doubleGesture.numberOfTapsRequired = 2;
-		[_scrollView addGestureRecognizer:doubleGesture];
-		[singleGesture requireGestureRecognizerToFail:doubleGesture];
+		_doubleGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleGestureClicked:)];
+		_doubleGesture.numberOfTapsRequired = 2;
+		[_scrollView addGestureRecognizer:_doubleGesture];
+		[_singleGesture requireGestureRecognizerToFail:_doubleGesture];
 		
-		UILongPressGestureRecognizer *longGesture =
-		[[UILongPressGestureRecognizer alloc] initWithTarget:self action:
+		_longGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:
 		 @selector(longGestureDidClick:)];
-		[_scrollView addGestureRecognizer:longGesture];
+		_longGesture.minimumPressDuration = .5;
+		[_scrollView addGestureRecognizer:_longGesture];
 	}
 	return self;
+}
+
+- (void)reset {
+	
+	[self.scrollView setZoomScale:1.0 animated:NO];
+	[self hiddenLoadFailedImageView:YES];
+	[self.indicator stopAnimating];
 }
 
 - (void)longGestureDidClick:(UIGestureRecognizer *)gesture {
 	
 	if (gesture.state != UIGestureRecognizerStateBegan) { return; }
-	if (self.longGestureDidClickBlock) {
-		self.longGestureDidClickBlock();
+	if (self.longGestureBlock) {
+		self.longGestureBlock(self.imageObject);
 	}
 }
 #pragma mark - 单击手势点击事件
 
 - (void)singleGestureClicked {
 	
-	if (self.singleGestureDidClickBlock) {
-		self.singleGestureDidClickBlock();
+	if (self.singleGestureBlock) {
+		self.singleGestureBlock(self.imageObject);
 	}
-}
-
-- (CGFloat)maxScale {
-	
-	// TODO:此处计算有误
-//	CGFloat imageHeight = self.imageObject.displayContentSize.height /self.imageObject.displayContentSize.width *CGRectGetWidth(self.contentView.frame);
-//	CGFloat maxScale =  CGRectGetHeight(self.contentView.frame) / imageHeight;
-//	//if (maxScale == 1) { maxScale = 3; }
-	
-	return 3;
 }
 
 #pragma mark - 双击点击事件
 
 - (void)doubleGestureClicked:(UITapGestureRecognizer *)gesture {
 	
-	CGFloat scale = 1.0;
-	if (self.scrollView.zoomScale >1.0) {
-		scale = 1.0;
-	}else {
-		scale = [self maxScale];
+	UIScrollView *scrollView = self.scrollView;
+	
+	CGFloat scale = 1;
+	if (scrollView.zoomScale != 3.0) {
+		scale = 3;
+	} else {
+		scale = 1;
 	}
-	[self.scrollView setZoomScale:scale animated:YES];
+	CGRect zoomRect = [self zoomRectForScale:scale withCenter:[gesture locationInView:gesture.view]];
+	[scrollView zoomToRect:zoomRect animated:YES];
+}
+
+- (CGRect)zoomRectForScale:(float)scale withCenter:(CGPoint)center {
+	
+	CGRect zoomRect;
+	zoomRect.size.height = self.scrollView.frame.size.height / scale;
+	zoomRect.size.width  = self.scrollView.frame.size.width  / scale;
+	zoomRect.origin.x    = center.x - (zoomRect.size.width  /2.0);
+	zoomRect.origin.y    = center.y - (zoomRect.size.height /2.0);
+	return zoomRect;
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -137,7 +246,14 @@
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
 	
-	return self.imageView;
+	return self.containerView;
+}
+
+- (void)scrollViewDidZoom:(UIScrollView *)scrollView {
+	
+	CGFloat offsetX = (CGRectGetWidth(scrollView.frame) > scrollView.contentSize.width) ? (CGRectGetWidth(scrollView.frame) - scrollView.contentSize.width) * 0.5 : 0.0;
+	CGFloat offsetY = (CGRectGetHeight(scrollView.frame) > scrollView.contentSize.height) ? (CGRectGetHeight(scrollView.frame) - scrollView.contentSize.height) * 0.5 : 0.0;
+	self.containerView.center = CGPointMake(scrollView.contentSize.width * 0.5 + offsetX, scrollView.contentSize.height * 0.5 + offsetY);
 }
 
 @end

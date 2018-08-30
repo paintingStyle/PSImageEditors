@@ -50,12 +50,13 @@
 		[_colorFullButtonViews addSubview:self.lightBlueButton];
 		[_colorFullButtonViews addSubview:self.blueButton];
 		
-		_revocationButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		_revocationButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
 		[_revocationButton setImage:[UIImage ps_imageNamed:@"btn_revocation_normal"]
 						   forState:UIControlStateNormal];
 		[_revocationButton setImage:[UIImage ps_imageNamed:@"btn_revocation_disabled"]
 						   forState:UIControlStateDisabled];
 		_revocationButton.enabled = NO;
+		[_revocationButton addTarget:self action:@selector(revocationButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
 		[self addSubview:_revocationButton];
 		
 		_bottomLineView = [[UIView alloc] init];
@@ -95,8 +96,10 @@
 			make.bottom.equalTo(self);
 			make.height.equalTo(@1);
 		}];
-    
+		
+		// 设置默认选中颜色
         self.redButton.isUse = YES;
+		self.currentColor = self.redButton.color;
 	}
 	return self;
 }
@@ -106,6 +109,14 @@
 	[UIView animateWithDuration:(animation ? 0.15:0) animations:^{
 		self.alpha = (show ? 1.0f:0.0f);
     }];
+}
+
+- (void)revocationButtonDidClick {
+	
+	if (self.delegate && [self.delegate respondsToSelector:
+						  @selector(colorToolBar:event:)]) {
+		[self.delegate colorToolBar:self event:PSColorToolBarEventRevocation];
+	}
 }
 
 - (void)colorFullButtonDidClick:(PSColorFullButton *)sender {
@@ -119,10 +130,13 @@
 		}
 	}
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(colorToolBarDidSelectColor:)]) {
-        [self.delegate colorToolBarDidSelectColor:self.currentColor];
+    if (self.delegate && [self.delegate respondsToSelector:
+						  @selector(colorToolBar:event:)]) {
+        [self.delegate colorToolBar:self event:PSColorToolBarEventSelectColor];
     }
 }
+
+#pragma mark - Getter/Setter
 
 - (PSColorFullButton *)blueButton {
 	

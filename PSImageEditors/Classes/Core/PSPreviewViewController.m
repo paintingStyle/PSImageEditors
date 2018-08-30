@@ -28,12 +28,10 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 @property (nonatomic, strong, readwrite) NSMutableArray<PSImageObject *> *dataSources;
 @property (nonatomic, assign, readwrite) PSImageObject *currentImageObject;
 
-@property (nonatomic, copy) GestureDidClickCallback singleGestureDidClickBlock;
-@property (nonatomic, copy) GestureDidClickCallback longGestureDidClickBlock;
+@property (nonatomic, copy) CallbackBlock singleGestureBlock;
+@property (nonatomic, copy) CallbackBlock longGestureBlock;
 
 @end
-
-#define DEF_Weakify(object) try{} @finally{} {} __weak __typeof__(object) weak##_##object = object;
 
 @implementation PSPreviewViewController
 
@@ -74,12 +72,12 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 	[self configData];
 	
 	@weakify(self);
-	self.singleGestureDidClickBlock = ^(PSImageObject *imageObject) {
+	self.singleGestureBlock = ^(PSImageObject *imageObject) {
 		@strongify(self);
 		NSIndexPath *indexPath = [NSIndexPath indexPathForItem:imageObject.index inSection:0];
 		[self collectionView:self.collectionView didSelectItemAtIndexPath:indexPath];
 	};
-	self.longGestureDidClickBlock = ^(PSImageObject *imageObject) {
+	self.longGestureBlock = ^(PSImageObject *imageObject) {
 		@strongify(self);
 		[self moreButtonDidClick];
 	};
@@ -118,6 +116,7 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 			PSImageObject *imageObject = [PSImageObject imageObjectWithIndex:idx
 														url:nil image:(isAnimation ? nil:obj)
 														GIFImage:(isAnimation ? obj:nil)];
+			imageObject.doubleClickZoom = YES;
 			[self.dataSources addObject:imageObject];
 		}];
 	}else {
@@ -131,6 +130,7 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 			}
 			PSImageObject *imageObject = [PSImageObject imageObjectWithIndex:idx
 														url:url image:nil GIFImage:nil];
+			imageObject.doubleClickZoom = YES;
 			[self.dataSources addObject:imageObject];
 		}];
 	}
@@ -192,8 +192,8 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 	PSPreviewViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:
 							   kReusableCellIdentifier forIndexPath:indexPath];
 	PSImageObject *imageObject = self.dataSources[indexPath.item];
-	cell.singleGestureDidClickBlock = self.singleGestureDidClickBlock;
-	cell.longGestureDidClickBlock = self.longGestureDidClickBlock;
+	cell.imageView.singleGestureBlock = self.singleGestureBlock;
+	cell.imageView.longGestureBlock = self.longGestureBlock;
 	cell.imageObject = imageObject;
 	
 	return cell;

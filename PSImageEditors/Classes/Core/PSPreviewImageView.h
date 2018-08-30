@@ -8,14 +8,19 @@
 #import <UIKit/UIKit.h>
 @class PSImageObject;
 
-typedef void(^GestureDidClickCallback)(void);
+typedef void(^CallbackBlock)(PSImageObject *imageObject);
 
 @interface PSPreviewImageView : UIView
 
-@property (nonatomic, strong) UIImage *image;
+@property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) FLAnimatedImageView *imageView;
+@property (nonatomic, strong) UIImageView *drawingView;
 
-@property (nonatomic, copy) GestureDidClickCallback singleGestureDidClickBlock;
-@property (nonatomic, copy) GestureDidClickCallback longGestureDidClickBlock;
+@property (nonatomic, strong) PSImageObject *imageObject;
+
+@property (nonatomic, copy) CallbackBlock singleGestureBlock;
+@property (nonatomic, copy) CallbackBlock longGestureBlock;
+
+- (void)reset;
 
 @end

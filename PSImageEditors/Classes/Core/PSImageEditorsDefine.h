@@ -5,6 +5,9 @@
 //  Created by rsf on 2018/8/24.
 //
 
+#define PSBottomToolBarHeight PS_TAB_BAR_H +6
+#define PSColorToolBarHeight 55
+
 #if __has_include(<FLAnimatedImage/FLAnimatedImageView.h>)
 	#import <FLAnimatedImage/FLAnimatedImageView.h>
 	#import <FLAnimatedImage/FLAnimatedImage.h>

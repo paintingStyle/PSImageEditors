@@ -40,6 +40,32 @@
 	return newImage;
 }
 
++ (UIImage *)imageCompressForWidth:(UIImage *)image
+					   targetWidth:(CGFloat)width {
+	
+	CGFloat height;
+	UIImage *newImage = nil;
+	CGFloat imageScale = image.size.height/image.size.width;
+	CGFloat screenScale = PS_SCREEN_H/PS_SCREEN_W;
+	if (imageScale > screenScale) {
+		height = floorf(width * imageScale);
+	} else {
+		height = floorf(width * imageScale);
+		
+	}
+	CGSize size = CGSizeMake(width, height);
+	
+	UIGraphicsBeginImageContext(size);
+	CGRect thumbnailRect = CGRectMake(0, 0, size.width, size.height);
+	[image drawInRect:thumbnailRect];
+	newImage = UIGraphicsGetImageFromCurrentImageContext();
+	if(newImage == nil){
+		NSLog(@"scale image fail");
+	}
+	UIGraphicsEndImageContext();
+	return newImage;
+}
+
 + (UIImage *)imageWithColor:(UIColor *)color {
 	
 	CGRect rect = CGRectMake(0, 0, 1, 1);
