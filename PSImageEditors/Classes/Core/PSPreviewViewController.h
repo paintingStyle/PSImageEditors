@@ -42,8 +42,6 @@
 @property (nonatomic, assign, getter=isClickShowNavigationBar) BOOL clickShowNavigationBar;
 
 - (instancetype)init NS_UNAVAILABLE;
-- (void)configUI;
-- (void)configData;
 
 /**
  初始化图片预览

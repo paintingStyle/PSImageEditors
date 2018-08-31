@@ -30,8 +30,27 @@ PSTopToolBarDelegate>
 - (void)viewDidLoad {
     
     [super viewDidLoad];
-    [self configUI];
-    [self configData];
+	
+	self.delegate = self;
+	self.clickShowNavigationBar = NO;
+	self.showToolBar = YES;
+	
+	self.topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolTypeDefault];
+	self.topToolBar.delegate = self;
+	[self.view addSubview:self.topToolBar];
+	[self.topToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
+		
+		make.left.top.right.equalTo(self.view);
+		make.height.equalTo(@(PS_NAV_BAR_H));
+	}];
+	
+	self.bottomToolBar = [[PSBottomToolBar alloc] initWithType:PSBottomToolTypeDefault];
+	[self.view addSubview:self.bottomToolBar];
+	[self.bottomToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
+		
+		make.left.bottom.right.equalTo(self.view);
+		make.height.equalTo(@(PSBottomToolBarHeight));
+	}];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -49,11 +68,6 @@ PSTopToolBarDelegate>
 }
 
 #pragma mark - Method
-
-- (void)configData {
-    
-    [super configData];
-}
 
 - (void)showMoreActionSheet {
     
@@ -126,28 +140,8 @@ PSTopToolBarDelegate>
 #pragma mark - InitAndLayout
 
 - (void)configUI {
-    
-    [super configUI];
-    self.delegate = self;
-    self.clickShowNavigationBar = NO;
-	self.showToolBar = YES;
-   
-    self.topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolTypeDefault];
-	self.topToolBar.delegate = self;
-    [self.view addSubview:self.topToolBar];
-    [self.topToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
-       
-        make.left.top.right.equalTo(self.view);
-        make.height.equalTo(@(PS_NAV_BAR_H));
-    }];
-    
-    self.bottomToolBar = [[PSBottomToolBar alloc] initWithType:PSBottomToolTypeDefault];
-    [self.view addSubview:self.bottomToolBar];
-    [self.bottomToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
-        
-        make.left.bottom.right.equalTo(self.view);
-        make.height.equalTo(@(PSBottomToolBarHeight));
-    }];
+	
+	
 }
 
 #pragma mark - Getter/Setter

@@ -4,7 +4,7 @@
 //
 //  Created by rsf on 2018/8/24.
 //  Copyright © 2018年 paintingStyle. All rights reserved.
-//
+// https://www.jianshu.com/p/49c0ead4b0ae
 
 #import "PSPreviewViewController.h"
 #import "PSPreviewViewCell.h"
@@ -68,8 +68,8 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 - (void)viewDidLoad {
 	
 	[super viewDidLoad];
-	[self configUI];
-	[self configData];
+	[self configPreviewUI];
+	[self configPreviewData];
 	
 	@weakify(self);
 	self.singleGestureBlock = ^(PSImageObject *imageObject) {
@@ -107,7 +107,7 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 
 #pragma mark - Method
 
-- (void)configData {
+- (void)configPreviewData {
 	
 	if (self.isLocal) {
 		[self.images enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -233,7 +233,7 @@ static NSString *const kReusableCellIdentifier = @"PSPreviewViewCell";
 
 #pragma mark - InitAndLayout
 
-- (void)configUI {
+- (void)configPreviewUI {
 	
 	UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
 	layout.itemSize = [UIScreen mainScreen].bounds.size;

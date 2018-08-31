@@ -26,9 +26,15 @@
 
 - (void)calculateDisplayContentSize {
 	
+	if (!self.GIFImage && !self.image) {
+		self.displayContentSize = CGSizeZero;
+		return;
+	}
+	
 	CGSize  size = self.GIFImage ? self.GIFImage.size : self.image.size;
 	CGFloat imageScale  = size.height/size.width;
 	CGFloat screenScale = PS_SCREEN_H/PS_SCREEN_W;
+	
 	CGFloat w = floorf(size.width /[UIScreen mainScreen].scale);
 	CGFloat h = floorf(size.height /[UIScreen mainScreen].scale);
 	

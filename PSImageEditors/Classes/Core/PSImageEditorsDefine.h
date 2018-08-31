@@ -3,7 +3,7 @@
 //  Pods
 //
 //  Created by rsf on 2018/8/24.
-//
+// 
 
 #define PSBottomToolBarHeight PS_TAB_BAR_H +6
 #define PSColorToolBarHeight 55
@@ -112,6 +112,8 @@ imageView.clipsToBounds  = YES;\
 
 #define PS_WINDOOW [UIApplication sharedApplication].delegate.window
 
+#define SP_ERROR(code, desc) [[NSError alloc] initWithDomain:@"PSImageEditorsErrorDomain" code:code userInfo:@{NSLocalizedDescriptionKey:desc}]
+
 #define PS_STROKE_PARAMETER(View, Radius, Width, Color)\
 \
 [View.layer setCornerRadius:(Radius)];\
@@ -131,11 +133,17 @@ imageView.clipsToBounds  = YES;\
 
 #define LAZY_LOAD(object, assignment) (object = object ?: assignment)
 
-#define diPSatch_async_main_safe(block)\
+/*
+ 主线程
+ dispatch_async_main_safe(^{
+ 
+ });
+ */
+#define dispatch_async_main_safe(block)\
 if ([NSThread isMainThread]) {\
 block();\
 } else {\
-diPSatch_async(diPSatch_get_main_queue(), block);\
+dispatch_async(dispatch_get_main_queue(), block);\
 }
 
 #define FormatString(format,...) [NSString stringWithFormat:format,##__VA_ARGS__]
