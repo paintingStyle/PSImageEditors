@@ -137,7 +137,7 @@ static const CGFloat   kHorizontalSpacing = 5.0f;
 		_drawingView = [[UIImageView alloc] init];
 		_drawingView.contentMode = UIViewContentModeCenter;
 		_drawingView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleTopMargin;
-		[_imageView addSubview:_drawingView];
+		[_scrollView addSubview:_drawingView];
 		
 		_loadFailedView = [[PSImageLoadFailedView alloc] init];
 		_loadFailedView.hidden = YES;

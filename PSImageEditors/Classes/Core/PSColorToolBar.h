@@ -19,7 +19,7 @@ typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 	
 	PSColorToolBarEventSelectColor = 0,
 	PSColorToolBarEventRevocation,
-	PSColorToolBarEventSelectText
+	PSColorToolBarEventChangeBgColor
 };
 
 @protocol PSColorToolBarDelegate<NSObject>
@@ -42,6 +42,11 @@ typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 /// 是否可以撤销
 @property (nonatomic, assign, getter=isRevocation) BOOL revocation;
 
+/// 是否可以改变文字颜色
+@property (nonatomic, assign, getter=isChangeBgColor) BOOL changeBgColor;
+
 - (void)setToolBarShow:(BOOL)show animation:(BOOL)animation;
+
+- (BOOL)isWhiteColor;
 
 @end

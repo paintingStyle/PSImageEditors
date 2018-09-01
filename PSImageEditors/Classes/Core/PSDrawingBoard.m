@@ -145,10 +145,11 @@
     _drawingView.userInteractionEnabled = YES;
     _drawingView.layer.shouldRasterize = YES;
     _drawingView.layer.minificationFilter = kCAFilterTrilinear;
-	
-	self.panGesture.enabled = YES;
-	self.imageView.userInteractionEnabled = YES;
-    self.drawingView.userInteractionEnabled = YES;
+    self.panGesture.enabled = YES;
+    
+    
+//    self.imageView.userInteractionEnabled = YES;
+//    self.drawingView.userInteractionEnabled = YES;
     
 //    self.editor.imageView.userInteractionEnabled = YES;
 //    self.previewImageView.scrollView.panGestureRecognizer.minimumNumberOfTouches = 2;

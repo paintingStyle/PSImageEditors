@@ -46,4 +46,6 @@ typedef NS_ENUM(NSUInteger, PSBottomToolEvent) {
 
 - (void)setToolBarShow:(BOOL)show animation:(BOOL)animation;
 
+- (void)resetStateWithEvent:(PSBottomToolEvent)event;
+
 @end

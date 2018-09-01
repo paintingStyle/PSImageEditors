@@ -36,23 +36,24 @@
 
 - (void)drawCirle {
 	
-	[self.layer.sublayers enumerateObjectsUsingBlock:^(CALayer *layer, NSUInteger idx, BOOL * _Nonnull stop) {
-		if (!layer.hidden) [layer removeFromSuperlayer];
-	}];
+    [self.layer.sublayers makeObjectsPerformSelector:@selector(removeFromSuperlayer)];
 	
-	UIGraphicsBeginImageContext(self.bounds.size);
-	CAShapeLayer *layer = [CAShapeLayer layer];
-	layer.frame = self.bounds;
-	UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(self.bounds.size.width/2.f, self.bounds.size.height/2.f) radius:_isUse ? _radius+5: _radius startAngle:0 endAngle:2*M_PI clockwise:YES];
-	layer.fillColor = _color.CGColor;
-	layer.allowsEdgeAntialiasing = YES;
-	layer.backgroundColor = [UIColor clearColor].CGColor;
-	layer.strokeColor = [UIColor whiteColor].CGColor;
-	layer.lineWidth = _isUse ? 2.f:1.0f;
-	layer.path = path.CGPath;
-	[path fill];
-	UIGraphicsEndImageContext();
-	[self.layer addSublayer:layer];
+    // 保持同步，等待删除图层完毕添加图层
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIGraphicsBeginImageContext(self.bounds.size);
+        CAShapeLayer *layer = [CAShapeLayer layer];
+        layer.frame = self.bounds;
+        UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(self.bounds.size.width/2.f, self.bounds.size.height/2.f) radius:_isUse ? _radius+5: _radius startAngle:0 endAngle:2*M_PI clockwise:YES];
+        layer.fillColor = _color.CGColor;
+        layer.allowsEdgeAntialiasing = YES;
+        layer.backgroundColor = [UIColor clearColor].CGColor;
+        layer.strokeColor = [UIColor whiteColor].CGColor;
+        layer.lineWidth = _isUse ? 2.f:1.0f;
+        layer.path = path.CGPath;
+        [path fill];
+        UIGraphicsEndImageContext();
+        [self.layer addSublayer:layer];
+    });
 }
 
 @end

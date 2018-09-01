@@ -24,7 +24,7 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ucd-MX-SwG">
                                 <rect key="frame" x="118" y="152" width="139" height="30"/>
                                 <state key="normal" title="preview local  image">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <color key="titleColor" red="0.082352941176470587" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
                                 <connections>
                                     <action selector="previewLocalImageDidClick" destination="BYZ-38-t0r" eventType="touchUpInside" id="LHi-m7-H2h"/>

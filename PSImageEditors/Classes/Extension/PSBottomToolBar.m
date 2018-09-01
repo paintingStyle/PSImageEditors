@@ -151,6 +151,31 @@
 	}
 }
 
+- (void)resetStateWithEvent:(PSBottomToolEvent)event {
+    
+    switch (event) {
+        case PSBottomToolEventBrush:
+            self.brushButton.selected = NO;
+            break;
+        case PSBottomToolEventText:
+            self.textButton.selected = NO;
+            break;
+        case PSBottomToolEventMosaic:
+            self.mosaicButton.selected = NO;
+            break;
+        case PSBottomToolEventClipping:
+            self.clippingButton.selected = NO;
+            break;
+    }
+    
+    if (!self.brushButton.isSelected
+        && !self.textButton.isSelected
+        && !self.mosaicButton.isSelected
+        && !self.clippingButton.isSelected) {
+        self.editor = NO;
+    }
+}
+
 - (void)resetButtons {
 	
 	if (self.type == PSBottomToolTypeEditor) {

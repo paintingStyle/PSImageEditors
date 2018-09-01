@@ -11,12 +11,14 @@
 #import "PSColorToolBar.h"
 #import "PSPreviewImageView.h"
 #import "PSDrawingBoard.h"
+#import "PSTextBoard.h"
 #import "PSImageObject.h"
 
 @interface PSEditorViewController ()
 <PSTopToolBarDelegate,
 PSBottomToolBarDelegate,
-PSColorToolBarDelegate> {
+PSColorToolBarDelegate,
+PSTextBoardItemDelegate> {
 	BOOL _navigationBarHidden;
 }
 
@@ -28,6 +30,7 @@ PSColorToolBarDelegate> {
 @property (nonatomic, strong) PSColorToolBar *colorToolBar;
 
 @property (nonatomic, strong) PSDrawingBoard *drawingBoard;
+@property (nonatomic, strong) PSTextBoard *textBoard;
 
 @end
 
@@ -61,7 +64,19 @@ PSColorToolBarDelegate> {
     };
     self.drawingBoard.drawingCallback = ^(BOOL isDrawing) {
         @strongify(self);
-		[self toolBarShow:!isDrawing animation:NO];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((isDrawing ? 0:0.5) * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self toolBarShow:!isDrawing animation:NO];
+        });
+    };
+    
+    self.textBoard.dissmissTextTool = ^(NSString *currentText) {
+        @strongify(self);
+        [self.textBoard cleanup];
+        if (self.bottomToolBar.isEditor) { // 判断待改进
+            [self.colorToolBar setToolBarShow:YES animation:YES];
+        }
+        [self.bottomToolBar resetStateWithEvent:PSBottomToolEventText];
+        self.currentMode = PSEditorModeNone;
     };
 }
 
@@ -83,6 +98,11 @@ PSColorToolBarDelegate> {
 	
 	[super viewWillDisappear:animated];
 	[self.navigationController setNavigationBarHidden:_navigationBarHidden animated:NO];
+}
+
+- (BOOL)prefersStatusBarHidden {
+    
+    return YES;
 }
 
 #pragma mark - Method
@@ -109,13 +129,9 @@ PSColorToolBarDelegate> {
 	case PSColorToolBarEventRevocation:
 		[self.drawingBoard revocation];
 		break;
-	case PSColorToolBarEventSelectText:
-		break;
 	default:
 		break;
 	}
-
-	
 }
 
 #pragma mark - PSTopToolBarDelegate
@@ -150,14 +166,39 @@ PSColorToolBarDelegate> {
 			}else {
 				[self.drawingBoard cleanup];
 			}
+            self.currentMode = PSEditorModeBrush;
 			break;
 		case PSBottomToolEventText:
+            [self.colorToolBar setToolBarShow:NO animation:YES];
+            if (self.bottomToolBar.isEditor) {
+                [self.textBoard setup];
+            }else {
+                [self.textBoard cleanup];
+            }
+            self.currentMode = PSEditorModeText;
 			break;
 		case PSBottomToolEventMosaic:
+            self.currentMode = PSEditorModeMosaic;
 			break;
 		case PSBottomToolEventClipping:
+            self.currentMode = PSEditorModeClipping;
 			break;
 	}
+}
+
+#pragma mark - PSTextBoardItemDelegate
+
+- (void)textBoardItem:(PSTextBoardItem *)item
+        hiddenToolBar:(BOOL)hidden
+            animation:(BOOL)animation {
+    
+    [self toolBarShow:!hidden animation:animation];
+}
+    
+- (void)textBoardItemDidTapWithItem:(PSTextBoardItem *)item {
+    
+    [self.colorToolBar setToolBarShow:NO animation:YES];
+     [self.textBoard setup];
 }
 
 #pragma mark - InitAndLayout
@@ -213,9 +254,28 @@ PSColorToolBarDelegate> {
 	self.drawingBoard.imageView = self.previewImageView.imageView;
 	self.drawingBoard.drawingView = self.previewImageView.drawingView;
 	self.drawingBoard.pathWidth = 5.0f;
+    
+    self.textBoard.editorView = self.view;
+    self.textBoard.previewImageView = self.previewImageView;
+    self.textBoard.currentColor = self.colorToolBar.currentColor;
+    self.textBoard.imageView = self.previewImageView.imageView;
+    self.textBoard.drawingView = self.previewImageView.drawingView;
+    
+    // 默认开启交互
+    self.previewImageView.drawingView.userInteractionEnabled = YES;
 }
 
 #pragma mark - Getter/Setter
+
+- (PSTextBoard *)textBoard {
+    
+    return LAZY_LOAD(_textBoard, ({
+        
+        _textBoard = [[PSTextBoard alloc] init];
+        _textBoard.itemDelegate = self;
+        _textBoard;
+    }));
+}
 
 - (PSDrawingBoard *)drawingBoard {
     

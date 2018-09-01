@@ -160,7 +160,6 @@
 }
 
 
-
 - (void)configPreviewUI {
     
     self.backgroundColor = [UIColor colorWithWhite:0 alpha:0.6f];
@@ -197,8 +196,34 @@
 }
 
 - (void)configCancelAndDoneIconUI {
-    
 
+    [self addSubview:self.maskImageView];
+    [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self);
+    }];
+    
+    [self.leftButton setImage:[UIImage ps_imageNamed:@"btn_cancel"]
+                     forState:UIControlStateNormal];
+    [self addSubview:self.leftButton];
+    
+    [self.rightButton setImage:[UIImage ps_imageNamed:@"btn_done"]
+                      forState:UIControlStateNormal];
+    [self addSubview:self.rightButton];
+    
+    
+    [self.leftButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        
+        make.size.equalTo(@44);
+        make.left.equalTo(@15);
+        make.centerY.equalTo(self).offset(PS_STATUS_BAR_H *0.5);
+    }];
+    
+    [self.rightButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        
+        make.size.equalTo(@44);
+        make.right.equalTo(@(-15));
+        make.centerY.equalTo(self.leftButton);
+    }];
 }
 
 - (UIImageView *)maskImageView {
