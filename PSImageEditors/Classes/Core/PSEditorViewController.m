@@ -250,18 +250,16 @@ PSTextBoardItemDelegate> {
 		make.height.equalTo(@55);
 	}];
 	
-	self.drawingBoard.currentColor = self.colorToolBar.currentColor;
-	self.drawingBoard.imageView = self.previewImageView.imageView;
-	self.drawingBoard.drawingView = self.previewImageView.drawingView;
+	self.drawingBoard.previewView = self.previewImageView;
+	self.drawingBoard.currentColor = self.colorToolBar.currentColor;;
 	self.drawingBoard.pathWidth = 5.0f;
     
     self.textBoard.editorView = self.view;
-    self.textBoard.previewImageView = self.previewImageView;
+    self.textBoard.previewView = self.previewImageView;
     self.textBoard.currentColor = self.colorToolBar.currentColor;
-    self.textBoard.imageView = self.previewImageView.imageView;
-    self.textBoard.drawingView = self.previewImageView.drawingView;
     
     // 默认开启交互
+	self.previewImageView.imageView.userInteractionEnabled = YES;
     self.previewImageView.drawingView.userInteractionEnabled = YES;
 }
 

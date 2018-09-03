@@ -11,12 +11,8 @@
 @interface PSBaseDrawingBoard : NSObject
 
 @property (nonatomic, strong) UIColor *currentColor;
-@property (nonatomic, strong) UIImageView *imageView;
-@property (nonatomic, strong) UIImageView *drawingView;
-
-@property (nonatomic, weak) UIView *editorView;
-
-@property (nonatomic, strong) PSPreviewImageView *previewImageView;
+@property (nonatomic, strong) PSPreviewImageView *previewView;
+@property (nonatomic, weak)   UIView *editorView;
 
 - (void)setup;
 - (void)cleanup;

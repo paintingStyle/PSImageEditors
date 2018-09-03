@@ -9,16 +9,14 @@
 #import "PSTextBoard.h"
 #import "PSImageEditorGestureManager.h"
 
-
 static const CGFloat MAX_FONT_SIZE = 50.0f;
 static const CGFloat MIN_TEXT_SCAL = 0.614f;
 static const CGFloat MAX_TEXT_SCAL = 4.0f;
-static const CGFloat LABEL_OFFSET  = 13.f;
-static const CGFloat DELETEBUTTON_BOUNDS = 26.f;
+static const CGFloat LABEL_OFFSET  = 0.f;
 
 @interface PSTextBoardItemOverlapContentView : UIView
 
-@property (nonatomic, copy  ) NSString *text;
+@property (nonatomic, copy) NSString *text;
 @property (nonatomic, strong) UIFont *textFont;
 @property (nonatomic, strong) UIColor *textColor;
 @property (nonatomic, assign) CGFloat defaultFont;
@@ -62,16 +60,11 @@ static const CGFloat DELETEBUTTON_BOUNDS = 26.f;
         [self.image drawInRect:CGRectInset(rect, 21, 25)];
         return;
     }
-    NSShadow *shadow = [[NSShadow alloc] init];
-    shadow.shadowColor = [UIColor grayColor]; //阴影颜色
-    shadow.shadowOffset= CGSizeMake(2, 2);//偏移量
-    shadow.shadowBlurRadius = 5;//模糊度
     
     rect.origin = CGPointMake(1, 2);
     NSAttributedString *string = [[NSAttributedString alloc] initWithString:self.text
                                                                  attributes:@{NSForegroundColorAttributeName : self.textColor,
-                                                                              NSFontAttributeName : self.textFont,
-                                                                              NSShadowAttributeName: shadow}];
+																			  NSFontAttributeName : self.textFont}];
     [string drawInRect:CGRectInset(rect, 21, 25)];
     
 }
@@ -132,14 +125,6 @@ static const CGFloat DELETEBUTTON_BOUNDS = 26.f;
     _contentView.frame = frame;
 }
 
-- (void)drawRect:(CGRect)rect {
-    //CGFloat scale = [(NSNumber *)[self valueForKeyPath:@"layer.transform.scale.x"] floatValue];
-    
-    //UIFont *font = [self.textFont fontWithSize:_defaultFont * scale];
-    
-    
-}
-
 @end
 
 @interface PSTextBoardItem () <UIGestureRecognizerDelegate>
@@ -159,9 +144,10 @@ static const CGFloat DELETEBUTTON_BOUNDS = 26.f;
     CGFloat _initialArg;
     CGFloat _initialScale;
     
-    CALayer *rectLayer1;
-    CALayer *rectLayer2;
-    CALayer *rectLayer3;
+    CALayer *_leftTopRectLayer;
+    CALayer *_rightTopRectLayer;
+	CALayer *_leftBottomRectLayer;
+	CALayer *_rightBottomRectLayer;
     
     CGFloat _rotation;
 }
@@ -171,9 +157,9 @@ static PSTextBoardItem *activeView = nil;
 + (void)  setActiveTextView:(PSTextBoardItem *)view
 {
     if(view != activeView){
-        [activeView setAvtive:NO];
+		activeView.active = NO;
         activeView = view;
-        [activeView setAvtive:YES];
+		activeView.active = YES;
         
         [activeView.archerBGView.superview bringSubviewToFront:activeView.archerBGView];
         [activeView.superview bringSubviewToFront:activeView];
@@ -183,17 +169,16 @@ static PSTextBoardItem *activeView = nil;
 
 + (void)setInactiveTextView:(PSTextBoardItem *)view {
     if (activeView) {activeView = nil;}
-    
-    [view setAvtive:NO];
+    view.active = NO;
 }
 
 - (instancetype)initWithTool:(PSTextBoard *)tool text:(NSString *)text font:(UIFont *)font orImage:(UIImage *)image
 {
-    self = [super initWithFrame:CGRectMake(0, 0, 132, 132)];
+	self = [super initWithFrame:CGRectMake(0, 0, 132, 132)];
     if(self){
         
-        _archerBGView = [[PSTextBoardItemOverlapView alloc] initWithFrame:CGRectMake(0, 0, 132, 132)];
-        _archerBGView.backgroundColor = [UIColor yellowColor];
+        _archerBGView = [[PSTextBoardItemOverlapView alloc] initWithFrame:CGRectZero];
+        _archerBGView.backgroundColor = [UIColor clearColor];
         
         _label = [[PSTextLabel alloc] init];
         _label.numberOfLines = 0;
@@ -201,52 +186,26 @@ static PSTextBoardItem *activeView = nil;
         _label.minimumScaleFactor = font.pointSize * 0.8f;
         _label.adjustsFontSizeToFitWidth = YES;
         _label.textAlignment = NSTextAlignmentCenter;
+		_label.textColor = [UIColor whiteColor];
         _label.text = text;
         _label.layer.allowsEdgeAntialiasing = true;
-        
-        //   _label.backgroundColor = [UIColor purpleColor];
-        _label.textColor = [UIColor whiteColor];
-        
+
+		
         self.text = text;
         [self addSubview:_label];
         
         _textBoard = tool;
        
-        CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textBoard.drawingView.frame) - 2*LABEL_OFFSET, FLT_MAX)];
+        CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textBoard.previewView.drawingView.frame) - 2*LABEL_OFFSET, FLT_MAX)];
         _label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, size.width + 20, size.height + _label.font.pointSize);
-#define IMAGE_MAXSIZE 200
-        if (image) {
-            CGSize imageSize = image.size;
-            CGFloat DI = imageSize.width / imageSize.height; //宽高比例
-            CGFloat maxLength = MAX(imageSize.width, imageSize.height);
-            
-            if (maxLength > IMAGE_MAXSIZE) {
-                maxLength = IMAGE_MAXSIZE;
-                if (maxLength == imageSize.height) {
-                    imageSize.height = maxLength;
-                    imageSize.width = maxLength * DI;
-                } else if (maxLength == imageSize.width) {
-                    imageSize.width = maxLength;
-                    imageSize.height = maxLength / DI;
-                }
-            }
-            
-            
-            _label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, imageSize.width, imageSize.height);
-        }
         self.frame = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*LABEL_OFFSET, CGRectGetHeight(_label.frame) + 2*LABEL_OFFSET);
-        
-//        _deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//        [_deleteButton setImage:[UIImage my_imageNamed:@"close_Text" inBundle:[NSBundle bundleForClass:self.class]] forState:UIControlStateNormal];
-//        _deleteButton.frame = CGRectMake(0, 0, DELETEBUTTON_BOUNDS, DELETEBUTTON_BOUNDS);
-//        [_deleteButton addTarget:self action:@selector(pushedDeleteBtn:) forControlEvents:UIControlEventTouchUpInside];
-//        [self addSubview:_deleteButton];
         
         _arg = 0;
         [self setScale:1];
         
         [self initGestures];
     }
+	
     return self;
 }
 
@@ -261,7 +220,7 @@ static PSTextBoardItem *activeView = nil;
     [pinch requireGestureRecognizerToFail:tap];
     [rotation requireGestureRecognizerToFail:tap];
     
-   [self.textBoard.previewImageView.scrollView.panGestureRecognizer requireGestureRecognizerToFail:pan];
+   [self.textBoard.previewView.scrollView.panGestureRecognizer requireGestureRecognizerToFail:pan];
     
     tap.delegate = [PSImageEditorGestureManager instance];
     pan.delegate = [PSImageEditorGestureManager instance];
@@ -358,8 +317,8 @@ static PSTextBoardItem *activeView = nil;
                recognizer.state == UIGestureRecognizerStateCancelled) {
         
         // TODO:XXX
-        CGRect rectCoordinate = [piece.superview convertRect:piece.frame toView:_textBoard.imageView.superview];
-        if (!CGRectIntersectsRect(CGRectInset(_textBoard.imageView.frame, 30, 30), rectCoordinate)) {
+        CGRect rectCoordinate = [piece.superview convertRect:piece.frame toView:_textBoard.previewView.imageView.superview];
+        if (!CGRectIntersectsRect(CGRectInset(_textBoard.previewView.imageView.frame, 30, 30), rectCoordinate)) {
             [UIView animateWithDuration:.2f animations:^{
                 piece.center = piece.superview.center;
                 self.center = piece.center;
@@ -454,16 +413,16 @@ static PSTextBoardItem *activeView = nil;
 }
 
 - (void)resizeSelf {
-    
-    
-    CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(self.textBoard.drawingView.frame) - 2*LABEL_OFFSET, FLT_MAX)];
-    _label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, size.width + 20, size.height + _label.font.pointSize);
+	
+    CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(self.textBoard.previewView.drawingView.frame) - 2*LABEL_OFFSET, FLT_MAX)];
+   _label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, size.width + 20, size.height + _label.font.pointSize);
     self.bounds = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*LABEL_OFFSET, CGRectGetHeight(_label.frame) + 2*LABEL_OFFSET);
     _archerBGView.bounds = self.bounds;
-    
-    rectLayer1.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, - 2, 4, 4);
-    rectLayer2.frame = CGRectMake(_scale/2.f - 2, _scale/2.f + CGRectGetHeight(_label.frame) - 2, 4, 4);
-    rectLayer3.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, CGRectGetHeight(_label.frame) - 2 - _scale/2.f, 4, 4);
+	
+	_leftTopRectLayer.frame = CGRectMake(_scale/2.f - 2, - 2, 4, 4);
+    _rightTopRectLayer.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, - 2, 4, 4);
+    _leftBottomRectLayer.frame = CGRectMake(_scale/2.f - 2, _scale/2.f + CGRectGetHeight(_label.frame) - 2, 4, 4);
+    _rightBottomRectLayer.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, CGRectGetHeight(_label.frame) - 2 - _scale/2.f, 4, 4);
 }
 
 - (void)layoutSubviews {
@@ -489,35 +448,44 @@ static PSTextBoardItem *activeView = nil;
     {
         [CATransaction begin];
         [CATransaction setDisableActions:YES];
-        if (!rectLayer1) {
-            rectLayer1 = [CALayer layer];
-            rectLayer1.backgroundColor = [UIColor whiteColor].CGColor;
-            [_label.layer addSublayer:rectLayer1];
+		
+		if (!_leftTopRectLayer) {
+			_leftTopRectLayer = [CALayer layer];
+			_leftTopRectLayer.backgroundColor = [UIColor whiteColor].CGColor;
+			[_label.layer addSublayer:_leftTopRectLayer];
+		}
+		_leftTopRectLayer.frame = CGRectMake(_scale/2.f - 2, - 2, 4, 4);
+		
+        if (!_rightTopRectLayer) {
+            _rightTopRectLayer = [CALayer layer];
+            _rightTopRectLayer.backgroundColor = [UIColor whiteColor].CGColor;
+            [_label.layer addSublayer:_rightTopRectLayer];
         }
-        rectLayer1.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, - 2, 4, 4);
-        
-        
-        if (!rectLayer2) {
-            rectLayer2 = [CALayer layer];
-            rectLayer2.backgroundColor = [UIColor whiteColor].CGColor;
-            [_label.layer addSublayer:rectLayer2];
+        _rightTopRectLayer.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, - 2, 4, 4);
+
+        if (!_leftBottomRectLayer) {
+            _leftBottomRectLayer = [CALayer layer];
+            _leftBottomRectLayer.backgroundColor = [UIColor whiteColor].CGColor;
+            [_label.layer addSublayer:_leftBottomRectLayer];
         }
-        rectLayer2.frame = CGRectMake(_scale/2.f - 2, CGRectGetHeight(_label.frame) - 2 - _scale/2.f, 4, 4);
+        _leftBottomRectLayer.frame = CGRectMake(_scale/2.f - 2, CGRectGetHeight(_label.frame) - 2 - _scale/2.f, 4, 4);
         
-        
-        if (!rectLayer3) {
-            rectLayer3 = [CALayer layer];
-            rectLayer3.backgroundColor = [UIColor whiteColor].CGColor;
-            [_label.layer addSublayer:rectLayer3];
+        if (!_rightBottomRectLayer) {
+            _rightBottomRectLayer = [CALayer layer];
+            _rightBottomRectLayer.backgroundColor = [UIColor whiteColor].CGColor;
+            [_label.layer addSublayer:_rightBottomRectLayer];
         }
-        rectLayer3.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, CGRectGetHeight(_label.frame) - 2 - _scale/2.f, 4, 4);
+        _rightBottomRectLayer.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, CGRectGetHeight(_label.frame) - 2 - _scale/2.f, 4, 4);
         [CATransaction commit];
     }
 }
 
 #pragma mark- Properties
 
-- (void)setAvtive:(BOOL)active {
+- (void)setActive:(BOOL)active {
+	
+	_active = active;
+	
     dispatch_async(dispatch_get_main_queue(), ^{
         [CATransaction begin];
         [CATransaction setDisableActions:YES];
@@ -528,26 +496,24 @@ static PSTextBoardItem *activeView = nil;
         _label.layer.shadowOpacity = .6f;
         _label.layer.shadowRadius = 2.f;
         
-        rectLayer1.hidden = rectLayer2.hidden = rectLayer3.hidden = !active;
+        _leftTopRectLayer.hidden =
+		_rightTopRectLayer.hidden =
+		_leftBottomRectLayer.hidden =
+		_rightBottomRectLayer.hidden = !active;
+		
         [CATransaction commit];
         
-        if (active) {
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeColor:) name:@"kColorPanNotificaiton" object:nil];
-        } else {
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:@"kColorPanNotificaiton" object:nil];
-        }
+//        if (active) {
+//            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeColor:) name:@"kColorPanNotificaiton" object:nil];
+//        } else {
+//            [[NSNotificationCenter defaultCenter] removeObserver:self name:@"kColorPanNotificaiton" object:nil];
+//        }
     });
 }
 
 - (void)changeColor:(NSNotification *)notification {
     UIColor *currentColor = (UIColor *)notification.object;
     self.fillColor = currentColor;
-}
-
-- (BOOL)active
-{
-   // return !_deleteButton.hidden;
-    return YES;
 }
 
 - (void)sizeToFitWithMaxWidth:(CGFloat)width lineHeight:(CGFloat)lineHeight
@@ -663,55 +629,36 @@ static PSTextBoardItem *activeView = nil;
 
 @implementation PSTextLabel
 
-- (id)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (self) {
-        // Initialization code
-    }
-    return self;
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    
-    PSEditImageCropOverLayView *view = [[PSEditImageCropOverLayView alloc] init];
-    view.bounds = self.bounds;
-    //[self addSubview:view];
-}
-
-- (void)drawTextInRect:(CGRect)rect
-{
-    CGSize shadowOffset = self.shadowOffset;
-    UIColor *txtColor = self.textColor;
-    UIFont *font = self.font;
-    
-    CGContextRef contextRef = UIGraphicsGetCurrentContext();
-    CGContextSetLineWidth(contextRef, 1);
-    CGContextSetLineJoin(contextRef, kCGLineJoinRound);
-    
-    CGContextSetTextDrawingMode(contextRef, kCGTextFill);
-    self.textColor = txtColor;
-    self.shadowOffset = CGSizeMake(10, 10);
-    self.font = font;
-    [super drawTextInRect:CGRectInset(rect, 5, 5)];
-    
-    self.shadowOffset = shadowOffset;
-}
-
-@end
-
-
-
-@implementation PSEditImageCropOverLayView
-
-- (void)drawRect:(CGRect)rect {
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:0];
-    path.lineWidth = 2.5;
-    [[UIColor whiteColor] setStroke];
-    [path stroke];
-}
+//- (id)initWithFrame:(CGRect)frame
+//{
+//    self = [super initWithFrame:frame];
+//    if (self) {
+//
+//    }
+//    return self;
+//}
+//
+//- (void)layoutSubviews {
+//    [super layoutSubviews];
+//}
+//
+//- (void)drawTextInRect:(CGRect)rect
+//{
+//    CGSize shadowOffset = self.shadowOffset;
+//    UIColor *txtColor = self.textColor;
+//    UIFont *font = self.font;
+//
+//    CGContextRef contextRef = UIGraphicsGetCurrentContext();
+//    CGContextSetLineWidth(contextRef, 1);
+//    CGContextSetLineJoin(contextRef, kCGLineJoinRound);
+//
+//    CGContextSetTextDrawingMode(contextRef, kCGTextFill);
+//    self.textColor = txtColor;
+//    self.shadowOffset = CGSizeMake(10, 10);
+//    self.font = font;
+//    [super drawTextInRect:CGRectInset(rect, 5, 5)];
+//
+//    self.shadowOffset = shadowOffset;
+//}
 
 @end

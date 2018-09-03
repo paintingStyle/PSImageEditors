@@ -20,10 +20,6 @@ static const CGFloat   kHorizontalSpacing = 5.0f;
 @property (nonatomic, strong) UIActivityIndicatorView *indicator;
 @property (nonatomic, strong) PSImageLoadFailedView *loadFailedView;
 
-@property (nonatomic, strong) UITapGestureRecognizer *singleGesture;
-@property (nonatomic, strong) UITapGestureRecognizer *doubleGesture;
-@property (nonatomic, strong) UILongPressGestureRecognizer *longGesture;
-
 @end
 
 @implementation PSPreviewImageView
@@ -137,7 +133,7 @@ static const CGFloat   kHorizontalSpacing = 5.0f;
 		_drawingView = [[UIImageView alloc] init];
 		_drawingView.contentMode = UIViewContentModeCenter;
 		_drawingView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleTopMargin;
-		[_scrollView addSubview:_drawingView];
+		[_imageView addSubview:_drawingView];
 		
 		_loadFailedView = [[PSImageLoadFailedView alloc] init];
 		_loadFailedView.hidden = YES;

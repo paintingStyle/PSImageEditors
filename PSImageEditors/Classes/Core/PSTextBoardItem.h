@@ -30,6 +30,7 @@
 @property (nonatomic, assign) NSTextAlignment textAlignment;
 @property (nonatomic, strong) UIImage *image;
 
+@property (nonatomic, assign, getter=isActive) BOOL active;
 @property (nonatomic, weak) id<PSTextBoardItemDelegate> delegate;
 @property (nonatomic, strong) PSTextBoardItemOverlapView *archerBGView;
 
@@ -38,10 +39,6 @@
 - (instancetype)initWithTool:(PSTextBoard *)tool text:(NSString *)text font:(UIFont *)font orImage:(UIImage *)image;
 - (void)setScale:(CGFloat)scale;
 - (void)sizeToFitWithMaxWidth:(CGFloat)width lineHeight:(CGFloat)lineHeight;
-
-@end
-
-@interface PSEditImageCropOverLayView : UIView
 
 @end
 

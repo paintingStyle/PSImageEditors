@@ -16,6 +16,10 @@ typedef void(^CallbackBlock)(PSImageObject *imageObject);
 @property (nonatomic, strong) FLAnimatedImageView *imageView;
 @property (nonatomic, strong) UIImageView *drawingView;
 
+@property (nonatomic, strong) UITapGestureRecognizer *singleGesture;
+@property (nonatomic, strong) UITapGestureRecognizer *doubleGesture;
+@property (nonatomic, strong) UILongPressGestureRecognizer *longGesture;
+
 @property (nonatomic, strong) PSImageObject *imageObject;
 
 @property (nonatomic, copy) CallbackBlock singleGestureBlock;

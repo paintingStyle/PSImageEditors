@@ -15,13 +15,11 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 #import "PSTopToolBar.h"
 #import "PSColorToolBar.h"
 
-@implementation PSTextBoard {
-    __weak UIImageView *_drawingView;
-}
+@implementation PSTextBoard
 
 - (void)setup {
     
-    _drawingView = self.drawingView;
+	
     //self.previewImageView.scrollView.pinchGestureRecognizer.enabled = NO;
 
     __weak typeof(self)weakSelf = self;
@@ -79,11 +77,13 @@ static const CGFloat kColorToolBarHeight = 48.0f;
         return;
     }
     
-    CGPoint point = [self.imageView.superview convertPoint:self.imageView.center
-                                                    toView:self.drawingView];
+//    CGPoint point = [self.previewView.imageView.superview convertPoint:self.previewView.imageView.center
+//                                                    toView:self.previewView.drawingView];
+	CGPoint point = [self.previewView.imageView convertPoint:self.previewView.imageView.center
+													  toView:self.previewView.drawingView];
     // 修正超长图文字的显示位置
-    if (CGRectGetHeight(self.imageView.frame) >PS_SCREEN_H) {
-        point.y = self.previewImageView.scrollView.contentOffset.y + PS_SCREEN_H *0.5;
+    if (CGRectGetHeight(self.previewView.imageView.frame) >PS_SCREEN_H) {
+        point.y = self.previewView.scrollView.contentOffset.y + PS_SCREEN_H *0.5;
     }
     
     PSTextBoardItem *view = [[PSTextBoardItem alloc] initWithTool:self text:text font:self.textView.textView.font orImage:nil];
@@ -94,7 +94,7 @@ static const CGFloat kColorToolBarHeight = 48.0f;
     view.text = text;
     view.center = point;
     view.userInteractionEnabled = YES;
-    [self.drawingView addSubview:view];
+    [self.previewView.drawingView addSubview:view];
 
     [PSTextBoardItem setActiveTextView:view];
 }

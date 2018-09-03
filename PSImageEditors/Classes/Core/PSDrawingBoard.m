@@ -7,14 +7,13 @@
 
 #import "PSDrawingBoard.h"
 #import "PSImageEditorGestureManager.h"
+#import "PSTextBoardItem.h"
 
-@interface PSDrawingBoard () {
-    __weak UIImageView        *_drawingView;
-    CGSize                     _originalImageSize;
-}
+@interface PSDrawingBoard ()
 
 @property (nonatomic, strong, readwrite) NSMutableArray<PSDrawingPath *> *drawingPaths;
 
+@property (nonatomic, assign) CGSize originalImageSize;
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
 @property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
 
@@ -50,16 +49,17 @@
 //draw
 - (void)drawingViewDidPan:(UIPanGestureRecognizer*)sender
 {
-    CGPoint currentDraggingPosition = [sender locationInView:_drawingView];
+    CGPoint currentDraggingPosition = [sender locationInView:self.previewView.drawingView];
     
     if(sender.state == UIGestureRecognizerStateBegan) {
-        //取消所有加入文字激活状态
-//        for (UIView *subView in self.editor.drawingView.subviews) {
-//            if ([subView isKindOfClass:[WBGTextToolView class]]) {
-//                [WBGTextToolView setInactiveTextView:(WBGTextToolView *)subView];
-//            }
-//        }
-        
+		
+		//取消所有加入文字激活状态
+        for (UIView *subView in self.previewView.drawingView.subviews) {
+            if ([subView isKindOfClass:[PSTextBoardItem class]]) {
+                [PSTextBoardItem setInactiveTextView:(PSTextBoardItem *)subView];
+            }
+        }
+		
         // 初始化一个UIBezierPath对象, 把起始点存储到UIBezierPath对象中, 用来存储所有的轨迹点
         PSDrawingPath *path = [PSDrawingPath pathToPoint:currentDraggingPosition pathWidth:MAX(1, self.pathWidth)];
         path.pathColor         = self.currentColor;
@@ -91,7 +91,7 @@
 }
 
 - (void)drawLine {
-    CGSize size = _drawingView.frame.size;
+    CGSize size = self.previewView.drawingView.frame.size;
     UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
     CGContextRef context = UIGraphicsGetCurrentContext();
     //去掉锯齿
@@ -102,16 +102,16 @@
         [path drawPath];
     }
     
-    _drawingView.image = UIGraphicsGetImageFromCurrentImageContext();
+    self.previewView.drawingView.image = UIGraphicsGetImageFromCurrentImageContext();
     
     UIGraphicsEndImageContext();
 }
 
 - (UIImage *)buildImage {
 	
-	UIGraphicsBeginImageContextWithOptions(_originalImageSize, NO, self.imageView.image.scale);
-    [self.imageView.image drawAtPoint:CGPointZero];
-    [_drawingView.image drawInRect:CGRectMake(0, 0, _originalImageSize.width, _originalImageSize.height)];
+	UIGraphicsBeginImageContextWithOptions(self.originalImageSize, NO, self.previewView.imageView.image.scale);
+    [self.previewView.imageView.image drawAtPoint:CGPointZero];
+    [self.previewView.drawingView.image drawInRect:CGRectMake(0, 0, self.originalImageSize.width, self.originalImageSize.height)];
     UIImage *tmp = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
@@ -121,8 +121,7 @@
 #pragma mark - implementation 重写父方法
 - (void)setup {
     //初始化一些东西
-    _originalImageSize   = self.imageView.image.size;
-    _drawingView         = self.drawingView;
+    self.originalImageSize   = self.previewView.imageView.image.size;
     
     //滑动手势
     if (!self.panGesture) {
@@ -140,17 +139,17 @@
         
     }
 	
-    [_drawingView addGestureRecognizer:self.panGesture];
-    [_drawingView addGestureRecognizer:self.tapGesture];
-    _drawingView.userInteractionEnabled = YES;
-    _drawingView.layer.shouldRasterize = YES;
-    _drawingView.layer.minificationFilter = kCAFilterTrilinear;
+    [self.previewView.drawingView addGestureRecognizer:self.panGesture];
+    [self.previewView.drawingView addGestureRecognizer:self.tapGesture];
+    self.previewView.drawingView.userInteractionEnabled = YES;
+    self.previewView.drawingView.layer.shouldRasterize = YES;
+    self.previewView.drawingView.layer.minificationFilter = kCAFilterTrilinear;
     self.panGesture.enabled = YES;
     
     
-//    self.imageView.userInteractionEnabled = YES;
-//    self.drawingView.userInteractionEnabled = YES;
-    
+    self.previewView.imageView.userInteractionEnabled = YES;
+    self.previewView.drawingView.userInteractionEnabled = YES;
+	
 //    self.editor.imageView.userInteractionEnabled = YES;
 //    self.previewImageView.scrollView.panGestureRecognizer.minimumNumberOfTouches = 2;
 //    self.previewImageView.scrollView.panGestureRecognizer.delaysTouchesBegan = NO;
@@ -162,8 +161,8 @@
 //    self.editor.imageView.userInteractionEnabled = NO;
    // self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 1;
     self.panGesture.enabled = NO;
-	self.imageView.userInteractionEnabled = NO;
-	_drawingView.userInteractionEnabled = NO;
+	self.previewView.imageView.userInteractionEnabled = NO;
+	self.previewView.drawingView.userInteractionEnabled = NO;
 }
 
 - (void)executeWithCompletionBlock:(void (^)(UIImage *, NSError *, NSDictionary *))completionBlock
