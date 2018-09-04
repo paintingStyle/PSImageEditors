@@ -22,6 +22,11 @@
 @property (nonatomic, strong) UIButton *mosaicButton;
 @property (nonatomic, strong) UIButton *clippingButton;
 
+// PSBottomToolTypeDelete
+@property (nonatomic, strong) UIView *deleteContainerView;
+@property (nonatomic, strong) UIButton *deleteButton;
+@property (nonatomic, strong) UIButton *deleteDescButton;
+
 @end
 
 @implementation PSBottomToolBar
@@ -39,6 +44,13 @@
 		self.titleLabel.text = [NSString stringWithFormat:@"原图(%@)",
 								imageObject.originSize];
 	};
+}
+
+- (void)setDeleteState:(PSBottomToolDeleteState)deleteState {
+    
+    _deleteState = deleteState;
+    self.deleteDescButton.selected = (deleteState == PSBottomToolDeleteStateDid);
+    self.deleteDescButton.selected = (deleteState == PSBottomToolDeleteStateDid);
 }
 
 - (instancetype)initWithType:(PSBottomToolType)type {
@@ -99,10 +111,10 @@
 
 - (void)configEditorUI {
     
-	[self addSubview:self.maskImageView];
-	[self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
-		make.edges.equalTo(self);
-	}];
+    [self addSubview:self.maskImageView];
+    [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self);
+    }];
 	
 	[self addSubview:self.brushButton];
 	[self addSubview:self.textButton];
@@ -122,6 +134,51 @@
 		make.centerY.equalTo(self);
 		make.height.equalTo(@28);
 	}];
+}
+
+- (void)configDeleteUI {
+    
+    [self addSubview:self.maskImageView];
+    [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self);
+    }];
+    
+    self.deleteContainerView = [[UIView alloc] init];
+    [self addSubview:self.deleteContainerView];
+    
+    self.deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.deleteButton setImage:[UIImage ps_imageNamed:@"btn_delete_normal"] forState:UIControlStateNormal];
+    [self.deleteButton setImage:[UIImage ps_imageNamed:@"btn_delete_selected"] forState:UIControlStateSelected];
+    [self.deleteContainerView addSubview:self.deleteButton];
+    
+    self.deleteDescButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.deleteDescButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    self.deleteDescButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    [self.deleteDescButton setTitle:@"拖动到此处删除" forState:UIControlStateNormal];
+    [self.deleteDescButton setTitle:@"松手即可删除" forState:UIControlStateSelected];
+    [self.deleteContainerView addSubview:self.deleteDescButton];
+    
+    
+    [self.deleteContainerView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self);
+    }];
+    
+    [self.deleteButton mas_makeConstraints:^(MASConstraintMaker *make) {
+       
+        make.top.equalTo(self.deleteContainerView);
+        make.centerX.equalTo(self.deleteContainerView);
+    }];
+    
+    [self.deleteDescButton mas_makeConstraints:^(MASConstraintMaker *make) {
+       
+        make.top.equalTo(self.deleteButton.mas_bottom).offset(6);
+        make.centerX.equalTo(self.deleteButton);
+    }];
+}
+
+- (void)configClippingUI {
+    
+    
 }
 
 - (void)buttonDidClickSender:(UIButton *)btn {
@@ -185,16 +242,6 @@
 			}
 		}
 	}
-}
-
-- (void)configDeleteUI {
-    
-    
-}
-
-- (void)configClippingUI {
-    
-    
 }
 
 - (UIButton *)clippingButton {

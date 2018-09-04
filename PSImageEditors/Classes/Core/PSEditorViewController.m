@@ -29,6 +29,8 @@ PSTextBoardItemDelegate> {
 @property (nonatomic, strong) PSBottomToolBar *bottomToolBar;
 @property (nonatomic, strong) PSColorToolBar *colorToolBar;
 
+@property (nonatomic, strong) PSBottomToolBar *deleteToolBar;
+
 @property (nonatomic, strong) PSDrawingBoard *drawingBoard;
 @property (nonatomic, strong) PSTextBoard *textBoard;
 
@@ -194,8 +196,26 @@ PSTextBoardItemDelegate> {
     
     [self toolBarShow:!hidden animation:animation];
 }
+
+- (void)textBoardItem:(PSTextBoardItem *)item
+   translationGesture:(UIPanGestureRecognizer *)gesture
+           activation:(BOOL)activation {
     
-- (void)textBoardItemDidTapWithItem:(PSTextBoardItem *)item {
+    self.deleteToolBar.hidden = !activation;
+    PSTextBoardItem *textBoardItem = gesture.view;
+    
+    // https://www.jianshu.com/p/92e2d0200eb4
+    CGRect rect = [self.view convertRect:textBoardItem.frame fromView:textBoardItem.superview];
+    BOOL contains = CGRectIntersectsRect(rect, self.deleteToolBar.frame);
+    if (contains) {
+        self.deleteToolBar.deleteState = PSBottomToolDeleteStateDid;
+        if (!activation) { [textBoardItem remove]; }
+    }else {
+        self.deleteToolBar.deleteState = PSBottomToolDeleteStateWill;
+    }
+}
+    
+- (void)textBoardItemDidClickItem:(PSTextBoardItem *)item {
     
     [self.colorToolBar setToolBarShow:NO animation:YES];
      [self.textBoard setup];
@@ -249,6 +269,15 @@ PSTextBoardItemDelegate> {
 		make.left.right.equalTo(self.bottomToolBar);
 		make.height.equalTo(@55);
 	}];
+    
+    self.deleteToolBar = [[PSBottomToolBar alloc] initWithType:PSBottomToolTypeDelete];
+    self.deleteToolBar.hidden = YES;
+    [self.view addSubview:self.deleteToolBar];
+    [self.deleteToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
+        
+        make.left.bottom.right.equalTo(self.view);
+        make.height.equalTo(@(PSBottomToolBarHeight));
+    }];
 	
 	self.drawingBoard.previewView = self.previewImageView;
 	self.drawingBoard.currentColor = self.colorToolBar.currentColor;;

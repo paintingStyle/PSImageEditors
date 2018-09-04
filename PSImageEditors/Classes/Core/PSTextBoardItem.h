@@ -16,7 +16,11 @@
         hiddenToolBar:(BOOL)hidden
             animation:(BOOL)animation;
 
-- (void)textBoardItemDidTapWithItem:(PSTextBoardItem *)item;
+- (void)textBoardItem:(PSTextBoardItem *)item
+   translationGesture:(UIPanGestureRecognizer *)gesture
+           activation:(BOOL)activation;
+
+- (void)textBoardItemDidClickItem:(PSTextBoardItem *)item;
 
 @end
 
@@ -39,6 +43,7 @@
 - (instancetype)initWithTool:(PSTextBoard *)tool text:(NSString *)text font:(UIFont *)font orImage:(UIImage *)image;
 - (void)setScale:(CGFloat)scale;
 - (void)sizeToFitWithMaxWidth:(CGFloat)width lineHeight:(CGFloat)lineHeight;
+- (void)remove;
 
 @end
 
