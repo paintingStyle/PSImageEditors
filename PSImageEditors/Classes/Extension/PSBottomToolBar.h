@@ -46,6 +46,8 @@ typedef NS_ENUM(NSUInteger, PSBottomToolDeleteState) {
 
 @property (nonatomic, strong) PSImageObject *imageObject;
 
+@property (nonatomic, assign, getter=isShow) BOOL show;
+
 /// 是否处于编辑模式
 @property (nonatomic, assign, getter=isEditor) BOOL editor;
 

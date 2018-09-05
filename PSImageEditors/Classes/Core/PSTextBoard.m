@@ -24,29 +24,46 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 
     __weak typeof(self)weakSelf = self;
     self.textView = [[PSTextView alloc] initWithFrame:CGRectMake(0, kTopOffset, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height - kTopOffset)];
-    self.textView.textView.textColor = self.currentColor;
-    self.textView.textView.font = [UIFont systemFontOfSize:24.f weight:UIFontWeightRegular];
+	
+	// 当前有激活的item，设定初始值
+	 PSTextBoardItem *textBoardItem = self.activeItem;
+	 if (textBoardItem) {
+		NSMutableDictionary *attrs = [NSMutableDictionary dictionary];
+		if (textBoardItem.fillColor) {
+			[attrs setObject:textBoardItem.fillColor forKey:NSBackgroundColorAttributeName];
+		}
+		if (textBoardItem.strokeColor) {
+			[attrs setObject:textBoardItem.strokeColor forKey:NSForegroundColorAttributeName];
+		}
+		if (textBoardItem.font) {
+			[attrs setObject:textBoardItem.font forKey:NSFontAttributeName];
+		}
+		self.textView.textView.text = textBoardItem.text;
+		self.textView.attrs = attrs;
+	}
+	
+//    self.textView.textView.textColor = self.currentColor;
+//    self.textView.textView.font = [UIFont systemFontOfSize:24.f weight:UIFontWeightRegular];
+	
 //    self.editor.backButton.enabled = NO;
 //    self.editor.undoButton.enabled = NO;
-    self.textView.dissmissTextTool = ^(NSString *currentText, BOOL isUse) {
-     
-//        weakSelf.editor.scrollView.pinchGestureRecognizer.enabled = YES;
-//        weakSelf.editor.backButton.enabled = YES;
-//        weakSelf.editor.undoButton.enabled = YES;
-        
-        if (weakSelf.isEditAgain) {
-            if (weakSelf.editAgainCallback && isUse) {
-                weakSelf.editAgainCallback(currentText);
-            }
-            weakSelf.isEditAgain = NO;
-        } else {
-            if (isUse) {
-                [weakSelf addNewText:currentText];
-            }
-        }
-        
-        weakSelf.dissmissTextTool(currentText);
-    };
+	self.textView.dissmissBlock = ^(NSString *text, NSDictionary *attrs, BOOL use) {
+		
+		if (weakSelf.isEditAgain) {
+			if (weakSelf.editAgainCallback && use) {
+				weakSelf.editAgainCallback(text, attrs);
+			}
+			weakSelf.isEditAgain = NO;
+		} else {
+			if (use) {
+				[weakSelf addTextBoardItemWithText:text attrs:attrs];
+			}
+		}
+		//        weakSelf.editor.scrollView.pinchGestureRecognizer.enabled = YES;
+		//        weakSelf.editor.backButton.enabled = YES;
+		//        weakSelf.editor.undoButton.enabled = YES;
+		weakSelf.dissmissTextTool(text);
+	};
     [self.editorView addSubview:self.textView];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeColor:) name:@"kColorPanNotificaiton" object:nil];
@@ -71,32 +88,46 @@ static const CGFloat kColorToolBarHeight = 48.0f;
     }
 }
 
-- (void)addNewText:(NSString *)text
-{
-    if (text == nil || text.length <= 0) {
-        return;
-    }
-    
-//    CGPoint point = [self.previewView.imageView.superview convertPoint:self.previewView.imageView.center
-//                                                    toView:self.previewView.drawingView];
+- (void)addTextBoardItemWithText:(NSString *)text
+						   attrs:(NSDictionary *)attrs {
+	
+    if (!text && !text.length) { return; }
+	
 	CGPoint point = [self.previewView.imageView convertPoint:self.previewView.imageView.center
 													  toView:self.previewView.drawingView];
     // 修正超长图文字的显示位置
     if (CGRectGetHeight(self.previewView.imageView.frame) >PS_SCREEN_H) {
         point.y = self.previewView.scrollView.contentOffset.y + PS_SCREEN_H *0.5;
     }
+	
+	UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
+	UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
+	UIFont *font = attrs[NSFontAttributeName];
     
     PSTextBoardItem *view = [[PSTextBoardItem alloc] initWithTool:self text:text font:self.textView.textView.font orImage:nil];
     view.delegate = self.itemDelegate;
-    view.fillColor = self.currentColor;
     view.borderColor = [UIColor whiteColor];
-    view.font = self.textView.textView.font;
+    view.font = font;
+	view.strokeColor = strokeColor;
+	view.fillColor = fillColor;
     view.text = text;
     view.center = point;
     view.userInteractionEnabled = YES;
     [self.previewView.drawingView addSubview:view];
-
     [PSTextBoardItem setActiveTextView:view];
+}
+
+- (PSTextBoardItem *)activeItem {
+	
+	__block PSTextBoardItem *activeItem;
+	[self.previewView.drawingView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+		if (![obj isKindOfClass:[PSTextBoardItem class]]) { return; }
+		if (((PSTextBoardItem *)obj).isActive) {
+			activeItem = obj;
+			*stop = YES;
+		}
+	}];
+	return activeItem;
 }
 
 @end
@@ -115,51 +146,65 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 
 @implementation PSTextView
 
-- (instancetype)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (self) {
-        self.backgroundColor = [UIColor clearColor];
-        
-        __weak typeof(self)weakSelf = self;
-        
-        UIBlurEffect *blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
-        self.effectView = [[UIVisualEffectView alloc] initWithEffect:blur];
-        self.effectView.frame = CGRectMake(0, -kTopOffset, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
-        [self addSubview:self.effectView];
-        
-        self.topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolTypeCancelAndDoneIcon];
-        self.topToolBar.delegate = self;
-        self.topToolBar.frame = CGRectMake(0, 0, PS_SCREEN_W, PS_NAV_BAR_H);
-        [self addSubview:self.topToolBar];
-        
-        self.textView = [[UITextView alloc] init];
-        CGRect frame = CGRectInset(self.bounds, 15, 0);
-        frame.origin.y = kTextTopOffset+PS_NAV_BAR_H;
-        frame.size.height -= PS_NAV_BAR_H;
-        self.textView.frame = frame;
-        self.textView.scrollEnabled = YES;
-        self.textView.returnKeyType = UIReturnKeyDone;
-        self.textView.delegate = self;
-        self.textView.backgroundColor = [UIColor clearColor];
-        [self addSubview:self.textView];
-        
-        self.colorToolBar = [[PSColorToolBar alloc] initWithType:PSColorToolBarTypeText];
-        self.colorToolBar.delegate = self;
-        self.colorToolBar.frame = CGRectMake(0, 0, PS_SCREEN_W, kColorToolBarHeight);
-        self.textView.inputAccessoryView = self.colorToolBar;
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(keyboardWillShow:)
-                                                     name:UIKeyboardWillShowNotification
-                                                   object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(keyboardWillHide:)
-                                                     name:UIKeyboardWillHideNotification
-                                                   object:nil];
-    }
-    
-    return self;
+- (void)setAttrs:(NSDictionary *)attrs {
+	
+	_attrs = attrs;
+	if (!attrs.allValues.count) { return; }
+	
+	UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
+	UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
+	
+	self.colorToolBar.changeBgColor = !CGColorEqualToColor(fillColor.CGColor, [UIColor clearColor].CGColor);
+	self.colorToolBar.currentColor = self.colorToolBar.changeBgColor ? fillColor:strokeColor;
+	
+	[self refreshTextViewDisplay];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame {
+	
+	if (self = [super initWithFrame:frame]) {
+		
+		self.backgroundColor = [UIColor clearColor];
+		
+		__weak typeof(self)weakSelf = self;
+		
+		UIBlurEffect *blur = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+		self.effectView = [[UIVisualEffectView alloc] initWithEffect:blur];
+		self.effectView.frame = CGRectMake(0, -kTopOffset, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
+		[self addSubview:self.effectView];
+		
+		self.topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolTypeCancelAndDoneIcon];
+		self.topToolBar.delegate = self;
+		self.topToolBar.frame = CGRectMake(0, 0, PS_SCREEN_W, PS_NAV_BAR_H);
+		[self addSubview:self.topToolBar];
+		
+		self.textView = [[UITextView alloc] init];
+		CGRect frame = CGRectInset(self.bounds, 15, 0);
+		frame.origin.y = kTextTopOffset+PS_NAV_BAR_H;
+		frame.size.height -= PS_NAV_BAR_H;
+		self.textView.frame = frame;
+		self.textView.scrollEnabled = YES;
+		self.textView.returnKeyType = UIReturnKeyDone;
+		self.textView.delegate = self;
+		self.textView.font = [UIFont systemFontOfSize:24.f weight:UIFontWeightRegular];
+		self.textView.backgroundColor = [UIColor clearColor];
+		[self addSubview:self.textView];
+		
+		self.colorToolBar = [[PSColorToolBar alloc] initWithType:PSColorToolBarTypeText];
+		self.colorToolBar.delegate = self;
+		self.colorToolBar.frame = CGRectMake(0, 0, PS_SCREEN_W, kColorToolBarHeight);
+		self.textView.inputAccessoryView = self.colorToolBar;
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(keyboardWillShow:)
+													 name:UIKeyboardWillShowNotification
+												   object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(keyboardWillHide:)
+													 name:UIKeyboardWillHideNotification
+												   object:nil];
+	}
+	return self;
 }
 
 #pragma mark - PSTopToolBarDelegate
@@ -256,10 +301,13 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 }
 
 - (void)dismissTextEditing:(BOOL)done {
-    
-    [self.textView resignFirstResponder];
-    if (self.dissmissTextTool) {
-        self.dissmissTextTool(self.textView.text, done);
+	
+	[self.textView resignFirstResponder];
+	
+	NSRange range = NSMakeRange(0, self.textView.text.length);
+	NSDictionary *attrs = [self.textView.attributedText attributesAtIndex:0 effectiveRange:&range];
+    if (self.dissmissBlock) {
+        self.dissmissBlock(self.textView.text, attrs, done);
     }
 }
 

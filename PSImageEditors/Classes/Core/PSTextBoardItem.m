@@ -16,101 +16,6 @@ static const CGFloat MAX_TEXT_SCAL = 4.0f;
 static const CGFloat kLabelMinSize = 20;
 static const CGFloat kTextBoardItemInset = 12;
 
-@interface PSTextBoardItemOverlapContentView : UIView
-
-@property (nonatomic, copy) NSString *text;
-@property (nonatomic, strong) UIFont *textFont;
-@property (nonatomic, strong) UIColor *textColor;
-@property (nonatomic, assign) CGFloat defaultFont;
-@property (nonatomic, strong) UIImage *image;
-
-@end
-
-@implementation PSTextBoardItemOverlapContentView
-
-//- (void)setText:(NSString *)text {
-//    if (_text != text) {
-//        _text = text;
-//        [self setNeedsDisplay];
-//    }
-//}
-//
-//- (void)setTextColor:(UIColor *)textColor {
-//    if (_textColor != textColor) {
-//        _textColor = textColor;
-//        [self setNeedsDisplay];
-//    }
-//}
-//
-//- (void)setTextFont:(UIFont *)textFont {
-//    if (_textFont != textFont) {
-//        _textFont = textFont;
-//        _defaultFont = textFont.pointSize;
-//        [self setNeedsDisplay];
-//    }
-//}
-//
-//- (void)drawRect:(CGRect)rect {
-//	
-//    rect.origin = CGPointMake(6, 6);
-//    NSAttributedString *string = [[NSAttributedString alloc] initWithString:self.text
-//                                                                 attributes:@{NSForegroundColorAttributeName : self.textColor,
-//																			  NSBackgroundColorAttributeName:[UIColor yellowColor],
-//																			  NSFontAttributeName : self.textFont}];
-//     [string drawInRect:CGRectInset(rect, 0, 0)];
-//
-//}
-
-@end
-
-@interface PSTextBoardItemOverlapView ()
-@property (nonatomic, strong) PSTextBoardItemOverlapContentView *contentView;
-@end
-@implementation PSTextBoardItemOverlapView
-- (instancetype)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (self) {
-        _contentView = [[PSTextBoardItemOverlapContentView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
-        _contentView.backgroundColor = [UIColor clearColor];
-        [self addSubview:_contentView];
-    }
-    return self;
-}
-
-- (void)setText:(NSString *)text {
-    if (_text != text) {
-        _text = text;
-        [_contentView setText:_text];
-    }
-}
-
-- (void)setTextColor:(UIColor *)textColor {
-    if (_textColor != textColor) {
-        _textColor = textColor;
-        [_contentView setTextColor:_textColor];
-    }
-}
-
-- (void)setTextFont:(UIFont *)textFont {
-    if (_textFont != textFont) {
-        _textFont = textFont;
-        _contentView.defaultFont = textFont.pointSize;
-        [_contentView setTextFont:_textFont];
-    }
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    
-    _contentView.bounds = self.bounds;
-    CGRect frame = _contentView.frame;
-    frame.origin = CGPointZero;
-    _contentView.frame = frame;
-}
-
-@end
-
 @interface PSTextBoardItem () <UIGestureRecognizerDelegate>
 
 @property (nonatomic, weak) PSTextBoard *textBoard;
@@ -145,7 +50,7 @@ static PSTextBoardItem *activeView = nil;
         activeView = view;
 		activeView.active = YES;
         
-        [activeView.archerBGView.superview bringSubviewToFront:activeView.archerBGView];
+    //    [activeView.containerView bringSubviewToFront:activeView];
         [activeView.superview bringSubviewToFront:activeView];
         
     }
@@ -159,10 +64,11 @@ static PSTextBoardItem *activeView = nil;
 - (instancetype)initWithTool:(PSTextBoard *)tool text:(NSString *)text font:(UIFont *)font orImage:(UIImage *)image
 {
     if(self = [super init]){
-        
-        _archerBGView = [[PSTextBoardItemOverlapView alloc] initWithFrame:CGRectZero];
-        _archerBGView.backgroundColor = [UIColor clearColor];
-        
+		
+		//_containerView = [[UIView alloc] init];
+//        _archerBGView = [[PSTextBoardItemOverlapView alloc] initWithFrame:CGRectZero];
+//        _archerBGView.backgroundColor = [UIColor clearColor];
+		
         _label = [[UILabel alloc] init];
         _label.numberOfLines = 0;
         _label.font = font;
@@ -231,41 +137,10 @@ static PSTextBoardItem *activeView = nil;
 
 #pragma mark- gesture events
 
-// TODO: 移除文字
-//- (void)pushedDeleteBtn:(id)sender
-//{
-//    PSTextBoardItem *nextTarget = nil;
-//
-//    const NSInteger index = [self.superview.subviews indexOfObject:self];
-//
-//    for(NSInteger i=index+1; i<self.superview.subviews.count; ++i){
-//        UIView *view = [self.superview.subviews objectAtIndex:i];
-//        if([view isKindOfClass:[PSTextBoardItem class]]){
-//            nextTarget = (PSTextBoardItem *)view;
-//            break;
-//        }
-//    }
-//
-//    if(nextTarget==nil){
-//        for(NSInteger i=index-1; i>=0; --i){
-//            UIView *view = [self.superview.subviews objectAtIndex:i];
-//            if([view isKindOfClass:[PSTextBoardItem class]]){
-//                nextTarget = (PSTextBoardItem *)view;
-//                break;
-//            }
-//        }
-//    }
-//
-//    [[self class] setActiveTextView:nextTarget];
-//    [self removeFromSuperview];
-//    [_archerBGView removeFromSuperview];
-//}
-
 - (void)remove {
     
     [[self class] setActiveTextView:self];
     [self removeFromSuperview];
-    [_archerBGView removeFromSuperview];
 }
 
 - (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation {
@@ -295,7 +170,7 @@ static PSTextBoardItem *activeView = nil;
 {
     //平移
     [[self class] setActiveTextView:self];
-    UIView *piece = _archerBGView;
+    UIView *piece = self;
     CGPoint translation = [recognizer translationInView:piece.superview];
     piece.center = CGPointMake(piece.center.x + translation.x, piece.center.y + translation.y);
     [recognizer setTranslation:CGPointZero inView:piece.superview];
@@ -340,7 +215,7 @@ static PSTextBoardItem *activeView = nil;
         recognizer.state == UIGestureRecognizerStateChanged) {
         //坑点：recognizer.scale是相对原图片大小的scal
         
-        CGFloat scale = [(NSNumber *)[_archerBGView valueForKeyPath:@"layer.transform.scale.x"] floatValue];
+        CGFloat scale = [(NSNumber *)[self valueForKeyPath:@"layer.transform.scale.x"] floatValue];
         NSLog(@"scale = %f", scale);
         [self hiddenToolBar:YES animation:YES];
         //取消当前
@@ -357,7 +232,7 @@ static PSTextBoardItem *activeView = nil;
         }
         
         
-        _archerBGView.transform = CGAffineTransformScale(_archerBGView.transform, currentScale, currentScale);
+        self.transform = CGAffineTransformScale(self.transform, currentScale, currentScale);
         recognizer.scale = 1;
         [self layoutSubviews];
         [self hiddenToolBar:YES animation:YES];
@@ -373,7 +248,7 @@ static PSTextBoardItem *activeView = nil;
     if (recognizer.state == UIGestureRecognizerStateBegan ||
         recognizer.state == UIGestureRecognizerStateChanged) {
         
-        _archerBGView.transform = CGAffineTransformRotate(_archerBGView.transform, recognizer.rotation);
+        self.transform = CGAffineTransformRotate(self.transform, recognizer.rotation);
         _rotation = _rotation + recognizer.rotation;
         recognizer.rotation = 0;
         [self layoutSubviews];
@@ -390,21 +265,31 @@ static PSTextBoardItem *activeView = nil;
 // TODO:点击文字
 #pragma mark - Edit it again
 - (void)textBoardItemDidTap:(UITapGestureRecognizer *)recognizer {
-    
+	
+	self.textBoard.isEditAgain = YES;
+	//self.textBoard.activeItem = self;
+	
     if (self.delegate && [self.delegate respondsToSelector:@selector(textBoardItemDidClickItem:)]) {
         [self.delegate textBoardItemDidClickItem:self];
     }
     
-    self.textBoard.isEditAgain = YES;
-    self.textBoard.textView.textView.text = self.text;
-    self.textBoard.textView.textView.font = self.font;
+//    self.textBoard.isEditAgain = YES;
+//    self.textBoard.textView.textView.text = self.text;
+//    self.textBoard.textView.textView.font = self.font;
 
     __weak typeof (self)weakSelf = self;
-    self.textBoard.editAgainCallback = ^(NSString *text){
+	self.textBoard.editAgainCallback = ^(NSString *text, NSDictionary *attrs) {
+
         weakSelf.text = text;
         [weakSelf resizeSelf];
-        weakSelf.font = weakSelf.textBoard.textView.textView.font;
-        weakSelf.fillColor = weakSelf.textBoard.textView.textView.textColor;
+		
+		UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
+		UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
+		UIFont *font = attrs[NSFontAttributeName];
+		
+		weakSelf.font = font;
+		weakSelf.strokeColor = strokeColor;
+		weakSelf.fillColor = fillColor;
     };
     
     
@@ -433,7 +318,7 @@ static PSTextBoardItem *activeView = nil;
 	_label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width + 0, size.height);
 
     self.bounds = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
-    _archerBGView.bounds = self.bounds;
+    self.bounds = self.bounds;
 	
 	_leftTopRectLayer.frame = CGRectMake(_scale/2.f - 2, - 2, 4, 4);
     _rightTopRectLayer.frame = CGRectMake(CGRectGetWidth(self.frame) - 2 - _scale/2.f, - 2, 4, 4);
@@ -445,20 +330,20 @@ static PSTextBoardItem *activeView = nil;
     [super layoutSubviews];
     
     CGRect boundss;
-    if (!_archerBGView.superview) {
-        [self.superview insertSubview:_archerBGView belowSubview:self];
-        _archerBGView.frame = self.frame;
+    if (!self.superview) {
+        [self.superview insertSubview:self belowSubview:self];
+        self.frame = self.frame;
         boundss = self.bounds;
     }
-    boundss = _archerBGView.bounds;
+    boundss = self.bounds;
     self.transform = CGAffineTransformMakeRotation(_rotation);
 	
     CGFloat w = boundss.size.width;
     CGFloat h = boundss.size.height;
-    CGFloat scale = [(NSNumber *)[_archerBGView valueForKeyPath:@"layer.transform.scale.x"] floatValue];
+    CGFloat scale = [(NSNumber *)[self valueForKeyPath:@"layer.transform.scale.x"] floatValue];
     
     self.bounds = CGRectMake(0, 0, w*scale, h*scale);
-    self.center = _archerBGView.center;
+    self.center = self.center;
     
     _label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, self.bounds.size.width - 2*kTextBoardItemInset, self.bounds.size.height - 2*kTextBoardItemInset);
     {
@@ -569,14 +454,6 @@ static PSTextBoardItem *activeView = nil;
 	rct.size.height = CGRectGetHeight(_label.frame) + 32;
 	self.frame = rct;
 	
-	
-//	CGRect rct = self.frame;
-//	rct.origin.x += (rct.size.width - (CGRectGetWidth(_label.frame))) / 2;
-//	rct.origin.y += (rct.size.height - (CGRectGetHeight(_label.frame))) / 2;
-//	rct.size.width  = CGRectGetWidth(_label.frame);
-//	rct.size.height = CGRectGetHeight(_label.frame);
-//	self.frame = rct;
-	
     _label.center = CGPointMake(rct.size.width/2, rct.size.height/2);
     
     self.transform = CGAffineTransformMakeRotation(_arg);
@@ -584,66 +461,59 @@ static PSTextBoardItem *activeView = nil;
     self.layer.borderWidth = 1/_scale;
 }
 
-- (void)setFillColor:(UIColor *)fillColor
-{
-    //_label.textColor = [UIColor clearColor];
-    _archerBGView.textColor = fillColor;
+- (void)setFont:(UIFont *)font {
+	_label.font = font;
 }
 
-- (UIColor*)fillColor
-{
-    //return _label.textColor;
-    return _archerBGView.textColor;
+- (UIFont*)font {
+	return _label.font;
 }
 
-- (void)setBorderColor:(UIColor *)borderColor
-{
+- (void)setTextAlignment:(NSTextAlignment)textAlignment {
+	_label.textAlignment = textAlignment;
+}
+
+- (NSTextAlignment)textAlignment {
+	return _label.textAlignment;
+}
+
+- (void)setText:(NSString *)text {
+	_text = text;
+	_label.text = text;
+}
+
+- (void)setStrokeColor:(UIColor *)strokeColor {
+
+	//_strokeColor = strokeColor;
+	_label.textColor = strokeColor;
+}
+
+- (UIColor *)strokeColor {
+	return _label.textColor;
+}
+
+- (void)setBorderColor:(UIColor *)borderColor {
     self.layer.borderColor = borderColor.CGColor;
 }
 
-- (UIColor*)borderColor
-{
+- (UIColor*)borderColor {
     return [UIColor colorWithCGColor:self.layer.borderColor];
 }
 
-- (void)setBorderWidth:(CGFloat)borderWidth
-{
+- (void)setBorderWidth:(CGFloat)borderWidth {
     self.layer.borderWidth = borderWidth;
 }
 
-- (CGFloat)borderWidth
-{
+- (CGFloat)borderWidth {
     return self.layer.borderWidth;
 }
 
-- (void)setFont:(UIFont *)font
-{
-    _label.font = font;
-    _archerBGView.textFont = font;
+- (void)setFillColor:(UIColor *)fillColor {
+	_label.backgroundColor = fillColor;
 }
 
-- (UIFont*)font
-{
-    return _label.font;
-}
-
-- (void)setTextAlignment:(NSTextAlignment)textAlignment
-{
-    _label.textAlignment = textAlignment;
-}
-
-- (NSTextAlignment)textAlignment
-{
-    return _label.textAlignment;
-}
-
-- (void)setText:(NSString *)text
-{
-    if(![text isEqualToString:_text]){
-        _text = text;
-        _label.text = (_text.length>0) ? _text : @"";
-        //_archerBGView.text = _label.text;
-    }
+- (UIColor *)fillColor {
+	return _label.backgroundColor;
 }
 
 @end

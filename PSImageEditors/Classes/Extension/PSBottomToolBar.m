@@ -82,12 +82,21 @@
 
 - (void)setToolBarShow:(BOOL)show animation:(BOOL)animation {
 	
+	CGFloat offestY;
+	if (self.type == PSBottomToolTypeDelete) {
+		offestY = PSBottomToolDeleteBarHeight;
+	}else {
+		offestY = PSBottomToolBarHeight;
+	}
+	
 	[UIView animateWithDuration:(animation ? 0.15:0) animations:^{
 		if (show) {
 			self.transform = CGAffineTransformIdentity;
 		}else{
-			self.transform = CGAffineTransformMakeTranslation(0, PSBottomToolBarHeight);
+			self.transform = CGAffineTransformMakeTranslation(0, offestY);
 		}
+	} completion:^(BOOL finished) {
+		self.show = show;
 	}];
 }
 

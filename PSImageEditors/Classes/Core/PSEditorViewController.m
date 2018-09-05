@@ -200,8 +200,12 @@ PSTextBoardItemDelegate> {
 - (void)textBoardItem:(PSTextBoardItem *)item
    translationGesture:(UIPanGestureRecognizer *)gesture
            activation:(BOOL)activation {
-    
-    self.deleteToolBar.hidden = !activation;
+	
+	if (!self.deleteToolBar.isShow && activation) {
+		[self.deleteToolBar setToolBarShow:YES animation:YES];
+	}else if (self.deleteToolBar.isShow && !activation) {
+		[self.deleteToolBar setToolBarShow:NO animation:YES];
+	}
     PSTextBoardItem *textBoardItem = gesture.view;
     
     // https://www.jianshu.com/p/92e2d0200eb4
@@ -271,12 +275,12 @@ PSTextBoardItemDelegate> {
 	}];
     
     self.deleteToolBar = [[PSBottomToolBar alloc] initWithType:PSBottomToolTypeDelete];
-    self.deleteToolBar.hidden = YES;
+	[self.deleteToolBar setToolBarShow:NO animation:NO];
     [self.view addSubview:self.deleteToolBar];
     [self.deleteToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
         
         make.left.bottom.right.equalTo(self.view);
-        make.height.equalTo(@(PSBottomToolBarHeight));
+        make.height.equalTo(@(PSBottomToolDeleteBarHeight));
     }];
 	
 	self.drawingBoard.previewView = self.previewImageView;

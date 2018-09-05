@@ -183,6 +183,14 @@
                                self.whiteButton.color.CGColor);
 }
 
+- (void)setCurrentColor:(UIColor *)currentColor {
+	
+	_currentColor = currentColor;
+	for (PSColorFullButton *button in self.colorFullButtonViews.subviews) {
+		button.isUse = CGColorEqualToColor(button.color.CGColor, currentColor.CGColor);
+	}
+}
+
 - (void)revocationButtonDidClick {
 	
 	if (self.delegate && [self.delegate respondsToSelector:
