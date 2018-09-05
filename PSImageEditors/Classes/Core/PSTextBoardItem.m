@@ -138,7 +138,7 @@ static const CGFloat kTextBoardItemInset = 12;
 
 static PSTextBoardItem *activeView = nil;
 
-+ (void)  setActiveTextView:(PSTextBoardItem *)view
++ (void)setActiveTextView:(PSTextBoardItem *)view
 {
     if(view != activeView){
 		activeView.active = NO;
@@ -261,6 +261,13 @@ static PSTextBoardItem *activeView = nil;
 //    [_archerBGView removeFromSuperview];
 //}
 
+- (void)remove {
+    
+    [[self class] setActiveTextView:self];
+    [self removeFromSuperview];
+    [_archerBGView removeFromSuperview];
+}
+
 - (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation {
     
     if (self.delegate && [self.delegate respondsToSelector:
@@ -293,15 +300,18 @@ static PSTextBoardItem *activeView = nil;
     piece.center = CGPointMake(piece.center.x + translation.x, piece.center.y + translation.y);
     [recognizer setTranslation:CGPointZero inView:piece.superview];
     
+    BOOL activation = NO;
+    
     if (recognizer.state == UIGestureRecognizerStateBegan ||
         recognizer.state == UIGestureRecognizerStateChanged) {
+        activation = YES;
         [self hiddenToolBar:YES animation:YES];
         //取消当前
       //  [self.textTool.editor resetCurrentTool];
     } else if (recognizer.state == UIGestureRecognizerStateEnded ||
                recognizer.state == UIGestureRecognizerStateFailed ||
                recognizer.state == UIGestureRecognizerStateCancelled) {
-        
+        activation = NO;
         // TODO:XXX
         CGRect rectCoordinate = [piece.superview convertRect:piece.frame toView:_textBoard.previewView.imageView.superview];
         if (!CGRectIntersectsRect(CGRectInset(_textBoard.previewView.imageView.frame, 30, 30), rectCoordinate)) {
@@ -313,6 +323,12 @@ static PSTextBoardItem *activeView = nil;
         }
         [self hiddenToolBar:NO animation:YES];
     }
+    
+    if (self.delegate && [self.delegate respondsToSelector:
+                          @selector(textBoardItem:translationGesture:activation:)]) {
+        [self.delegate textBoardItem:self translationGesture:recognizer activation:activation];
+    }
+    
     [self layoutSubviews];
 }
 
@@ -375,8 +391,8 @@ static PSTextBoardItem *activeView = nil;
 #pragma mark - Edit it again
 - (void)textBoardItemDidTap:(UITapGestureRecognizer *)recognizer {
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(textBoardItemDidTapWithItem:)]) {
-        [self.delegate textBoardItemDidTapWithItem:self];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textBoardItemDidClickItem:)]) {
+        [self.delegate textBoardItemDidClickItem:self];
     }
     
     self.textBoard.isEditAgain = YES;

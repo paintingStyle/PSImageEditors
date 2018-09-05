@@ -197,10 +197,6 @@
 
 - (void)configCancelAndDoneIconUI {
 
-    [self addSubview:self.maskImageView];
-    [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(self);
-    }];
     
     [self.leftButton setImage:[UIImage ps_imageNamed:@"btn_cancel"]
                      forState:UIControlStateNormal];

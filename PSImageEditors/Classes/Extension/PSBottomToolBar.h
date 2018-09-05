@@ -25,6 +25,13 @@ typedef NS_ENUM(NSUInteger, PSBottomToolEvent) {
 	PSBottomToolEventClipping,
 };
 
+typedef NS_ENUM(NSUInteger, PSBottomToolDeleteState) {
+    
+    PSBottomToolDeleteStateNormal = 0,/**< 默认样式，显示删除按钮  */
+    PSBottomToolDeleteStateWill,     /**< 拖拽到删除区域，将要删除  */
+    PSBottomToolDeleteStateDid,     /**< 拖拽到删除区域释放，删除 */
+};
+
 @protocol PSBottomToolBarDelegate<NSObject>
 
 @optional
@@ -41,6 +48,9 @@ typedef NS_ENUM(NSUInteger, PSBottomToolEvent) {
 
 /// 是否处于编辑模式
 @property (nonatomic, assign, getter=isEditor) BOOL editor;
+
+/// PSBottomToolTypeDelete模式下删除的样式
+@property (nonatomic, assign) PSBottomToolDeleteState deleteState;
 
 - (instancetype)initWithType:(PSBottomToolType)type;
 
