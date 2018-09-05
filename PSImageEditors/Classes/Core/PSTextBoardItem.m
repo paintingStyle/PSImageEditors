@@ -12,7 +12,9 @@
 static const CGFloat MAX_FONT_SIZE = 50.0f;
 static const CGFloat MIN_TEXT_SCAL = 0.614f;
 static const CGFloat MAX_TEXT_SCAL = 4.0f;
-static const CGFloat LABEL_OFFSET  = 0.f;
+
+static const CGFloat kLabelMinSize = 20;
+static const CGFloat kTextBoardItemInset = 12;
 
 @interface PSTextBoardItemOverlapContentView : UIView
 
@@ -26,48 +28,38 @@ static const CGFloat LABEL_OFFSET  = 0.f;
 
 @implementation PSTextBoardItemOverlapContentView
 
-- (void)setText:(NSString *)text {
-    if (_text != text) {
-        _text = text;
-        [self setNeedsDisplay];
-    }
-}
-
-- (void)setTextColor:(UIColor *)textColor {
-    if (_textColor != textColor) {
-        _textColor = textColor;
-        [self setNeedsDisplay];
-    }
-}
-
-- (void)setTextFont:(UIFont *)textFont {
-    if (_textFont != textFont) {
-        _textFont = textFont;
-        _defaultFont = textFont.pointSize;
-        [self setNeedsDisplay];
-    }
-}
-
-- (void)setImage:(UIImage *)image {
-    if (_image != image) {
-        _image = image;
-        [self setNeedsDisplay];
-    }
-}
-
-- (void)drawRect:(CGRect)rect {
-    if (self.image) {
-        [self.image drawInRect:CGRectInset(rect, 21, 25)];
-        return;
-    }
-    
-    rect.origin = CGPointMake(1, 2);
-    NSAttributedString *string = [[NSAttributedString alloc] initWithString:self.text
-                                                                 attributes:@{NSForegroundColorAttributeName : self.textColor,
-																			  NSFontAttributeName : self.textFont}];
-    [string drawInRect:CGRectInset(rect, 21, 25)];
-    
-}
+//- (void)setText:(NSString *)text {
+//    if (_text != text) {
+//        _text = text;
+//        [self setNeedsDisplay];
+//    }
+//}
+//
+//- (void)setTextColor:(UIColor *)textColor {
+//    if (_textColor != textColor) {
+//        _textColor = textColor;
+//        [self setNeedsDisplay];
+//    }
+//}
+//
+//- (void)setTextFont:(UIFont *)textFont {
+//    if (_textFont != textFont) {
+//        _textFont = textFont;
+//        _defaultFont = textFont.pointSize;
+//        [self setNeedsDisplay];
+//    }
+//}
+//
+//- (void)drawRect:(CGRect)rect {
+//	
+//    rect.origin = CGPointMake(6, 6);
+//    NSAttributedString *string = [[NSAttributedString alloc] initWithString:self.text
+//                                                                 attributes:@{NSForegroundColorAttributeName : self.textColor,
+//																			  NSBackgroundColorAttributeName:[UIColor yellowColor],
+//																			  NSFontAttributeName : self.textFont}];
+//     [string drawInRect:CGRectInset(rect, 0, 0)];
+//
+//}
 
 @end
 
@@ -108,14 +100,6 @@ static const CGFloat LABEL_OFFSET  = 0.f;
     }
 }
 
-- (void)setImage:(UIImage *)image {
-    if (_image != image) {
-        _image = image;
-        [_contentView setImage:image];
-    }
-}
-
-
 - (void)layoutSubviews {
     [super layoutSubviews];
     
@@ -135,7 +119,7 @@ static const CGFloat LABEL_OFFSET  = 0.f;
 
 @implementation PSTextBoardItem
 {
-    PSTextLabel  *_label;
+    UILabel  *_label;
     
     CGFloat _scale;
     CGFloat _arg;
@@ -174,32 +158,34 @@ static PSTextBoardItem *activeView = nil;
 
 - (instancetype)initWithTool:(PSTextBoard *)tool text:(NSString *)text font:(UIFont *)font orImage:(UIImage *)image
 {
-	self = [super initWithFrame:CGRectMake(0, 0, 132, 132)];
-    if(self){
+    if(self = [super init]){
         
         _archerBGView = [[PSTextBoardItemOverlapView alloc] initWithFrame:CGRectZero];
         _archerBGView.backgroundColor = [UIColor clearColor];
         
-        _label = [[PSTextLabel alloc] init];
+        _label = [[UILabel alloc] init];
         _label.numberOfLines = 0;
-        _label.font = font;// [UIFont systemFontOfSize:MAX_FONT_SIZE];
+        _label.font = font;
         _label.minimumScaleFactor = font.pointSize * 0.8f;
         _label.adjustsFontSizeToFitWidth = YES;
         _label.textAlignment = NSTextAlignmentCenter;
 		_label.textColor = [UIColor whiteColor];
         _label.text = text;
         _label.layer.allowsEdgeAntialiasing = true;
-
+		
+		//_label.backgroundColor = [UIColor yellowColor];
 		
         self.text = text;
         [self addSubview:_label];
         
         _textBoard = tool;
-       
-        CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textBoard.previewView.drawingView.frame) - 2*LABEL_OFFSET, FLT_MAX)];
-        _label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, size.width + 20, size.height + _label.font.pointSize);
-        self.frame = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*LABEL_OFFSET, CGRectGetHeight(_label.frame) + 2*LABEL_OFFSET);
-        
+		
+        CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textBoard.previewView.drawingView.frame) - 2*kTextBoardItemInset, FLT_MAX)];
+        //_label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, size.width + 0, size.height + _label.font.pointSize);
+		_label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width, size.height);
+		
+        self.frame = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
+		
         _arg = 0;
         [self setScale:1];
         
@@ -414,15 +400,29 @@ static PSTextBoardItem *activeView = nil;
 
 - (void)resizeSelf {
 	
-    CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(self.textBoard.previewView.drawingView.frame) - 2*LABEL_OFFSET, FLT_MAX)];
-   _label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, size.width + 20, size.height + _label.font.pointSize);
-    self.bounds = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*LABEL_OFFSET, CGRectGetHeight(_label.frame) + 2*LABEL_OFFSET);
+	
+//	Size size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textBoard.previewView.drawingView.frame) - 2*kTextBoardItemInset, FLT_MAX)];
+//	//_label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, size.width + 0, size.height + _label.font.pointSize);
+//	_label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width, size.height);
+//
+//	self.frame = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
+	
+	
+    CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(self.textBoard.previewView.drawingView.frame) - 2*kTextBoardItemInset, FLT_MAX)];
+	if (CGSizeEqualToSize(size, CGSizeZero)) {
+		size = CGSizeMake(kLabelMinSize, kLabelMinSize);
+	}
+	
+	//	_label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, size.width + 0, size.height + _label.font.pointSize);
+	_label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width + 0, size.height);
+
+    self.bounds = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
     _archerBGView.bounds = self.bounds;
 	
 	_leftTopRectLayer.frame = CGRectMake(_scale/2.f - 2, - 2, 4, 4);
-    _rightTopRectLayer.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, - 2, 4, 4);
-    _leftBottomRectLayer.frame = CGRectMake(_scale/2.f - 2, _scale/2.f + CGRectGetHeight(_label.frame) - 2, 4, 4);
-    _rightBottomRectLayer.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, CGRectGetHeight(_label.frame) - 2 - _scale/2.f, 4, 4);
+    _rightTopRectLayer.frame = CGRectMake(CGRectGetWidth(self.frame) - 2 - _scale/2.f, - 2, 4, 4);
+    _leftBottomRectLayer.frame = CGRectMake(_scale/2.f - 2, _scale/2.f + CGRectGetHeight(self.frame) - 2, 4, 4);
+    _rightBottomRectLayer.frame = CGRectMake(CGRectGetWidth(self.frame) - 2 - _scale/2.f, CGRectGetHeight(self.frame) - 2 - _scale/2.f, 4, 4);
 }
 
 - (void)layoutSubviews {
@@ -436,7 +436,7 @@ static PSTextBoardItem *activeView = nil;
     }
     boundss = _archerBGView.bounds;
     self.transform = CGAffineTransformMakeRotation(_rotation);
-    
+	
     CGFloat w = boundss.size.width;
     CGFloat h = boundss.size.height;
     CGFloat scale = [(NSNumber *)[_archerBGView valueForKeyPath:@"layer.transform.scale.x"] floatValue];
@@ -444,7 +444,7 @@ static PSTextBoardItem *activeView = nil;
     self.bounds = CGRectMake(0, 0, w*scale, h*scale);
     self.center = _archerBGView.center;
     
-    _label.frame = CGRectMake(LABEL_OFFSET, LABEL_OFFSET, self.bounds.size.width - 2*LABEL_OFFSET, self.bounds.size.height - 2*LABEL_OFFSET);
+    _label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, self.bounds.size.width - 2*kTextBoardItemInset, self.bounds.size.height - 2*kTextBoardItemInset);
     {
         [CATransaction begin];
         [CATransaction setDisableActions:YES];
@@ -452,30 +452,30 @@ static PSTextBoardItem *activeView = nil;
 		if (!_leftTopRectLayer) {
 			_leftTopRectLayer = [CALayer layer];
 			_leftTopRectLayer.backgroundColor = [UIColor whiteColor].CGColor;
-			[_label.layer addSublayer:_leftTopRectLayer];
+			[self.layer addSublayer:_leftTopRectLayer];
 		}
 		_leftTopRectLayer.frame = CGRectMake(_scale/2.f - 2, - 2, 4, 4);
 		
         if (!_rightTopRectLayer) {
             _rightTopRectLayer = [CALayer layer];
             _rightTopRectLayer.backgroundColor = [UIColor whiteColor].CGColor;
-            [_label.layer addSublayer:_rightTopRectLayer];
+            [self.layer addSublayer:_rightTopRectLayer];
         }
-        _rightTopRectLayer.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, - 2, 4, 4);
+        _rightTopRectLayer.frame = CGRectMake(CGRectGetWidth(self.frame) - 2 - _scale/2.f, - 2, 4, 4);
 
         if (!_leftBottomRectLayer) {
             _leftBottomRectLayer = [CALayer layer];
             _leftBottomRectLayer.backgroundColor = [UIColor whiteColor].CGColor;
-            [_label.layer addSublayer:_leftBottomRectLayer];
+            [self.layer addSublayer:_leftBottomRectLayer];
         }
-        _leftBottomRectLayer.frame = CGRectMake(_scale/2.f - 2, CGRectGetHeight(_label.frame) - 2 - _scale/2.f, 4, 4);
-        
+        _leftBottomRectLayer.frame = CGRectMake(_scale/2.f - 2, CGRectGetHeight(self.frame) - 2 - _scale/2.f, 4, 4);
+		
         if (!_rightBottomRectLayer) {
             _rightBottomRectLayer = [CALayer layer];
             _rightBottomRectLayer.backgroundColor = [UIColor whiteColor].CGColor;
-            [_label.layer addSublayer:_rightBottomRectLayer];
+            [self.layer addSublayer:_rightBottomRectLayer];
         }
-        _rightBottomRectLayer.frame = CGRectMake(CGRectGetWidth(_label.frame) - 2 - _scale/2.f, CGRectGetHeight(_label.frame) - 2 - _scale/2.f, 4, 4);
+        _rightBottomRectLayer.frame = CGRectMake(CGRectGetWidth(self.frame) - 2 - _scale/2.f, CGRectGetHeight(self.frame) - 2 - _scale/2.f, 4, 4);
         [CATransaction commit];
     }
 }
@@ -489,13 +489,20 @@ static PSTextBoardItem *activeView = nil;
     dispatch_async(dispatch_get_main_queue(), ^{
         [CATransaction begin];
         [CATransaction setDisableActions:YES];
-   
-        _label.layer.borderWidth = (active) ? 1/_scale : 0;
-        _label.layer.shadowColor = [UIColor grayColor].CGColor;
-        _label.layer.shadowOffset= CGSizeMake(0, 0);
-        _label.layer.shadowOpacity = .6f;
-        _label.layer.shadowRadius = 2.f;
-        
+		
+		// 边框阴影
+//        _label.layer.borderWidth = (active) ? 1/_scale : 0;
+//        _label.layer.shadowColor = [UIColor grayColor].CGColor;
+//        _label.layer.shadowOffset= CGSizeMake(0, 0);
+//        _label.layer.shadowOpacity = .6f;
+//        _label.layer.shadowRadius = 2.f;
+		
+		self.layer.borderWidth = (active) ? 1/_scale : 0;
+		self.layer.shadowColor = [UIColor grayColor].CGColor;
+		self.layer.shadowOffset= CGSizeMake(0, 0);
+		self.layer.shadowOpacity = .6f;
+		self.layer.shadowRadius = 2.f;
+		
         _leftTopRectLayer.hidden =
 		_rightTopRectLayer.hidden =
 		_leftBottomRectLayer.hidden =
@@ -539,23 +546,31 @@ static PSTextBoardItem *activeView = nil;
     
     _label.transform = CGAffineTransformMakeScale(_scale, _scale);
     
-    CGRect rct = self.frame;
-    rct.origin.x += (rct.size.width - (CGRectGetWidth(_label.frame) + 32)) / 2;
-    rct.origin.y += (rct.size.height - (CGRectGetHeight(_label.frame) + 32)) / 2;
-    rct.size.width  = CGRectGetWidth(_label.frame) + 32;
-    rct.size.height = CGRectGetHeight(_label.frame) + 32;
-    self.frame = rct;
-    
+	CGRect rct = self.frame;
+	rct.origin.x += (rct.size.width - (CGRectGetWidth(_label.frame) + 32)) / 2;
+	rct.origin.y += (rct.size.height - (CGRectGetHeight(_label.frame) + 32)) / 2;
+	rct.size.width  = CGRectGetWidth(_label.frame) + 32;
+	rct.size.height = CGRectGetHeight(_label.frame) + 32;
+	self.frame = rct;
+	
+	
+//	CGRect rct = self.frame;
+//	rct.origin.x += (rct.size.width - (CGRectGetWidth(_label.frame))) / 2;
+//	rct.origin.y += (rct.size.height - (CGRectGetHeight(_label.frame))) / 2;
+//	rct.size.width  = CGRectGetWidth(_label.frame);
+//	rct.size.height = CGRectGetHeight(_label.frame);
+//	self.frame = rct;
+	
     _label.center = CGPointMake(rct.size.width/2, rct.size.height/2);
     
     self.transform = CGAffineTransformMakeRotation(_arg);
     
-    _label.layer.borderWidth = 1/_scale;
+    self.layer.borderWidth = 1/_scale;
 }
 
 - (void)setFillColor:(UIColor *)fillColor
 {
-    _label.textColor = [UIColor clearColor];
+    //_label.textColor = [UIColor clearColor];
     _archerBGView.textColor = fillColor;
 }
 
@@ -567,22 +582,22 @@ static PSTextBoardItem *activeView = nil;
 
 - (void)setBorderColor:(UIColor *)borderColor
 {
-    _label.layer.borderColor = borderColor.CGColor;
+    self.layer.borderColor = borderColor.CGColor;
 }
 
 - (UIColor*)borderColor
 {
-    return [UIColor colorWithCGColor:_label.layer.borderColor];
+    return [UIColor colorWithCGColor:self.layer.borderColor];
 }
 
 - (void)setBorderWidth:(CGFloat)borderWidth
 {
-    _label.layer.borderWidth = borderWidth;
+    self.layer.borderWidth = borderWidth;
 }
 
 - (CGFloat)borderWidth
 {
-    return _label.layer.borderWidth;
+    return self.layer.borderWidth;
 }
 
 - (void)setFont:(UIFont *)font
@@ -611,54 +626,8 @@ static PSTextBoardItem *activeView = nil;
     if(![text isEqualToString:_text]){
         _text = text;
         _label.text = (_text.length>0) ? _text : @"";
-        _archerBGView.text = _label.text;
+        //_archerBGView.text = _label.text;
     }
 }
-
-- (void)setImage:(UIImage *)image {
-    if (_image != image) {
-        _image = image;
-        _archerBGView.image = image;
-    }
-}
-
-@end
-
-@interface PSTextBoard ()
-@end
-
-@implementation PSTextLabel
-
-//- (id)initWithFrame:(CGRect)frame
-//{
-//    self = [super initWithFrame:frame];
-//    if (self) {
-//
-//    }
-//    return self;
-//}
-//
-//- (void)layoutSubviews {
-//    [super layoutSubviews];
-//}
-//
-//- (void)drawTextInRect:(CGRect)rect
-//{
-//    CGSize shadowOffset = self.shadowOffset;
-//    UIColor *txtColor = self.textColor;
-//    UIFont *font = self.font;
-//
-//    CGContextRef contextRef = UIGraphicsGetCurrentContext();
-//    CGContextSetLineWidth(contextRef, 1);
-//    CGContextSetLineJoin(contextRef, kCGLineJoinRound);
-//
-//    CGContextSetTextDrawingMode(contextRef, kCGTextFill);
-//    self.textColor = txtColor;
-//    self.shadowOffset = CGSizeMake(10, 10);
-//    self.font = font;
-//    [super drawTextInRect:CGRectInset(rect, 5, 5)];
-//
-//    self.shadowOffset = shadowOffset;
-//}
 
 @end

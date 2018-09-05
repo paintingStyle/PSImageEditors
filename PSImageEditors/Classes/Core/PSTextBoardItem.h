@@ -28,7 +28,6 @@
 @property (nonatomic, strong) UIColor *borderColor;
 @property (nonatomic, assign) CGFloat borderWidth;
 @property (nonatomic, assign) NSTextAlignment textAlignment;
-@property (nonatomic, strong) UIImage *image;
 
 @property (nonatomic, assign, getter=isActive) BOOL active;
 @property (nonatomic, weak) id<PSTextBoardItemDelegate> delegate;
@@ -42,18 +41,10 @@
 
 @end
 
-@interface PSTextBoardItemOverlapView : UIView 
+@interface PSTextBoardItemOverlapView : UIView
 
 @property (nonatomic, copy  ) NSString *text;
 @property (nonatomic, strong) UIFont *textFont;
 @property (nonatomic, strong) UIColor *textColor;
-@property (nonatomic, strong) UIImage *image;
-
-@end
-
-@interface PSTextLabel : UILabel
-
-@property (nonatomic, strong) UIColor *outlineColor;
-@property (nonatomic, assign) CGFloat outlineWidth;
 
 @end
