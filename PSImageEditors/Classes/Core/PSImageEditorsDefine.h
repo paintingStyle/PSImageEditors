@@ -40,9 +40,9 @@ if(c == 0x47) result = YES;\
 #define PS_SCREEN_H [UIScreen mainScreen].bounds.size.height
 
 /**
- 兼容iPhone X，导航栏 状态栏 tabar高度
+ 兼容iPhone X,热点栏，导航栏 状态栏 tabar高度
  */
-#define PS_STATUS_BAR_H (iPhone_X ? 44.0f: 20.0f)
+#define PS_STATUS_BAR_H  CGRectGetHeight([UIApplication sharedApplication].statusBarFrame)
 #define PS_NAV_BAR_H    (iPhone_X ? 88.0f: 64.0f)
 #define PS_TAB_BAR_H    (iPhone_X ? 83.0f: 49.0f)
 #define PS_COMMON_NUM   44.0f
@@ -102,7 +102,7 @@ tableView.estimatedSectionFooterHeight = 0;\
  */
 #define PS_IMAGEVIEW_CENTER_FIX(imageView)\
 [imageView setContentScaleFactor:[[UIScreen mainScreen] scale]];\
-imageView.contentMode =  UIViewContentModeScaleAPSectFill;\
+imageView.contentMode =  UIViewContentModeScaleAspectFit;\
 imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight;\
 imageView.clipsToBounds  = YES;\
 
