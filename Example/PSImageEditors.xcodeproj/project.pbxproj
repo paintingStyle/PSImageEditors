@@ -20,6 +20,7 @@
 		167AF4DE21313AB80023B586 /* localImage_08@2x.gif in Resources */ = {isa = PBXBuildFile; fileRef = 167AF4D221313AB70023B586 /* localImage_08@2x.gif */; };
 		167AF4DF21313AB80023B586 /* localImage_06@2x.gif in Resources */ = {isa = PBXBuildFile; fileRef = 167AF4D321313AB70023B586 /* localImage_06@2x.gif */; };
 		167AF4E2213147450023B586 /* PSNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 167AF4E1213147450023B586 /* PSNavigationController.m */; };
+		16DD06A62147F76D00E82EAA /* cat.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 16DD06A52147F76D00E82EAA /* cat.jpg */; };
 		47F833B0212FB27F00AE3937 /* PSAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 47F833AF212FB27F00AE3937 /* PSAppDelegate.m */; };
 		47F833B3212FB27F00AE3937 /* PSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 47F833B2212FB27F00AE3937 /* PSViewController.m */; };
 		47F833B6212FB27F00AE3937 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 47F833B4212FB27F00AE3937 /* Main.storyboard */; };
@@ -58,6 +59,7 @@
 		167AF4D321313AB70023B586 /* localImage_06@2x.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "localImage_06@2x.gif"; sourceTree = "<group>"; };
 		167AF4E0213147450023B586 /* PSNavigationController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PSNavigationController.h; sourceTree = "<group>"; };
 		167AF4E1213147450023B586 /* PSNavigationController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PSNavigationController.m; sourceTree = "<group>"; };
+		16DD06A52147F76D00E82EAA /* cat.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = cat.jpg; sourceTree = "<group>"; };
 		47F833AB212FB27F00AE3937 /* PSImageEditors.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PSImageEditors.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		47F833AE212FB27F00AE3937 /* PSAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PSAppDelegate.h; sourceTree = "<group>"; };
 		47F833AF212FB27F00AE3937 /* PSAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PSAppDelegate.m; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				167AF4C821313AB70023B586 /* localImage_10@2x.jpg */,
+				16DD06A52147F76D00E82EAA /* cat.jpg */,
 				167AF4C921313AB70023B586 /* localImage_00@2x.jpg */,
 				167AF4CA21313AB70023B586 /* localImage_04@2x.jpg */,
 				167AF4CB21313AB70023B586 /* localImage_07@2x.gif */,
@@ -282,6 +285,7 @@
 				167AF4D621313AB80023B586 /* localImage_04@2x.jpg in Resources */,
 				167AF4DB21313AB80023B586 /* localImage_01@2x.jpg in Resources */,
 				167AF4D521313AB80023B586 /* localImage_00@2x.jpg in Resources */,
+				16DD06A62147F76D00E82EAA /* cat.jpg in Resources */,
 				167AF4DC21313AB80023B586 /* localImage_09@2x.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

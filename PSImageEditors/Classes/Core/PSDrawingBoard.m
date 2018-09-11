@@ -151,7 +151,7 @@
     
     
     self.previewView.imageView.userInteractionEnabled = YES;
-    self.previewView.drawingView.userInteractionEnabled = YES;
+    //self.previewView.drawingView.userInteractionEnabled = YES;
 	
 //    self.editor.imageView.userInteractionEnabled = YES;
 //    self.previewImageView.scrollView.panGestureRecognizer.minimumNumberOfTouches = 2;
@@ -166,7 +166,7 @@
    // self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 1;
     self.panGesture.enabled = NO;
 	self.previewView.imageView.userInteractionEnabled = NO;
-	self.previewView.drawingView.userInteractionEnabled = NO;
+	//self.previewView.drawingView.userInteractionEnabled = NO;
 }
 
 - (void)executeWithCompletionBlock:(void (^)(UIImage *, NSError *, NSDictionary *))completionBlock

@@ -17,10 +17,12 @@
 
 - (void)setup {
 	self.editor = YES;
+    self.previewView.drawingView.userInteractionEnabled = YES;
 }
 	
 - (void)cleanup {
 	self.editor = NO;
+    self.previewView.drawingView.userInteractionEnabled = NO;
 }
 
 - (void)executeWithCompletionBlock:(void(^)(UIImage *image, NSError *error, NSDictionary *userInfo))completionBlock {

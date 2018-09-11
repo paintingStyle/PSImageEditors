@@ -12,6 +12,7 @@
 @property (nonatomic, copy) void(^drawEndBlock)(BOOL canUndo);
 
 - (void)undo;
+- (BOOL)canUndo;
 - (void)changeRectangularMosaic;
 - (void)changeGrindArenaceousMosaic;
 
@@ -34,8 +35,10 @@
 @interface PSMosaicCache : NSObject
 
 - (instancetype)initWithOriginalImage:(UIImage*)image;
+- (UIImage *)previousImage;
+
 - (void)writeImageToCache:(UIImage *)image;
-- (UIImage *)undo;
+- (void)removeImageAtIndex:(NSInteger)index;
 - (void)clear;
 
 @end

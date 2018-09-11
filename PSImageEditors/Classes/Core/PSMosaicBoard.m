@@ -7,6 +7,8 @@
 
 #import "PSMosaicBoard.h"
 
+static const CGFloat kDrawLineWidth = 30.0f;
+
 @interface PSMosaicBoard ()
 
 @property (nonatomic, strong) PSMosaicView *mosaicView;
@@ -19,15 +21,22 @@
 	[super setup];
 	
 	self.previewView.scrollView.panGestureRecognizer.enabled = NO;
-	self.mosaicView = [[PSMosaicView alloc] initWithFrame:self.previewView.drawingView.bounds];
-	self.mosaicView.originalImage = self.previewView.imageView.image;
-	self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:self.previewView.imageView.image level:20];;
-	[self.previewView.drawingView addSubview:self.mosaicView];
-	self.mosaicView.drawEndBlock = self.drawEndBlock;
-	// 获取初始值
-	if (self.drawEndBlock) {
-		self.drawEndBlock([self.mosaicView canUndo]);
-	}
+    
+    if (!_mosaicView) {
+        self.mosaicView = [[PSMosaicView alloc] initWithFrame:self.previewView.drawingView.bounds];
+        self.mosaicView.originalImage = self.previewView.imageView.image;
+        self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:self.previewView.imageView.image level:20];;
+        [self.previewView.drawingView addSubview:self.mosaicView];
+        self.mosaicView.drawEndBlock = self.drawEndBlock;
+        // 获取初始值
+        if (self.drawEndBlock) {
+            self.drawEndBlock([self canUndo]);
+        }
+        UIButton *test = [UIButton buttonWithType:UIButtonTypeInfoDark];
+        test.backgroundColor = [UIColor redColor];
+        test.frame = CGRectMake(88, 88, 88, 88);
+        [self.mosaicView addSubview:test];
+    }
 }
 
 - (void)changeRectangularMosaic {
@@ -37,12 +46,18 @@
 
 - (void)changeGrindArenaceousMosaic {
 	
+    // 注意mosaicImage不能为带有alpha通道，否则画出的路径显示为黑色
 	self.mosaicView.mosaicImage = [UIImage ps_imageNamed:@"icon_mosaic_mask"];
 }
 
 - (void)undo {
 	
 	[self.mosaicView undo];
+}
+
+- (BOOL)canUndo {
+    
+    return [self.mosaicView canUndo];
 }
 	
 - (void)cleanup {
@@ -60,7 +75,6 @@
 @property (nonatomic, strong) UIImage *originalImage;
 
 @property (nonatomic, assign) NSInteger currentIndex;
-@property (nonatomic, assign) NSInteger operationCount;
 
 @end
 
@@ -84,12 +98,18 @@
 	}
 	[_cacheArray addObject:image];
 	_currentIndex++;
-	_operationCount = _currentIndex;
 }
 
-- (UIImage *)undo {
+- (void)removeImageAtIndex:(NSInteger)index {
+    
+    if (index <= self.cacheArray.count-1) {
+        [self.cacheArray removeObjectAtIndex:index];
+    }
+}
+
+- (UIImage *)previousImage {
 	if (_currentIndex - 1 >= 0) {
-		_currentIndex--;
+        _currentIndex--;
 		return _cacheArray[_currentIndex];
 	}
 	return nil;
@@ -200,7 +220,7 @@
 	self.shapeLayer.frame = self.bounds;
 	self.shapeLayer.lineCap = kCALineCapRound;
 	self.shapeLayer.lineJoin = kCALineJoinRound;
-	self.shapeLayer.lineWidth = 10.0f;
+	self.shapeLayer.lineWidth = kDrawLineWidth;
 	self.shapeLayer.strokeColor = [[UIColor blueColor] CGColor];
 	self.shapeLayer.fillColor = nil;
 	[self.layer addSublayer:self.shapeLayer];
@@ -272,14 +292,17 @@
 		}
 		
 	}
-	CGContextSetLineCap(UIGraphicsGetCurrentContext(), kCGLineCapRound);
-	CGContextSetLineWidth(UIGraphicsGetCurrentContext(), 10.f * rate);
-	CGContextSetBlendMode(UIGraphicsGetCurrentContext(), kCGBlendModeClear);
-	CGContextStrokePath(UIGraphicsGetCurrentContext());
-	
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetAllowsAntialiasing(context, true); //去掉锯齿
+	CGContextSetLineCap(context, kCGLineCapRound);
+	CGContextSetLineWidth(context, kDrawLineWidth * rate);
+	CGContextSetBlendMode(context, kCGBlendModeClear);
+	CGContextStrokePath(context);
+    
 	UIImage *finalPath = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
 	UIGraphicsBeginImageContextWithOptions(size, YES, 1.0);
+
 	[self.mosaicImage drawInRect:CGRectMake(0, 0, size.width, size.height)];
 	[finalPath drawInRect:CGRectMake(0, 0, size.width, size.height)];
 	_mosaiFinalImage = UIGraphicsGetImageFromCurrentImageContext();
@@ -293,11 +316,13 @@
 	}
 }
 
-- (void)undo{
-	UIImage *image = [self.mosaicCache undo];
-	if (!image)return;
+- (void)undo {
+    
+	UIImage *image = [self.mosaicCache previousImage];
+    if (!image) { return; }
 	self.mosaiFinalImage = image;
 	[self resetMosaiImage];
+    [self.mosaicCache removeImageAtIndex:self.mosaicCache.cacheArray.count-1];
 }
 
 - (BOOL)canUndo{

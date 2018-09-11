@@ -110,9 +110,12 @@ PSTextBoardItemDelegate> {
 	
 	[self.topToolBar setToolBarShow:show animation:animation];
 	[self.bottomToolBar setToolBarShow:show animation:animation];
-	if (self.bottomToolBar.isEditor) {
+	if (self.currentMode == PSEditorModeBrush && self.bottomToolBar.isEditor) {
 		[self.colorToolBar setToolBarShow:show animation:animation];
 	}
+    if (self.currentMode == PSEditorModeMosaic && self.bottomToolBar.isEditor) {
+        [self.mosaicToolBar setToolBarShow:show animation:animation];
+    }
 }
 
 #pragma mark - Delegate
@@ -193,6 +196,7 @@ PSTextBoardItemDelegate> {
 			break;
 		case PSMosaicToolBarEventUndo:
 			[self.mosaicBoard undo];
+            self.mosaicToolBar.canUndo = [self.mosaicBoard canUndo];
 			break;
 		default:
 			break;
@@ -336,6 +340,7 @@ PSTextBoardItemDelegate> {
 		[_currentBoard cleanup]; 
 		break;
 		case PSEditorModeBrush:
+        self.drawingBoard.pathWidth = 5.0f;
 		[self.mosaicToolBar setToolBarShow:NO animation:NO];
 		[self.colorToolBar setToolBarShow:YES animation:YES];
 		break;

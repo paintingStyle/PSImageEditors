@@ -12,6 +12,8 @@
 #import <PSFilePreviewsViewController.h>
 #import <FLAnimatedImage/FLAnimatedImage.h>
 
+#import <PSEditorViewController.h>
+
 @interface PSViewController ()
 
 @property (nonatomic, copy) NSArray *images;
@@ -64,7 +66,9 @@
 
 - (IBAction)selectAlbumPreviewDidClick {
     
-
+    
+    PSEditorViewController *controller = [[PSEditorViewController alloc] initWithImage:[UIImage imageNamed:@"cat.jpg"]];
+    [self.navigationController pushViewController:controller animated:YES];
 }
 
 - (IBAction)imageCroppingDidClick {
