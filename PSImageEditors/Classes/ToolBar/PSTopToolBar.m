@@ -7,34 +7,6 @@
 
 #import "PSTopToolBar.h"
 
-#pragma mark - 色板
-
-#define SPAP_COLOR_1  UIColorFromRGB(0x26242a)
-#define SPAP_COLOR_2  UIColorFromRGB(0x666666)
-#define SPAP_COLOR_3  UIColorFromRGB(0x999999)
-#define SPAP_COLOR_4  UIColorFromRGB(0xbbbbbb)
-#define SPAP_COLOR_5  UIColorFromRGB(0xcccccc)
-#define SPAP_COLOR_6  UIColorFromRGB(0xe6e6e6)
-#define SPAP_COLOR_7  UIColorFromRGB(0x4393f9)
-#define SPAP_COLOR_8  UIColorFromRGBA(0x4393f9, 0.5)
-#define SPAP_COLOR_9  UIColorFromRGB(0xf2f6f9)
-#define SPAP_COLOR_10  UIColorFromRGB(0xffffff)
-#define SPAP_COLOR_11  UIColorFromRGB(0x4ccfaf)
-#define SPAP_COLOR_12  UIColorFromRGB(0xfe6972)
-#define SPAP_COLOR_13  UIColorFromRGB(0xf5fafe)
-#define SPAP_COLOR_14  UIColorFromRGB(0xfafafa)
-
-
-#pragma mark - 字体
-
-#define SPAP_FONT_SIZE_1  32
-#define SPAP_FONT_SIZE_2  18
-#define SPAP_FONT_SIZE_3  16
-#define SPAP_FONT_SIZE_4  14
-#define SPAP_FONT_SIZE_5  12
-#define SPAP_FONT_SIZE_6  10
-#define SPAP_FONT_SIZE_7  9
-
 @interface PSTopToolBar()
 
 @property (nonatomic, assign) PSTopToolType type;

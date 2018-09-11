@@ -7,10 +7,21 @@
 
 #import "PSBaseDrawingBoard.h"
 
+@interface PSBaseDrawingBoard()
+
+@property (nonatomic, assign, readwrite, getter=isEditor) BOOL editor;
+	
+@end
+
 @implementation PSBaseDrawingBoard
 
-- (void)setup {}
-- (void)cleanup {}
+- (void)setup {
+	self.editor = YES;
+}
+	
+- (void)cleanup {
+	self.editor = NO;
+}
 
 - (void)executeWithCompletionBlock:(void(^)(UIImage *image, NSError *error, NSDictionary *userInfo))completionBlock {
     

@@ -19,4 +19,9 @@
 @property (nonatomic, assign) CGFloat drawPathWidth;
 
 @end
+
+/**
+待解决：
+ 1，旋转文字显示问题
+ */
  

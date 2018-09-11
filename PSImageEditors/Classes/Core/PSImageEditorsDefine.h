@@ -6,6 +6,7 @@
 // 
 
 #define PSBottomToolBarHeight PS_TAB_BAR_H +6
+#define PSBottomToolDeleteBarHeight PS_TAB_BAR_H +16
 #define PSColorToolBarHeight 55
 
 #if __has_include(<FLAnimatedImage/FLAnimatedImageView.h>)

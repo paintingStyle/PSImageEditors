@@ -6,18 +6,21 @@
 //
 
 #import "PSEditorViewController.h"
-#import "PSTopToolBar.h"
-#import "PSBottomToolBar.h"
-#import "PSColorToolBar.h"
 #import "PSPreviewImageView.h"
 #import "PSDrawingBoard.h"
 #import "PSTextBoard.h"
+#import "PSMosaicBoard.h"
+#import "PSTopToolBar.h"
+#import "PSBottomToolBar.h"
+#import "PSColorToolBar.h"
+#import "PSMosaicToolBar.h"
 #import "PSImageObject.h"
 
 @interface PSEditorViewController ()
 <PSTopToolBarDelegate,
 PSBottomToolBarDelegate,
 PSColorToolBarDelegate,
+PSMosaicToolBarDelegate,
 PSTextBoardItemDelegate> {
 	BOOL _navigationBarHidden;
 }
@@ -28,11 +31,13 @@ PSTextBoardItemDelegate> {
 @property (nonatomic, strong) PSTopToolBar *topToolBar;
 @property (nonatomic, strong) PSBottomToolBar *bottomToolBar;
 @property (nonatomic, strong) PSColorToolBar *colorToolBar;
-
+@property (nonatomic, strong) PSMosaicToolBar *mosaicToolBar;
 @property (nonatomic, strong) PSBottomToolBar *deleteToolBar;
 
+@property (nonatomic, strong) PSBaseDrawingBoard *currentBoard;
 @property (nonatomic, strong) PSDrawingBoard *drawingBoard;
 @property (nonatomic, strong) PSTextBoard *textBoard;
+@property (nonatomic, strong) PSMosaicBoard *mosaicBoard;
 
 @end
 
@@ -62,7 +67,7 @@ PSTextBoardItemDelegate> {
 	
     self.drawingBoard.drawToolStatus = ^(BOOL canPrev) {
         @strongify(self);
-        self.colorToolBar.revocation = canPrev;
+        self.colorToolBar.canUndo = canPrev;
     };
     self.drawingBoard.drawingCallback = ^(BOOL isDrawing) {
         @strongify(self);
@@ -71,15 +76,7 @@ PSTextBoardItemDelegate> {
         });
     };
     
-    self.textBoard.dissmissTextTool = ^(NSString *currentText) {
-        @strongify(self);
-        [self.textBoard cleanup];
-        if (self.bottomToolBar.isEditor) { // 判断待改进
-            [self.colorToolBar setToolBarShow:YES animation:YES];
-        }
-        [self.bottomToolBar resetStateWithEvent:PSBottomToolEventText];
-        self.currentMode = PSEditorModeNone;
-    };
+
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -162,28 +159,42 @@ PSTextBoardItemDelegate> {
 	
 	switch (event) {
 		case PSBottomToolEventBrush:
-			[self.colorToolBar setToolBarShow:self.bottomToolBar.isEditor animation:YES];
-			if (self.bottomToolBar.isEditor) {
-				[self.drawingBoard setup];
-			}else {
-				[self.drawingBoard cleanup];
-			}
-            self.currentMode = PSEditorModeBrush;
-			break;
+		self.currentMode = self.bottomToolBar.isEditor ?
+					  PSEditorModeBrush:PSEditorModeNone;
+		self.currentBoard = self.drawingBoard;
+		break;
 		case PSBottomToolEventText:
-            [self.colorToolBar setToolBarShow:NO animation:YES];
-            if (self.bottomToolBar.isEditor) {
-                [self.textBoard setup];
-            }else {
-                [self.textBoard cleanup];
-            }
-            self.currentMode = PSEditorModeText;
-			break;
+		self.currentMode = self.bottomToolBar.isEditor ?
+				      PSEditorModeText:PSEditorModeNone;
+		self.currentBoard = self.textBoard;
+		break;
 		case PSBottomToolEventMosaic:
-            self.currentMode = PSEditorModeMosaic;
-			break;
+		self.currentMode = self.bottomToolBar.isEditor ?
+					 PSEditorModeMosaic:PSEditorModeNone;
+		self.currentBoard = self.mosaicBoard;
+		break;
 		case PSBottomToolEventClipping:
-            self.currentMode = PSEditorModeClipping;
+		self.currentMode = self.bottomToolBar.isEditor ?
+					  PSEditorModeClipping:PSEditorModeNone;
+		break;
+	}
+}
+
+#pragma mark - PSMosaicToolBarDelegate
+
+- (void)mosaicToolBarType:(PSMosaicType)type event:(PSMosaicToolBarEvent)event {
+	
+	switch (event) {
+		case PSMosaicToolBarEventRectangular:
+			[self.mosaicBoard changeRectangularMosaic];
+			break;
+		case PSMosaicToolBarEventGrindArenaceous:
+			[self.mosaicBoard changeGrindArenaceousMosaic];
+			break;
+		case PSMosaicToolBarEventUndo:
+			[self.mosaicBoard undo];
+			break;
+		default:
 			break;
 	}
 }
@@ -200,8 +211,12 @@ PSTextBoardItemDelegate> {
 - (void)textBoardItem:(PSTextBoardItem *)item
    translationGesture:(UIPanGestureRecognizer *)gesture
            activation:(BOOL)activation {
-    
-    self.deleteToolBar.hidden = !activation;
+	
+	if (!self.deleteToolBar.isShow && activation) {
+		[self.deleteToolBar setToolBarShow:YES animation:YES];
+	}else if (self.deleteToolBar.isShow && !activation) {
+		[self.deleteToolBar setToolBarShow:NO animation:YES];
+	}
     PSTextBoardItem *textBoardItem = gesture.view;
     
     // https://www.jianshu.com/p/92e2d0200eb4
@@ -269,37 +284,109 @@ PSTextBoardItemDelegate> {
 		make.left.right.equalTo(self.bottomToolBar);
 		make.height.equalTo(@55);
 	}];
+	
+	[self.view addSubview:self.mosaicToolBar];
+	[self.mosaicToolBar setToolBarShow:NO animation:NO];
+	[self.mosaicToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
+		make.bottom.equalTo(self.bottomToolBar.mas_top);
+		make.left.right.equalTo(self.bottomToolBar);
+		make.height.equalTo(@44);
+	}];
     
     self.deleteToolBar = [[PSBottomToolBar alloc] initWithType:PSBottomToolTypeDelete];
-    self.deleteToolBar.hidden = YES;
+	[self.deleteToolBar setToolBarShow:NO animation:NO];
     [self.view addSubview:self.deleteToolBar];
     [self.deleteToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
         
         make.left.bottom.right.equalTo(self.view);
-        make.height.equalTo(@(PSBottomToolBarHeight));
+        make.height.equalTo(@(PSBottomToolDeleteBarHeight));
     }];
 	
-	self.drawingBoard.previewView = self.previewImageView;
-	self.drawingBoard.currentColor = self.colorToolBar.currentColor;;
-	self.drawingBoard.pathWidth = 5.0f;
-    
-    self.textBoard.editorView = self.view;
-    self.textBoard.previewView = self.previewImageView;
-    self.textBoard.currentColor = self.colorToolBar.currentColor;
-    
+//	self.drawingBoard.previewView = self.previewImageView;
+//	self.drawingBoard.currentColor = self.colorToolBar.currentColor;;
+//	self.drawingBoard.pathWidth = 5.0f;
+//
+//    self.textBoard.editorView = self.view;
+//    self.textBoard.previewView = self.previewImageView;
+//    self.textBoard.currentColor = self.colorToolBar.currentColor;
+	
     // 默认开启交互
 	self.previewImageView.imageView.userInteractionEnabled = YES;
     self.previewImageView.drawingView.userInteractionEnabled = YES;
 }
 
 #pragma mark - Getter/Setter
-
+	
+- (void)setCurrentBoard:(PSBaseDrawingBoard *)currentBoard {
+	
+	if (_currentBoard != currentBoard) {
+		[_currentBoard cleanup];
+		_currentBoard = currentBoard;
+		_currentBoard.previewView = self.previewImageView;
+		_currentBoard.currentColor = self.colorToolBar.currentColor;
+		_currentBoard.editorView = self.view;
+		[_currentBoard setup];
+	}
+	
+	switch (self.currentMode) {
+		case PSEditorModeNone:
+		[self.colorToolBar setToolBarShow:NO animation:NO];
+		[self.mosaicToolBar setToolBarShow:NO animation:NO];
+		[self.bottomToolBar reset];
+		[_currentBoard cleanup]; 
+		break;
+		case PSEditorModeBrush:
+		[self.mosaicToolBar setToolBarShow:NO animation:NO];
+		[self.colorToolBar setToolBarShow:YES animation:YES];
+		break;
+		case PSEditorModeText:
+		[self.colorToolBar setToolBarShow:NO animation:NO];
+		[self.mosaicToolBar setToolBarShow:NO animation:NO];
+		break;
+		case PSEditorModeMosaic:
+		[self.colorToolBar setToolBarShow:NO animation:NO];
+		[self.mosaicToolBar setToolBarShow:YES animation:YES];
+		break;
+		case PSEditorModeClipping:
+		break;
+	}
+}
+	
+- (PSMosaicToolBar *)mosaicToolBar {
+	
+	return LAZY_LOAD(_mosaicToolBar, ({
+		
+		_mosaicToolBar = [[PSMosaicToolBar alloc] init];
+		_mosaicToolBar.delegate = self;
+		_mosaicToolBar.mosaicType = PSMosaicToolBarEventGrindArenaceous;
+		_mosaicToolBar;
+	}));
+}
+- (PSMosaicBoard *)mosaicBoard {
+	
+	return LAZY_LOAD(_mosaicBoard, ({
+		@weakify(self);
+		_mosaicBoard = [[PSMosaicBoard alloc] init];
+		_mosaicBoard.drawEndBlock = ^(BOOL canUndo) {
+			@weakify(self);
+			self.mosaicToolBar.canUndo = canUndo;
+		};
+		_mosaicBoard;
+	}));
+}
+	
 - (PSTextBoard *)textBoard {
     
     return LAZY_LOAD(_textBoard, ({
-        
+		
+		@weakify(self);
         _textBoard = [[PSTextBoard alloc] init];
         _textBoard.itemDelegate = self;
+		_textBoard.dissmissTextTool = ^(NSString *currentText) {
+			@strongify(self);
+			self.currentMode = PSEditorModeNone;
+			self.currentBoard = nil;
+		};
         _textBoard;
     }));
 }

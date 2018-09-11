@@ -5,7 +5,7 @@
 //  Created by paintingStyle on 2018/8/25.
 //
 
-#import <UIKit/UIKit.h>
+#import "PSToolBar.h"
 @class PSImageObject;
 
 typedef NS_ENUM(NSUInteger, PSTopToolType) {
@@ -33,7 +33,7 @@ typedef NS_ENUM(NSUInteger, PSTopToolEvent) {
 
 @end
 
-@interface PSTopToolBar : UIView
+@interface PSTopToolBar : PSToolBar
 
 @property (nonatomic, weak) id<PSTopToolBarDelegate> delegate;
 
@@ -44,7 +44,5 @@ typedef NS_ENUM(NSUInteger, PSTopToolEvent) {
 @property (nonatomic, strong) PSImageObject *imageObject;
 
 - (instancetype)initWithType:(PSTopToolType)type;
-
-- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation;
 
 @end

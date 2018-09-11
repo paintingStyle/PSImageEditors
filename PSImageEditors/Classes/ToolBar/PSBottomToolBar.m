@@ -82,12 +82,21 @@
 
 - (void)setToolBarShow:(BOOL)show animation:(BOOL)animation {
 	
+	CGFloat offestY;
+	if (self.type == PSBottomToolTypeDelete) {
+		offestY = PSBottomToolDeleteBarHeight;
+	}else {
+		offestY = PSBottomToolBarHeight;
+	}
+	
 	[UIView animateWithDuration:(animation ? 0.15:0) animations:^{
 		if (show) {
 			self.transform = CGAffineTransformIdentity;
 		}else{
-			self.transform = CGAffineTransformMakeTranslation(0, PSBottomToolBarHeight);
+			self.transform = CGAffineTransformMakeTranslation(0, offestY);
 		}
+	} completion:^(BOOL finished) {
+		self.show = show;
 	}];
 }
 
@@ -182,25 +191,29 @@
 }
 
 - (void)buttonDidClickSender:(UIButton *)btn {
+
+	UIButton *currentButton = nil;
 	
 	PSBottomToolEvent event;
 	if (btn == self.brushButton) {
 		event = PSBottomToolEventBrush;
-		self.brushButton.selected = !self.brushButton.selected;
-		self.editor = self.brushButton.selected;
+		currentButton = self.brushButton;
 	}else if (btn == self.textButton) {
 		event = PSBottomToolEventText;
-		self.textButton.selected = !self.textButton.selected;
-		self.editor = self.textButton.selected;
+		currentButton = self.textButton;
 	}else if (btn == self.mosaicButton) {
 		event = PSBottomToolEventMosaic;
-		self.mosaicButton.selected = !self.mosaicButton.selected;
-		self.editor = self.mosaicButton.selected;
+		currentButton = self.mosaicButton;
 	}else if (btn == self.clippingButton) {
 		event = PSBottomToolEventClipping;
-		self.clippingButton.selected = !self.clippingButton.selected;
-		self.editor = self.clippingButton.selected;
+		currentButton = self.clippingButton;
 	}
+	
+	for (UIButton *button in self.subviews) {
+		if ([button isKindOfClass:[UIButton class]]
+			&& (button !=currentButton)) { button.selected = NO; }
+	}
+	currentButton.selected = !currentButton.isSelected;
 	
 	if (self.delegate && [self.delegate respondsToSelector:
 						  @selector(bottomToolBarType:event:)]) {
@@ -208,30 +221,38 @@
 	}
 }
 
-- (void)resetStateWithEvent:(PSBottomToolEvent)event {
-    
-    switch (event) {
-        case PSBottomToolEventBrush:
-            self.brushButton.selected = NO;
-            break;
-        case PSBottomToolEventText:
-            self.textButton.selected = NO;
-            break;
-        case PSBottomToolEventMosaic:
-            self.mosaicButton.selected = NO;
-            break;
-        case PSBottomToolEventClipping:
-            self.clippingButton.selected = NO;
-            break;
-    }
-    
-    if (!self.brushButton.isSelected
-        && !self.textButton.isSelected
-        && !self.mosaicButton.isSelected
-        && !self.clippingButton.isSelected) {
-        self.editor = NO;
-    }
+- (void)reset {
+	
+	self.brushButton.selected = NO;
+	self.textButton.selected = NO;
+	self.mosaicButton.selected = NO;
+	self.clippingButton.selected = NO;
 }
+
+//- (void)resetStateWithEvent:(PSBottomToolEvent)event {
+//    
+//    switch (event) {
+//        case PSBottomToolEventBrush:
+//            self.brushButton.selected = NO;
+//            break;
+//        case PSBottomToolEventText:
+//            self.textButton.selected = NO;
+//            break;
+//        case PSBottomToolEventMosaic:
+//            self.mosaicButton.selected = NO;
+//            break;
+//        case PSBottomToolEventClipping:
+//            self.clippingButton.selected = NO;
+//            break;
+//    }
+//    
+//    if (!self.brushButton.isSelected
+//        && !self.textButton.isSelected
+//        && !self.mosaicButton.isSelected
+//        && !self.clippingButton.isSelected) {
+//        self.editor = NO;
+//    }
+//}
 
 - (void)resetButtons {
 	
@@ -296,6 +317,14 @@
 		[_brushButton addTarget:self action:@selector(buttonDidClickSender:) forControlEvents:UIControlEventTouchUpInside];
 		_brushButton;
 	}));
+}
+	
+- (BOOL)isEditor {
+	
+	return (self.brushButton.isSelected
+			|| self.textButton.isSelected
+			|| self.mosaicButton.isSelected
+			|| self.clippingButton.isSelected);
 }
 
 - (UIImageView *)maskImageView {
