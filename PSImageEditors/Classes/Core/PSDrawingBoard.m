@@ -120,6 +120,9 @@
 
 #pragma mark - implementation 重写父方法
 - (void)setup {
+	
+	[super setup];
+	
     //初始化一些东西
     self.originalImageSize   = self.previewView.imageView.image.size;
     
@@ -158,6 +161,7 @@
 
 - (void)cleanup {
 	
+	[super cleanup];
 //    self.editor.imageView.userInteractionEnabled = NO;
    // self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 1;
     self.panGesture.enabled = NO;

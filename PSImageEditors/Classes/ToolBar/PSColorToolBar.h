@@ -5,7 +5,7 @@
 //  Created by rsf on 2018/8/29.
 //
 
-#import <UIKit/UIKit.h>
+#import "PSToolBar.h"
 #import "PSColorFullButton.h"
 @class PSColorToolBar;
 
@@ -29,8 +29,8 @@ typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 - (void)colorToolBar:(PSColorToolBar *)toolBar event:(PSColorToolBarEvent)event;
 
 @end
-
-@interface PSColorToolBar : UIView
+ 
+@interface PSColorToolBar : PSToolBar
 
 - (instancetype)initWithType:(PSColorToolBarType)type;
 
@@ -40,12 +40,10 @@ typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 @property (nonatomic, strong) UIColor *currentColor;
 
 /// 是否可以撤销
-@property (nonatomic, assign, getter=isRevocation) BOOL revocation;
+@property (nonatomic, assign) BOOL canUndo;
 
 /// 是否可以改变文字颜色
 @property (nonatomic, assign, getter=isChangeBgColor) BOOL changeBgColor;
-
-- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation;
 
 - (BOOL)isWhiteColor;
 

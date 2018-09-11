@@ -18,9 +18,11 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 @implementation PSTextBoard
 
 - (void)setup {
-    
 	
-    //self.previewImageView.scrollView.pinchGestureRecognizer.enabled = NO;
+	[super setup];
+	
+	// 关闭scrollView自带的缩放手势
+    self.previewView.scrollView.pinchGestureRecognizer.enabled = NO;
 
     __weak typeof(self)weakSelf = self;
     self.textView = [[PSTextView alloc] initWithFrame:CGRectMake(0, kTopOffset, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height - kTopOffset)];
@@ -59,7 +61,7 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 				[weakSelf addTextBoardItemWithText:text attrs:attrs];
 			}
 		}
-		//        weakSelf.editor.scrollView.pinchGestureRecognizer.enabled = YES;
+	    weakSelf.previewView.scrollView.pinchGestureRecognizer.enabled = YES;
 		//        weakSelf.editor.backButton.enabled = YES;
 		//        weakSelf.editor.undoButton.enabled = YES;
 		weakSelf.dissmissTextTool(text);
@@ -71,7 +73,8 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 }
 
 - (void)cleanup {
-    
+    [super cleanup];
+	
     [self.textView removeFromSuperview];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"kColorPanNotificaiton" object:nil];
     //TODO: todo?
@@ -304,8 +307,11 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 	
 	[self.textView resignFirstResponder];
 	
-	NSRange range = NSMakeRange(0, self.textView.text.length);
-	NSDictionary *attrs = [self.textView.attributedText attributesAtIndex:0 effectiveRange:&range];
+	NSDictionary *attrs = nil;
+	if (self.textView.text.length) {
+		NSRange range = NSMakeRange(0, self.textView.text.length);
+		attrs = [self.textView.attributedText attributesAtIndex:0 effectiveRange:&range];
+	}
     if (self.dissmissBlock) {
         self.dissmissBlock(self.textView.text, attrs, done);
     }

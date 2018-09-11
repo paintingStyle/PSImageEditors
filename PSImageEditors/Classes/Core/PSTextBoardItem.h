@@ -33,6 +33,8 @@
 @property (nonatomic, strong) UIColor *strokeColor;
 @property (nonatomic, strong) UIColor *fillColor;
 @property (nonatomic, assign) NSTextAlignment textAlignment;
+	
+//@property (nonatomic, strong) UIView *containerView;
 
 /// item处于激活状态
 @property (nonatomic, assign, getter=isActive) BOOL active;

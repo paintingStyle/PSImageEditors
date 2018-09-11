@@ -5,7 +5,7 @@
 //  Created by paintingStyle on 2018/8/25.
 //
 
-#import <UIKit/UIKit.h>
+#import "PSToolBar.h"
 @class PSImageObject;
 
 typedef NS_ENUM(NSUInteger, PSBottomToolType) {
@@ -40,7 +40,7 @@ typedef NS_ENUM(NSUInteger, PSBottomToolDeleteState) {
 
 @end
 
-@interface PSBottomToolBar : UIView
+@interface PSBottomToolBar : PSToolBar
 
 @property (nonatomic, weak) id<PSBottomToolBarDelegate> delegate;
 
@@ -55,9 +55,10 @@ typedef NS_ENUM(NSUInteger, PSBottomToolDeleteState) {
 @property (nonatomic, assign) PSBottomToolDeleteState deleteState;
 
 - (instancetype)initWithType:(PSBottomToolType)type;
+	
+- (void)reset;
 
-- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation;
-
-- (void)resetStateWithEvent:(PSBottomToolEvent)event;
+//- (void)resetStateWithEvent:(PSBottomToolEvent)event;
 
 @end
+

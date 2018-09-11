@@ -344,6 +344,8 @@ static PSTextBoardItem *activeView = nil;
     
     self.bounds = CGRectMake(0, 0, w*scale, h*scale);
     self.center = self.center;
+	
+	LOG_FRAME(self.bounds);
     
     _label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, self.bounds.size.width - 2*kTextBoardItemInset, self.bounds.size.height - 2*kTextBoardItemInset);
     {

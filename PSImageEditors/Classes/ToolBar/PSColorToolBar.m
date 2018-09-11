@@ -23,7 +23,7 @@
 @property (nonatomic, strong) PSColorFullButton *blueButton;
 
 @property (nonatomic, strong) UIView *colorFullButtonViews;
-@property (nonatomic, strong) UIButton *revocationButton;
+@property (nonatomic, strong) UIButton *undoButton;
 @property (nonatomic, strong) UIView *bottomLineView;
 
 @property (nonatomic, strong) UIButton *changeBgColorButton;
@@ -32,10 +32,10 @@
 
 @implementation PSColorToolBar
 
-- (void)setRevocation:(BOOL)revocation {
+- (void)setCanUndo:(BOOL)canUndo {
     
-    _revocation = revocation;
-    self.revocationButton.enabled = revocation;
+    _canUndo = canUndo;
+    self.undoButton.enabled = canUndo;
 }
 
 - (instancetype)initWithType:(PSColorToolBarType)type {
@@ -118,21 +118,21 @@
     [_colorFullButtonViews addSubview:self.lightBlueButton];
     [_colorFullButtonViews addSubview:self.blueButton];
     
-    _revocationButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
-    [_revocationButton setImage:[UIImage ps_imageNamed:@"btn_revocation_normal"]
+    _undoButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
+    [_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_normal"]
                        forState:UIControlStateNormal];
-    [_revocationButton setImage:[UIImage ps_imageNamed:@"btn_revocation_disabled"]
+    [_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_disabled"]
                        forState:UIControlStateDisabled];
-    _revocationButton.enabled = NO;
-    [_revocationButton addTarget:self action:@selector(revocationButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
-    [self addSubview:_revocationButton];
+    _undoButton.enabled = NO;
+    [_undoButton addTarget:self action:@selector(undoButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:_undoButton];
     
     _bottomLineView = [[UIView alloc] init];
     _bottomLineView.backgroundColor = PSColorFromRGB(0x999999);
     [self addSubview:_bottomLineView];
     
     
-    [_revocationButton mas_makeConstraints:^(MASConstraintMaker *make) {
+    [_undoButton mas_makeConstraints:^(MASConstraintMaker *make) {
         
         make.right.equalTo(@(-15));
         make.bottom.equalTo(@(-30));
@@ -143,8 +143,8 @@
         make.top.equalTo(self);
         make.left.equalTo(@15);
         make.height.equalTo(@(kColorFullButtonSize.height));
-        make.right.equalTo(_revocationButton.mas_left).offset(-5);
-        make.centerY.equalTo(_revocationButton);
+        make.right.equalTo(_undoButton.mas_left).offset(-5);
+        make.centerY.equalTo(_undoButton);
     }];
     
     [_colorFullButtonViews.subviews mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
@@ -191,7 +191,7 @@
 	}
 }
 
-- (void)revocationButtonDidClick {
+- (void)undoButtonDidClick {
 	
 	if (self.delegate && [self.delegate respondsToSelector:
 						  @selector(colorToolBar:event:)]) {
