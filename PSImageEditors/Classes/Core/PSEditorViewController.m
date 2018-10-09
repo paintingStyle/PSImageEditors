@@ -14,8 +14,10 @@
 #import "PSBottomToolBar.h"
 #import "PSColorToolBar.h"
 #import "PSMosaicToolBar.h"
+#import "PSTextBoardItem.h"
 #import "PSImageObject.h"
-#import "TOCropViewController.h"
+#import <TOCropViewController.h>
+#import <UIImage+CropRotate.h>
 
 @interface PSEditorViewController ()
 <PSTopToolBarDelegate,
@@ -180,13 +182,128 @@ PSTextBoardItemDelegate> {
 		case PSBottomToolEventClipping:
 		self.currentMode = self.bottomToolBar.isEditor ?
 					  PSEditorModeClipping:PSEditorModeNone;
+			[self buildClipImageShowHud:NO clipedCallback:^(UIImage *clipedImage) {
+				
+				
+			}];
+//		[self.currentBoard executeWithCompletionBlock:^(UIImage *image, NSError *error, NSDictionary *userInfo) {
+//			
+//			
+//		}];
+//			
+//			[self Clipping];
 		break;
 	}
 }
 
+- (void)buildClipImageShowHud:(BOOL)showHud clipedCallback:(void(^)(UIImage *clipedImage))clipedCallback {
+	if (showHud) {
+		//ShowBusyTextIndicatorForView(self.view, @"生成图片中...", nil);
+	}
+	//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+	CGFloat WS = CGRectGetWidth(self.previewImageView.imageView.frame)/ CGRectGetWidth(self.previewImageView.drawingView.frame);
+	CGFloat HS = CGRectGetHeight(self.previewImageView.imageView.frame)/ CGRectGetHeight(self.previewImageView.drawingView.frame);
+	
+	dispatch_async(dispatch_get_main_queue(), ^{
+		UIGraphicsBeginImageContextWithOptions(CGSizeMake(self.previewImageView.imageView.image.size.width, self.previewImageView.imageView.image.size.height),
+											   NO,
+											   self.previewImageView.imageView.image.scale);
+	});
+	
+	[self.previewImageView.imageView.image drawAtPoint:CGPointZero];
+	CGFloat viewToimgW = CGRectGetWidth(self.previewImageView.imageView.frame)/self.previewImageView.imageView.image.size.width;
+	CGFloat viewToimgH = CGRectGetHeight(self.previewImageView.imageView.frame)/self.previewImageView.imageView.image.size.height;
+	__unused CGFloat drawX = CGRectGetMinX(self.previewImageView.imageView.frame)/viewToimgW;
+	CGFloat drawY = CGRectGetMidY(self.previewImageView.imageView.frame)/viewToimgH;
+	[self.previewImageView.drawingView.image drawInRect:CGRectMake(0, -drawY, self.previewImageView.imageView.image.size.width/WS, self.previewImageView.imageView.image.size.height/HS)];
+	
+	dispatch_async(dispatch_get_main_queue(), ^{
+		for (UIView *subV in self.previewImageView.drawingView.subviews) {
+			if ([subV isKindOfClass:[PSTextBoardItem class]]) {
+				PSTextBoardItem *textLabel = (PSTextBoardItem *)subV;
+				//进入正常状态
+				[PSTextBoardItem setInactiveTextView:textLabel];
+				
+				//生成图片
+				__unused UIView *tes = textLabel;
+				CGFloat rotation = [[textLabel.layer valueForKeyPath:@"transform.rotation.z"] doubleValue];
+				UIImage *textImg = [self.class screenshot:textLabel orientation:UIDeviceOrientationPortrait usePresentationLayer:YES];
+				textImg = [textImg ps_imageRotatedByRadians:rotation];
+				
+				CGFloat selfRw = self.previewImageView.imageView.bounds.size.width / self.previewImageView.imageView.image.size.width;
+				CGFloat selfRh = self.previewImageView.imageView.bounds.size.height / self.previewImageView.imageView.image.size.height;
+				
+				CGFloat sw = textImg.size.width / selfRw;
+				CGFloat sh = textImg.size.height / selfRh;
+				
+				[textImg drawInRect:CGRectMake(CGRectGetMinX(textLabel.frame)/selfRw, (CGRectGetMinY(textLabel.frame)/selfRh) - drawY, sw, sh)];
+			}
+		}
+	});
+	
+	UIImage *tmp = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	dispatch_async(dispatch_get_main_queue(), ^{
+		//HideBusyIndicatorForView(self.view);
+		UIImage *image = [UIImage imageWithCGImage:tmp.CGImage scale:[UIScreen mainScreen].scale orientation:UIImageOrientationUp];
+		UIImage *a = [UIImage imageNamed:@"bg"];
+		clipedCallback(image ? :a);
+		
+	});
+	//    });
+}
+
++ (UIImage *)screenshot:(UIView *)view orientation:(UIDeviceOrientation)orientation usePresentationLayer:(BOOL)usePresentationLayer
+{
+	__block CGSize targetSize = CGSizeZero;
+	
+	CGFloat transformScaleX = [[view.layer valueForKeyPath:@"transform.scale.x"] doubleValue];
+	CGFloat transformScaleY = [[view.layer valueForKeyPath:@"transform.scale.y"] doubleValue];
+	
+	dispatch_async(dispatch_get_main_queue(), ^{
+		CGSize size = view.bounds.size;
+		targetSize = CGSizeMake(size.width * transformScaleX, size.height *  transformScaleY);
+	});
+	
+	UIGraphicsBeginImageContextWithOptions(targetSize, NO, [UIScreen mainScreen].scale);
+	
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+	CGContextSaveGState(ctx);
+	dispatch_async(dispatch_get_main_queue(), ^{
+		[view drawViewHierarchyInRect:CGRectMake(0, 0, targetSize.width, targetSize.height) afterScreenUpdates:NO];
+	});
+	CGContextRestoreGState(ctx);
+	
+	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	return image;
+}
+
 - (void)Clipping {
 	
-	
+	UIImage *clipedImage = [UIImage ps_imageNamed:@"icon_mask_top"];
+	TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:
+											TOCropViewCroppingStyleDefault image:clipedImage];
+	cropController.delegate = self;
+	__weak typeof(self)weakSelf = self;
+	CGRect viewFrame = [self.view convertRect:self.previewImageView.imageView.frame
+									   toView:self.navigationController.view];
+	[cropController presentAnimatedFromParentViewController:self
+												  fromImage:clipedImage
+												   fromView:nil
+												  fromFrame:viewFrame
+													  angle:0
+											   toImageFrame:CGRectZero
+													  setup:^{
+//														  [weakSelf refreshImageView];
+//														  weakSelf.colorPan.hidden = YES;
+//														  weakSelf.currentMode = EditorClipMode;
+//														  [weakSelf setCurrentTool:nil];
+													  }
+												 completion:^{
+												 }];
 }
 
 #pragma mark - PSMosaicToolBarDelegate
