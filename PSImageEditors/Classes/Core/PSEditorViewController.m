@@ -15,6 +15,7 @@
 #import "PSColorToolBar.h"
 #import "PSMosaicToolBar.h"
 #import "PSImageObject.h"
+#import "TOCropViewController.h"
 
 @interface PSEditorViewController ()
 <PSTopToolBarDelegate,
@@ -183,6 +184,11 @@ PSTextBoardItemDelegate> {
 	}
 }
 
+- (void)Clipping {
+	
+	
+}
+
 #pragma mark - PSMosaicToolBarDelegate
 
 - (void)mosaicToolBarType:(PSMosaicType)type event:(PSMosaicToolBarEvent)event {
@@ -222,13 +228,15 @@ PSTextBoardItemDelegate> {
 		[self.deleteToolBar setToolBarShow:NO animation:YES];
 	}
     PSTextBoardItem *textBoardItem = gesture.view;
-    
+	
     // https://www.jianshu.com/p/92e2d0200eb4
     CGRect rect = [self.view convertRect:textBoardItem.frame fromView:textBoardItem.superview];
     BOOL contains = CGRectIntersectsRect(rect, self.deleteToolBar.frame);
     if (contains) {
         self.deleteToolBar.deleteState = PSBottomToolDeleteStateDid;
-        if (!activation) { [textBoardItem remove]; }
+        if (!activation) {
+			[textBoardItem remove];
+		}
     }else {
         self.deleteToolBar.deleteState = PSBottomToolDeleteStateWill;
     }
@@ -315,8 +323,8 @@ PSTextBoardItemDelegate> {
 //    self.textBoard.currentColor = self.colorToolBar.currentColor;
 	
     // 默认开启交互
-	self.previewImageView.imageView.userInteractionEnabled = YES;
-    self.previewImageView.drawingView.userInteractionEnabled = YES;
+//	self.previewImageView.imageView.userInteractionEnabled = YES;
+//    self.previewImageView.drawingView.userInteractionEnabled = YES;
 }
 
 #pragma mark - Getter/Setter

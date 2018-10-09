@@ -5,12 +5,14 @@ PODS:
     - Masonry (~> 1.1.0)
     - SDWebImage (~> 4.4.2)
     - SDWebImage/GIF
+    - TOCropViewController
   - SDWebImage (4.4.2):
     - SDWebImage/Core (= 4.4.2)
   - SDWebImage/Core (4.4.2)
   - SDWebImage/GIF (4.4.2):
     - FLAnimatedImage (~> 1.0)
     - SDWebImage/Core
+  - TOCropViewController (2.3.8)
 
 DEPENDENCIES:
   - PSImageEditors (from `../`)
@@ -20,6 +22,7 @@ SPEC REPOS:
     - FLAnimatedImage
     - Masonry
     - SDWebImage
+    - TOCropViewController
 
 EXTERNAL SOURCES:
   PSImageEditors:
@@ -28,8 +31,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  PSImageEditors: 9ac78a728b5947c20ab8d48e4007bace8f5997d4
+  PSImageEditors: daf82dcc31abf6438cb01045cc5ea79e57856397
   SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
+  TOCropViewController: 0a075f02c253e88095143bbac7b013fc6fba5090
 
 PODFILE CHECKSUM: 37aeabdc95c9d41e1a8d71690391bbb9e177c3f3
 

@@ -61,9 +61,8 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 				[weakSelf addTextBoardItemWithText:text attrs:attrs];
 			}
 		}
+		// 开启scrollView自带的缩放手势
 	    weakSelf.previewView.scrollView.pinchGestureRecognizer.enabled = YES;
-		//        weakSelf.editor.backButton.enabled = YES;
-		//        weakSelf.editor.undoButton.enabled = YES;
 		weakSelf.dissmissTextTool(text);
 	};
     [self.editorView addSubview:self.textView];
@@ -74,6 +73,9 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 
 - (void)cleanup {
     [super cleanup];
+	
+	self.previewView.imageView.userInteractionEnabled = YES;
+	self.previewView.drawingView.userInteractionEnabled = YES;
 	
     [self.textView removeFromSuperview];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"kColorPanNotificaiton" object:nil];
@@ -96,25 +98,30 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 	
     if (!text && !text.length) { return; }
 	
-	CGPoint point = [self.previewView.imageView convertPoint:self.previewView.imageView.center
-													  toView:self.previewView.drawingView];
-    // 修正超长图文字的显示位置
-    if (CGRectGetHeight(self.previewView.imageView.frame) >PS_SCREEN_H) {
-        point.y = self.previewView.scrollView.contentOffset.y + PS_SCREEN_H *0.5;
-    }
+//	UIView *v = [UIView new];
+//	v.frame = CGRectMake(30, 30, CGRectGetWidth(self.previewView.drawingView.frame)-60,  CGRectGetHeight(self.previewView.drawingView.frame)-60);
+//	v.backgroundColor = [UIColor yellowColor];
+//	[self.previewView.drawingView addSubview:v];
 	
 	UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
 	UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
 	UIFont *font = attrs[NSFontAttributeName];
     
     PSTextBoardItem *view = [[PSTextBoardItem alloc] initWithTool:self text:text font:self.textView.textView.font orImage:nil];
+	
+	CGPoint center = CGPointMake(CGRectGetWidth(self.previewView.drawingView.frame) *0.5, CGRectGetHeight(self.previewView.drawingView.frame) *0.5);
+	// 修正超长图文字的显示位置
+	if (CGRectGetHeight(self.previewView.imageView.frame) >PS_SCREEN_H) {
+		center.y = self.previewView.scrollView.contentOffset.y + PS_SCREEN_H *0.5;
+	}
+	
     view.delegate = self.itemDelegate;
     view.borderColor = [UIColor whiteColor];
     view.font = font;
 	view.strokeColor = strokeColor;
 	view.fillColor = fillColor;
     view.text = text;
-    view.center = point;
+    view.center = center;
     view.userInteractionEnabled = YES;
     [self.previewView.drawingView addSubview:view];
     [PSTextBoardItem setActiveTextView:view];

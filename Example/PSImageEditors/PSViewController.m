@@ -79,7 +79,7 @@
     
     if (!_images) {
         NSMutableArray *images = [NSMutableArray array];
-        for (int i=0; i<12; i++) {
+        for (int i=1; i<12; i++) {
             NSString *imageName = [NSString stringWithFormat:@"localImage_%02d@2x.jpg",i];
             UIImage *image = [UIImage imageNamed:imageName];
             if (image) {

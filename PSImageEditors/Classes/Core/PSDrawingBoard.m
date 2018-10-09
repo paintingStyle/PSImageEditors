@@ -165,7 +165,7 @@
 //    self.editor.imageView.userInteractionEnabled = NO;
    // self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 1;
     self.panGesture.enabled = NO;
-	self.previewView.imageView.userInteractionEnabled = NO;
+	//self.previewView.imageView.userInteractionEnabled = NO;
 	//self.previewView.drawingView.userInteractionEnabled = NO;
 }
 

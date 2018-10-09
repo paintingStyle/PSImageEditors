@@ -17,11 +17,13 @@
 
 - (void)setup {
 	self.editor = YES;
+	self.previewView.imageView.userInteractionEnabled = YES;
     self.previewView.drawingView.userInteractionEnabled = YES;
 }
 	
 - (void)cleanup {
 	self.editor = NO;
+	self.previewView.imageView.userInteractionEnabled = NO;
     self.previewView.drawingView.userInteractionEnabled = NO;
 }
 

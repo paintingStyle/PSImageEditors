@@ -44,7 +44,7 @@ if(c == 0x47) result = YES;\
  兼容iPhone X,热点栏，导航栏 状态栏 tabar高度
  */
 #define PS_STATUS_BAR_H  CGRectGetHeight([UIApplication sharedApplication].statusBarFrame)
-#define PS_NAV_BAR_H    (iPhone_X ? 88.0f: 64.0f)
+#define PS_NAV_BAR_H    (iPhone_X ?    : 64.0f)
 #define PS_TAB_BAR_H    (iPhone_X ? 83.0f: 49.0f)
 #define PS_COMMON_NUM   44.0f
 

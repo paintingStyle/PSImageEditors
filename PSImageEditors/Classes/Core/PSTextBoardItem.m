@@ -96,6 +96,10 @@ static PSTextBoardItem *activeView = nil;
         [self setScale:1];
         
         [self initGestures];
+		
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+			id a = self;
+		});
     }
 	
     return self;
@@ -175,33 +179,27 @@ static PSTextBoardItem *activeView = nil;
     piece.center = CGPointMake(piece.center.x + translation.x, piece.center.y + translation.y);
     [recognizer setTranslation:CGPointZero inView:piece.superview];
     
-    BOOL activation = NO;
-    
-    if (recognizer.state == UIGestureRecognizerStateBegan ||
-        recognizer.state == UIGestureRecognizerStateChanged) {
-        activation = YES;
+	BOOL activation = (recognizer.state == UIGestureRecognizerStateBegan ||
+					   recognizer.state == UIGestureRecognizerStateChanged);
+	
+	if (self.delegate && [self.delegate respondsToSelector:
+						  @selector(textBoardItem:translationGesture:activation:)]) {
+		[self.delegate textBoardItem:self translationGesture:recognizer activation:activation];
+	}
+	
+    if (activation) {
         [self hiddenToolBar:YES animation:YES];
         //取消当前
       //  [self.textTool.editor resetCurrentTool];
-    } else if (recognizer.state == UIGestureRecognizerStateEnded ||
-               recognizer.state == UIGestureRecognizerStateFailed ||
-               recognizer.state == UIGestureRecognizerStateCancelled) {
-        activation = NO;
-        // TODO:XXX
-        CGRect rectCoordinate = [piece.superview convertRect:piece.frame toView:_textBoard.previewView.imageView.superview];
-        if (!CGRectIntersectsRect(CGRectInset(_textBoard.previewView.imageView.frame, 30, 30), rectCoordinate)) {
-            [UIView animateWithDuration:.2f animations:^{
-                piece.center = piece.superview.center;
-                self.center = piece.center;
-                
-            }];
-        }
-        [self hiddenToolBar:NO animation:YES];
-    }
-    
-    if (self.delegate && [self.delegate respondsToSelector:
-                          @selector(textBoardItem:translationGesture:activation:)]) {
-        [self.delegate textBoardItem:self translationGesture:recognizer activation:activation];
+    } else  {
+		CGRect rectCoordinate = [piece.superview convertRect:piece.frame toView:_textBoard.previewView.imageView.superview];
+		if (!CGRectIntersectsRect(CGRectInset(_textBoard.previewView.imageView.frame, 30, 30), rectCoordinate)) {
+			[UIView animateWithDuration:.2f animations:^{
+				piece.center = piece.superview.center;
+				self.center = piece.center;
+			}];
+		}
+		[self hiddenToolBar:NO animation:YES];
     }
     
     [self layoutSubviews];
@@ -329,23 +327,24 @@ static PSTextBoardItem *activeView = nil;
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    CGRect boundss;
-    if (!self.superview) {
-        [self.superview insertSubview:self belowSubview:self];
-        self.frame = self.frame;
-        boundss = self.bounds;
-    }
-    boundss = self.bounds;
+//    CGRect boundss;
+//    if (!self.superview) {
+//        [self.superview insertSubview:self belowSubview:self];
+//        self.frame = self.frame;
+//        boundss = self.bounds;
+//    }
+//    boundss = self.bounds;
     self.transform = CGAffineTransformMakeRotation(_rotation);
 	
-    CGFloat w = boundss.size.width;
-    CGFloat h = boundss.size.height;
+//    CGFloat w = boundss.size.width;
+//    CGFloat h = boundss.size.height;
+	CGFloat w = self.bounds.size.width;
+	CGFloat h = self.bounds.size.height;
     CGFloat scale = [(NSNumber *)[self valueForKeyPath:@"layer.transform.scale.x"] floatValue];
     
     self.bounds = CGRectMake(0, 0, w*scale, h*scale);
     self.center = self.center;
-	
-	LOG_FRAME(self.bounds);
+
     
     _label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, self.bounds.size.width - 2*kTextBoardItemInset, self.bounds.size.height - 2*kTextBoardItemInset);
     {
@@ -368,7 +367,7 @@ static PSTextBoardItem *activeView = nil;
 
         if (!_leftBottomRectLayer) {
             _leftBottomRectLayer = [CALayer layer];
-            _leftBottomRectLayer.backgroundColor = [UIColor whiteColor].CGColor;
+            _leftBottomRectLayer.backgroundColor = [UIColor yellowColor].CGColor;
             [self.layer addSublayer:_leftBottomRectLayer];
         }
         _leftBottomRectLayer.frame = CGRectMake(_scale/2.f - 2, CGRectGetHeight(self.frame) - 2 - _scale/2.f, 4, 4);
@@ -379,6 +378,7 @@ static PSTextBoardItem *activeView = nil;
             [self.layer addSublayer:_rightBottomRectLayer];
         }
         _rightBottomRectLayer.frame = CGRectMake(CGRectGetWidth(self.frame) - 2 - _scale/2.f, CGRectGetHeight(self.frame) - 2 - _scale/2.f, 4, 4);
+		
         [CATransaction commit];
     }
 }
