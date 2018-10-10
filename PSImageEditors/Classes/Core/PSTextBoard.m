@@ -98,11 +98,6 @@ static const CGFloat kColorToolBarHeight = 48.0f;
 	
     if (!text && !text.length) { return; }
 	
-//	UIView *v = [UIView new];
-//	v.frame = CGRectMake(30, 30, CGRectGetWidth(self.previewView.drawingView.frame)-60,  CGRectGetHeight(self.previewView.drawingView.frame)-60);
-//	v.backgroundColor = [UIColor yellowColor];
-//	[self.previewView.drawingView addSubview:v];
-	
 	UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
 	UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
 	UIFont *font = attrs[NSFontAttributeName];
@@ -123,7 +118,7 @@ static const CGFloat kColorToolBarHeight = 48.0f;
     view.text = text;
     view.center = center;
     view.userInteractionEnabled = YES;
-    [self.previewView.drawingView addSubview:view];
+    [self.editorView addSubview:view];
     [PSTextBoardItem setActiveTextView:view];
 }
 

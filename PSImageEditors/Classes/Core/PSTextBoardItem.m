@@ -389,17 +389,10 @@ static PSTextBoardItem *activeView = nil;
 	
 	_active = active;
 	
-    dispatch_async(dispatch_get_main_queue(), ^{
+   // dispatch_async(dispatch_get_main_queue(), ^{
         [CATransaction begin];
         [CATransaction setDisableActions:YES];
-		
-		// 边框阴影
-//        _label.layer.borderWidth = (active) ? 1/_scale : 0;
-//        _label.layer.shadowColor = [UIColor grayColor].CGColor;
-//        _label.layer.shadowOffset= CGSizeMake(0, 0);
-//        _label.layer.shadowOpacity = .6f;
-//        _label.layer.shadowRadius = 2.f;
-		
+	
 		self.layer.borderWidth = (active) ? 1/_scale : 0;
 		self.layer.shadowColor = [UIColor grayColor].CGColor;
 		self.layer.shadowOffset= CGSizeMake(0, 0);
@@ -418,7 +411,7 @@ static PSTextBoardItem *activeView = nil;
 //        } else {
 //            [[NSNotificationCenter defaultCenter] removeObserver:self name:@"kColorPanNotificaiton" object:nil];
 //        }
-    });
+  //  });
 }
 
 - (void)changeColor:(NSNotification *)notification {

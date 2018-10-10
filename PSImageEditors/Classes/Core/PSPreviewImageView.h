@@ -25,6 +25,7 @@ typedef void(^CallbackBlock)(PSImageObject *imageObject);
 @property (nonatomic, copy) CallbackBlock singleGestureBlock;
 @property (nonatomic, copy) CallbackBlock longGestureBlock;
 
+- (void)changeImage:(UIImage *)image;
 - (void)reset;
 
 @end

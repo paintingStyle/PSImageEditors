@@ -17,4 +17,7 @@
 /** 图片旋转角度 */
 - (UIImage *)ps_imageRotatedByRadians:(CGFloat)radians;
 
+/** 根据image本身创建指定rect的image */
+- (UIImage *)ps_imageAtRect:(CGRect)rect;
+
 @end

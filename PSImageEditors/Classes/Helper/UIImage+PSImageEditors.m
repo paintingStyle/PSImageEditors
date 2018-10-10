@@ -203,4 +203,19 @@
 	return newImage;
 }
 
+- (UIImage *)ps_imageAtRect:(CGRect)rect {
+	
+	//把像 素rect 转化为 点rect（如无转化则按原图像素取部分图片）
+	CGFloat scale = [UIScreen mainScreen].scale;
+	CGFloat x= rect.origin.x*scale,y=rect.origin.y*scale,w=rect.size.width*scale,h=rect.size.height*scale;
+	CGRect dianRect = CGRectMake(x, y, w, h);
+	
+	//截取部分图片并生成新图片
+	CGImageRef newImageRef = CGImageCreateWithImageInRect([self CGImage], dianRect);
+	UIImage *newImage = [UIImage imageWithCGImage:newImageRef scale:scale orientation:self.imageOrientation];
+	CGImageRelease(newImageRef);
+	return newImage;
+}
+
+
 @end

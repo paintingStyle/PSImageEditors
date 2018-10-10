@@ -98,6 +98,12 @@ static const CGFloat   kHorizontalSpacing = 5.0f;
 	}
 }
 
+- (void)changeImage:(UIImage *)image {
+	
+	self.imageView.image = image;
+	[self processingImageDisplay];
+}
+
 - (void)layoutSubviews {
 	
 	[super layoutSubviews];
@@ -132,6 +138,7 @@ static const CGFloat   kHorizontalSpacing = 5.0f;
 		
 		_drawingView = [[UIImageView alloc] init];
 		_drawingView.contentMode = UIViewContentModeCenter;
+		_drawingView.clipsToBounds = YES; // 超出画笔边界不显示
 		_drawingView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleTopMargin;
 		[_imageView addSubview:_drawingView];
 		
