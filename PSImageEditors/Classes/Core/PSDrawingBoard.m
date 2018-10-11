@@ -17,6 +17,8 @@
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
 @property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
 
+@property (nonatomic, strong) UIImageView *drawingLineView;
+
 @end
 
 @implementation PSDrawingBoard
@@ -101,8 +103,8 @@
     for (PSDrawingPath *path in _drawingPaths) {
         [path drawPath];
     }
-    
-    self.previewView.drawingView.image = UIGraphicsGetImageFromCurrentImageContext();
+	self.drawingLineView.image = UIGraphicsGetImageFromCurrentImageContext();
+    //self.previewView.drawingView.image = UIGraphicsGetImageFromCurrentImageContext();
     
     UIGraphicsEndImageContext();
 }
@@ -142,6 +144,10 @@
         
     }
 	
+	self.drawingLineView = [[UIImageView alloc] initWithFrame:self.previewView.drawingView.frame];
+	//self.drawingLineView.backgroundColor = [UIColor redColor];
+	[self.previewView.drawingView addSubview:self.drawingLineView];
+	
     [self.previewView.drawingView addGestureRecognizer:self.panGesture];
     [self.previewView.drawingView addGestureRecognizer:self.tapGesture];
     self.previewView.drawingView.userInteractionEnabled = YES;
@@ -151,6 +157,10 @@
     
     
     self.previewView.imageView.userInteractionEnabled = YES;
+	if (self.drawToolStatus) {
+		self.drawToolStatus(_drawingPaths.count > 0 ? : NO);
+	}
+	
     //self.previewView.drawingView.userInteractionEnabled = YES;
 	
 //    self.editor.imageView.userInteractionEnabled = YES;

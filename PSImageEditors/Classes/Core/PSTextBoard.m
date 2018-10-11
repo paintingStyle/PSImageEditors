@@ -104,7 +104,7 @@ static const CGFloat kColorToolBarHeight = 48.0f;
     
     PSTextBoardItem *view = [[PSTextBoardItem alloc] initWithTool:self text:text font:self.textView.textView.font orImage:nil];
 	
-	CGPoint center = CGPointMake(CGRectGetWidth(self.previewView.drawingView.frame) *0.5, CGRectGetHeight(self.previewView.drawingView.frame) *0.5);
+	CGPoint center = self.previewView.imageView.center;//CGPointMake(CGRectGetWidth(self.previewView.drawingView.frame) *0.5, CGRectGetHeight(self.previewView.drawingView.frame) *0.5);
 	// 修正超长图文字的显示位置
 	if (CGRectGetHeight(self.previewView.imageView.frame) >PS_SCREEN_H) {
 		center.y = self.previewView.scrollView.contentOffset.y + PS_SCREEN_H *0.5;

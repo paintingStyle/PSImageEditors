@@ -16,9 +16,12 @@
         hiddenToolBar:(BOOL)hidden
             animation:(BOOL)animation;
 
+- (BOOL)textBoardItem:(PSTextBoardItem *)item
+	restrictedPanAreasAtTextBoard:(PSTextBoard *)textBoard;
+
 - (void)textBoardItem:(PSTextBoardItem *)item
    translationGesture:(UIPanGestureRecognizer *)gesture
-           activation:(BOOL)activation;
+		   activation:(BOOL)activation;
 
 - (void)textBoardItemDidClickItem:(PSTextBoardItem *)item;
 

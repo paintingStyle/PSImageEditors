@@ -19,6 +19,10 @@
 #import <TOCropViewController.h>
 #import <UIImage+CropRotate.h>
 
+static inline CGRect PSTextBoardItemDeleteCoordinate(void) {
+	return CGRectMake(0, PS_SCREEN_H-PSBottomToolDeleteBarHeight, PS_SCREEN_W, PSBottomToolDeleteBarHeight);;
+}
+
 @interface PSEditorViewController ()
 <PSTopToolBarDelegate,
 PSBottomToolBarDelegate,
@@ -156,7 +160,7 @@ TOCropViewControllerDelegate> {
 	[imageView.image drawAtPoint:CGPointZero];
 	[drawingView.image drawInRect:CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height)];
 	// text
-	for (UIView *view in self.previewImageView.drawingView.subviews) {
+	for (UIView *view in self.view.subviews) {
 		if (![view isKindOfClass:[PSTextBoardItem class]]) { return; }
 		
 		PSTextBoardItem *textLabel = (PSTextBoardItem *)view;
@@ -337,7 +341,7 @@ TOCropViewControllerDelegate> {
 	
     // https://www.jianshu.com/p/92e2d0200eb4
     CGRect rect = [self.view convertRect:textBoardItem.frame fromView:textBoardItem.superview];
-    BOOL contains = CGRectIntersectsRect(rect, self.deleteToolBar.frame);
+    BOOL contains = CGRectIntersectsRect(rect, PSTextBoardItemDeleteCoordinate());
     if (contains) {
         self.deleteToolBar.deleteState = PSBottomToolDeleteStateDid;
         if (!activation) {
@@ -346,6 +350,16 @@ TOCropViewControllerDelegate> {
     }else {
         self.deleteToolBar.deleteState = PSBottomToolDeleteStateWill;
     }
+}
+
+- (BOOL)textBoardItem:(PSTextBoardItem *)item
+   restrictedPanAreasAtTextBoard:(PSTextBoard *)textBoard {
+	
+	CGRect rectCoordinate = [item.superview convertRect:item.frame toView:textBoard.previewView.imageView.superview];
+	BOOL hasDeleteCoordinate = CGRectIntersectsRect(PSTextBoardItemDeleteCoordinate(), rectCoordinate);
+	BOOL beyondBorder = !CGRectIntersectsRect(CGRectInset(textBoard.previewView.imageView.frame, 30, 30), rectCoordinate);
+	
+	return beyondBorder && !hasDeleteCoordinate;
 }
     
 - (void)textBoardItemDidClickItem:(PSTextBoardItem *)item {

@@ -21,21 +21,18 @@ static const CGFloat kDrawLineWidth = 30.0f;
 	[super setup];
 	
 	self.previewView.scrollView.panGestureRecognizer.enabled = NO;
-    
+	
     if (!_mosaicView) {
         self.mosaicView = [[PSMosaicView alloc] initWithFrame:self.previewView.drawingView.bounds];
         self.mosaicView.originalImage = self.previewView.imageView.image;
         self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:self.previewView.imageView.image level:20];;
         [self.previewView.drawingView addSubview:self.mosaicView];
+		[self.previewView.drawingView sendSubviewToBack:self.mosaicView];
         self.mosaicView.drawEndBlock = self.drawEndBlock;
         // 获取初始值
         if (self.drawEndBlock) {
             self.drawEndBlock([self canUndo]);
         }
-        UIButton *test = [UIButton buttonWithType:UIButtonTypeInfoDark];
-        test.backgroundColor = [UIColor redColor];
-        test.frame = CGRectMake(88, 88, 88, 88);
-        [self.mosaicView addSubview:test];
     }
 }
 

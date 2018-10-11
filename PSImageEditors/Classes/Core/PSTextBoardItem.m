@@ -16,7 +16,7 @@ static const CGFloat MAX_TEXT_SCAL = 4.0f;
 static const CGFloat kLabelMinSize = 20;
 static const CGFloat kTextBoardItemInset = 12;
 
-@interface PSTextBoardItem () <UIGestureRecognizerDelegate>
+@interface PSTextBoardItem () <UIGestureRecognizerDelegate,UITableViewDelegate>
 
 @property (nonatomic, weak) PSTextBoard *textBoard;
 
@@ -181,19 +181,23 @@ static PSTextBoardItem *activeView = nil;
     
 	BOOL activation = (recognizer.state == UIGestureRecognizerStateBegan ||
 					   recognizer.state == UIGestureRecognizerStateChanged);
-	
-	if (self.delegate && [self.delegate respondsToSelector:
-						  @selector(textBoardItem:translationGesture:activation:)]) {
-		[self.delegate textBoardItem:self translationGesture:recognizer activation:activation];
-	}
+
+	CGRect rectCoordinate = [piece.superview convertRect:piece.frame toView:_textBoard.previewView.imageView.superview];
+	CGRect deleteCoordinate = CGRectMake(0, PS_SCREEN_H-PSBottomToolDeleteBarHeight, PS_SCREEN_W, PSBottomToolDeleteBarHeight);
+	BOOL hasDeleteCoordinate = CGRectIntersectsRect(deleteCoordinate, rectCoordinate);
+	BOOL beyondBorder = !CGRectIntersectsRect(CGRectInset(_textBoard.previewView.imageView.frame, 30, 30), rectCoordinate);
 	
     if (activation) {
         [self hiddenToolBar:YES animation:YES];
         //取消当前
       //  [self.textTool.editor resetCurrentTool];
     } else  {
-		CGRect rectCoordinate = [piece.superview convertRect:piece.frame toView:_textBoard.previewView.imageView.superview];
-		if (!CGRectIntersectsRect(CGRectInset(_textBoard.previewView.imageView.frame, 30, 30), rectCoordinate)) {
+		BOOL restrictedPanAreas = NO;
+		if (self.delegate && [self.delegate respondsToSelector:
+							  @selector(textBoardItem:restrictedPanAreasAtTextBoard:)]) {
+			restrictedPanAreas = [self.delegate textBoardItem:self restrictedPanAreasAtTextBoard:_textBoard];
+		}
+		if (restrictedPanAreas) {
 			[UIView animateWithDuration:.2f animations:^{
 				piece.center = piece.superview.center;
 				self.center = piece.center;
@@ -201,6 +205,12 @@ static PSTextBoardItem *activeView = nil;
 		}
 		[self hiddenToolBar:NO animation:YES];
     }
+	
+	if (self.delegate && [self.delegate respondsToSelector:
+						  @selector(textBoardItem:translationGesture:activation:)]) {
+		[self.delegate textBoardItem:self translationGesture:recognizer
+						  activation:activation];
+	}
     
     [self layoutSubviews];
 }
