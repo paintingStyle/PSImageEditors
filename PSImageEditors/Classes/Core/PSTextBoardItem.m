@@ -49,7 +49,7 @@ static PSTextBoardItem *activeView = nil;
 		activeView.active = NO;
         activeView = view;
 		activeView.active = YES;
-        
+      
     //    [activeView.containerView bringSubviewToFront:activeView];
         [activeView.superview bringSubviewToFront:activeView];
         
