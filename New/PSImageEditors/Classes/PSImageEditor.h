@@ -13,7 +13,7 @@
 
 @property (nonatomic, weak) id<PSImageEditorDelegate> delegate;
 @property (nonatomic, weak) id<PSImageEditorDataSource> dataSource;
-@property (nonatomic, assign) PSImageEditorMode currentMode;
+//@property (nonatomic, assign) PSImageEditorMode currentMode;
 
 - (instancetype)initWithImage:(UIImage*)image;
 - (instancetype)initWithImage:(UIImage*)image

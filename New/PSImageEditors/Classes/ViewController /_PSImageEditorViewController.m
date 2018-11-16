@@ -6,7 +6,10 @@
 //
 
 #import "_PSImageEditorViewController.h"
-#import "PSImageToolBase.h"
+#import "PSDrawTool.h"
+#import "PSMosaicTool.h"
+#import "PSTexTool.h"
+#import "PSClippingTool.h"
 
 static inline NSDictionary *PSImageToolMappings (void) {
 	
@@ -28,6 +31,11 @@ static inline NSDictionary *PSImageToolMappings (void) {
 @property (nonatomic, strong) UIView *contentView;
 
 @property (nonatomic, strong) PSImageToolBase *currentTool;
+@property (nonatomic, strong) PSDrawTool *drawTool;
+@property (nonatomic, strong) PSMosaicTool *mosaicTool;
+@property (nonatomic, strong) PSTexTool *texTool;
+@property (nonatomic, strong) PSClippingTool *clippingTool;
+
 @property (nonatomic, strong) NSMutableDictionary *option;
 @property (nonatomic, strong, readwrite) PSTopToolBar *topToolBar;
 @property (nonatomic, strong, readwrite) PSBootomToolBar *bootomToolBar;
@@ -35,15 +43,6 @@ static inline NSDictionary *PSImageToolMappings (void) {
 @end
 
 @implementation _PSImageEditorViewController
-
-- (NSMutableDictionary *)option  {
-	
-	return LAZY_LOAD(_option, ({
-		
-		_option = [NSMutableDictionary dictionary];
-		_option;
-	}));
-}
 
 - (instancetype)initWithImage:(UIImage *)image
                      delegate:(id<PSImageEditorDelegate>)delegate
@@ -54,14 +53,6 @@ static inline NSDictionary *PSImageToolMappings (void) {
         _originalImage = image;
         self.delegate = self;
         self.dataSource = dataSource;
-		if (self.dataSource && [self.dataSource respondsToSelector:@selector(imageEditorDefaultColor)]) {
-			UIColor *defaultColor = [self.dataSource imageEditorDefaultColor];
-			[self.option setObject:defaultColor ?:[UIColor redColor] forKey:kImageToolDrawLineColorKey];
-		}
-		if (self.dataSource && [self.dataSource respondsToSelector:@selector(imageEditorDrawPathWidth)]) {
-			CGFloat drawPathWidth = [self.dataSource imageEditorDrawPathWidth];
-			[self.option setObject:@(MAX(1, drawPathWidth)) forKey:kImageToolDrawLineWidthKey];
-		}
     }
     return self;
 }
@@ -114,6 +105,8 @@ static inline NSDictionary *PSImageToolMappings (void) {
 
 - (void)setupToolWithEditorMode:(PSImageEditorMode)mode {
 	
+    
+    
 	NSString *className = PSImageToolMappings()[@(mode)];
 	if (!className) { return; }
 	Class toolClass = NSClassFromString(className);
@@ -165,6 +158,21 @@ static inline NSDictionary *PSImageToolMappings (void) {
     [self resetZoomScaleWithAnimate:NO];
 }
 
+- (NSDictionary *)drawToolOption {
+    
+    NSMutableDictionary *option = [NSMutableDictionary dictionary];
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(imageEditorDefaultColor)]) {
+        UIColor *defaultColor = [self.dataSource imageEditorDefaultColor];
+        [option setObject:defaultColor ?:[UIColor redColor] forKey:kImageToolDrawLineColorKey];
+    }
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(imageEditorDrawPathWidth)]) {
+        CGFloat drawPathWidth = [self.dataSource imageEditorDrawPathWidth];
+        [option setObject:@(MAX(1, drawPathWidth)) forKey:kImageToolDrawLineWidthKey];
+    }
+    
+    return option;
+}
+
 #pragma mark - PSTopToolBarDelegate
 
 - (void)topToolBarBackItemDidClick {
@@ -189,20 +197,20 @@ static inline NSDictionary *PSImageToolMappings (void) {
 - (void)bottomToolBar:(PSBootomToolBar *)toolBar
  didClickAtEditorMode:(PSImageEditorMode)mode {
 	
-	if (toolBar.isEditor) {
-		[self setupToolWithEditorMode:mode];
-	}else {
-		[self.currentTool cleanup];
-	}
+	//if (!toolBar.isEditor) { [self.currentTool cleanup]; }
 	
 	switch (mode) {
 		case PSImageEditorModeDraw:
+            self.currentTool = self.drawTool;
 			break;
 		case PSImageEditorModeText:
+            self.currentTool = self.texTool;
 			break;
 		case PSImageEditorModeMosaic:
+            self.currentTool = self.mosaicTool;
 			break;
 		case PSImageEditorModeClipping:
+            self.currentTool = self.clippingTool;
 			break;
 		default:
 			break;
@@ -266,7 +274,44 @@ static inline NSDictionary *PSImageToolMappings (void) {
 		[_currentTool cleanup];
 		_currentTool = currentTool;
 		[_currentTool setup];
+        NSLog(@"_currentTool:%@",_currentTool);
 	}
+}
+
+- (PSClippingTool *)clippingTool {
+    
+    return LAZY_LOAD(_clippingTool, ({
+        
+        _clippingTool = [[PSClippingTool alloc] initWithImageEditor:self withOption:nil];
+        _clippingTool;
+    }));
+}
+
+- (PSMosaicTool *)mosaicTool {
+    
+    return LAZY_LOAD(_mosaicTool, ({
+        
+        _mosaicTool = [[PSMosaicTool alloc] initWithImageEditor:self withOption:nil];
+        _mosaicTool;
+    }));
+}
+
+- (PSTexTool *)texTool {
+    
+    return LAZY_LOAD(_texTool, ({
+        
+        _texTool = [[PSTexTool alloc] initWithImageEditor:self withOption:nil];
+        _texTool;
+    }));
+}
+
+- (PSDrawTool *)drawTool {
+    
+    return LAZY_LOAD(_drawTool, ({
+        
+        _drawTool = [[PSDrawTool alloc] initWithImageEditor:self withOption:[self drawToolOption]];
+        _drawTool;
+    }));
 }
 
 - (PSBootomToolBar *)bootomToolBar {
@@ -325,6 +370,15 @@ static inline NSDictionary *PSImageToolMappings (void) {
             UIScrollViewContentInsetAdjustmentNever;
         }
         _scrollView;
+    }));
+}
+
+- (NSMutableDictionary *)option  {
+    
+    return LAZY_LOAD(_option, ({
+        
+        _option = [NSMutableDictionary dictionary];
+        _option;
     }));
 }
 

@@ -11,7 +11,7 @@
 typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 	
 	PSColorToolBarEventSelectColor = 0,
-	PSColorToolBarEventRevocation,
+	PSColorToolBarEventUndo,
 	PSColorToolBarEventChangeBgColor
 };
 
@@ -35,8 +35,6 @@ typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 
 /// 是否可以改变文字颜色
 @property (nonatomic, assign, getter=isChangeBgColor) BOOL changeBgColor;
-
-@property (nonatomic, strong) UIViewController *viewController;
 
 @property (nonatomic, weak) id<PSColorToolBarDelegate> delegate;
 

@@ -201,7 +201,7 @@
 	
 	if (self.delegate && [self.delegate respondsToSelector:
 						  @selector(colorToolBar:event:)]) {
-		[self.delegate colorToolBar:self event:PSColorToolBarEventRevocation];
+		[self.delegate colorToolBar:self event:PSColorToolBarEventUndo];
 	}
 }
 
