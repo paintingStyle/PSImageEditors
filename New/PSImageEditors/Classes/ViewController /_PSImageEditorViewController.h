@@ -6,23 +6,18 @@
 //
 
 #import "PSImageEditor.h"
-#import "PSBrushCanvasView.h"
-#import "PSMosaicCanvasView.h"
-#import "PSTextCanvasView.h"
-
+#import "PSTopToolBar.h"
+#import "PSBootomToolBar.h"
 
 @interface _PSImageEditorViewController : PSImageEditor
 
+/// 缩放容器
+@property (nonatomic, strong) UIScrollView *scrollView;
 /// 最底层负责显示的图片
-@property (nonatomic, strong, readonly) UIImageView *imageView;
-/// 画笔画布
-@property (nonatomic, strong, readonly) PSBrushCanvasView *brushCanvasView;
-/// 文字画布
-@property (nonatomic, strong, readonly) PSMosaicCanvasView *textCanvasView;
-/// 马赛克画布
-@property (nonatomic, strong, readonly) PSTextCanvasView *mosaicCanvasView;
+@property (nonatomic, strong) UIImageView *imageView;
 
-- (void)fixZoomScaleWithAnimated:(BOOL)animated;
-- (void)resetZoomScaleWithAnimated:(BOOL)animated;
+/// 用于布局参照
+@property (nonatomic, strong, readonly) PSTopToolBar *topToolBar;
+@property (nonatomic, strong, readonly) PSBootomToolBar *bootomToolBar;
 
 @end

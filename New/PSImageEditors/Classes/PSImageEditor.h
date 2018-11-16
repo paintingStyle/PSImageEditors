@@ -7,15 +7,6 @@
 
 #import <UIKit/UIKit.h>
 
-typedef NS_ENUM(NSUInteger, PSImageEditorMode) {
-    
-    PSImageEditorModeNone,
-    PSImageEditorModeBrush,
-    PSImageEditorModeText,
-    PSImageEditorModeMosaic,
-    PSImageEditorModeClipping
-};
-
 @protocol PSImageEditorDelegate,PSImageEditorDataSource;
 
 @interface PSImageEditor : UIViewController
@@ -45,6 +36,6 @@ typedef NS_ENUM(NSUInteger, PSImageEditorMode) {
 
 @optional
 - (UIColor *)imageEditorDefaultColor;
-- (NSNumber *)imageEditorDrawPathWidth;
+- (CGFloat)imageEditorDrawPathWidth;
 
 @end

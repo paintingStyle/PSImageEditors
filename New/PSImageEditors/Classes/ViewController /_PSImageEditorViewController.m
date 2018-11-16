@@ -6,25 +6,44 @@
 //
 
 #import "_PSImageEditorViewController.h"
-#import "PSImageEditorTopBar.h"
+#import "PSImageToolBase.h"
 
-@interface _PSImageEditorViewController ()<UIScrollViewDelegate> {
+static inline NSDictionary *PSImageToolMappings (void) {
+	
+	return @{
+			@(PSImageEditorModeDraw):@"PSDrawTool",
+			@(PSImageEditorModeText):@"PSTexTool",
+			@(PSImageEditorModeMosaic):@"PSMosaicTool",
+			@(PSImageEditorModeClipping):@"PSClippingTool",
+			};
+}
+
+
+@interface _PSImageEditorViewController ()
+<UIScrollViewDelegate,PSTopToolBarDelegate,PSBottomToolBarDelegate> {
     BOOL _originalNavBarHidden;
     UIImage *_originalImage;
 }
 
-@property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) UIView *contentView;
-@property (nonatomic, strong, readwrite) UIImageView *imageView;
 
-@property (nonatomic, strong) PSImageEditorTopBar *topBar;
-@property (nonatomic, strong, readwrite) PSBrushCanvasView *brushCanvasView;
-@property (nonatomic, strong, readwrite) PSMosaicCanvasView *textCanvasView;
-@property (nonatomic, strong, readwrite) PSTextCanvasView *mosaicCanvasView;
+@property (nonatomic, strong) PSImageToolBase *currentTool;
+@property (nonatomic, strong) NSMutableDictionary *option;
+@property (nonatomic, strong, readwrite) PSTopToolBar *topToolBar;
+@property (nonatomic, strong, readwrite) PSBootomToolBar *bootomToolBar;
 
 @end
 
 @implementation _PSImageEditorViewController
+
+- (NSMutableDictionary *)option  {
+	
+	return LAZY_LOAD(_option, ({
+		
+		_option = [NSMutableDictionary dictionary];
+		_option;
+	}));
+}
 
 - (instancetype)initWithImage:(UIImage *)image
                      delegate:(id<PSImageEditorDelegate>)delegate
@@ -35,6 +54,14 @@
         _originalImage = image;
         self.delegate = self;
         self.dataSource = dataSource;
+		if (self.dataSource && [self.dataSource respondsToSelector:@selector(imageEditorDefaultColor)]) {
+			UIColor *defaultColor = [self.dataSource imageEditorDefaultColor];
+			[self.option setObject:defaultColor ?:[UIColor redColor] forKey:kImageToolDrawLineColorKey];
+		}
+		if (self.dataSource && [self.dataSource respondsToSelector:@selector(imageEditorDrawPathWidth)]) {
+			CGFloat drawPathWidth = [self.dataSource imageEditorDrawPathWidth];
+			[self.option setObject:@(MAX(1, drawPathWidth)) forKey:kImageToolDrawLineWidthKey];
+		}
     }
     return self;
 }
@@ -85,6 +112,24 @@
 
 #pragma mark - Method
 
+- (void)setupToolWithEditorMode:(PSImageEditorMode)mode {
+	
+	NSString *className = PSImageToolMappings()[@(mode)];
+	if (!className) { return; }
+	Class toolClass = NSClassFromString(className);
+	if(toolClass){
+		id instance = [toolClass alloc];
+		if (instance && [instance isKindOfClass:[PSImageToolBase class]]){
+			instance = [instance initWithImageEditor:self withOption:self.option];
+			if (![self.currentTool isKindOfClass:toolClass]) {
+				self.currentTool = instance;
+			}
+		}
+	}
+	
+	
+}
+
 - (void)resetImageViewFrame {
     
     CGSize size = (_imageView.image) ? _imageView.image.size : _imageView.frame.size;
@@ -120,6 +165,50 @@
     [self resetZoomScaleWithAnimate:NO];
 }
 
+#pragma mark - PSTopToolBarDelegate
+
+- (void)topToolBarBackItemDidClick {
+	
+	if (self.presentingViewController
+		&& self.navigationController.viewControllers.count == 1) {
+		[self dismissViewControllerAnimated:YES completion:nil];
+	} else {
+		[self.navigationController popViewControllerAnimated:YES];
+	}
+}
+
+- (void)topToolBarDoneItemDidClick {
+	
+	[self.currentTool executeWithCompletionBlock:^(UIImage *image, NSError *error, NSDictionary *userInfo) {
+		UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
+	}];
+}
+
+#pragma mark - PSBottomToolBarDelegate
+
+- (void)bottomToolBar:(PSBootomToolBar *)toolBar
+ didClickAtEditorMode:(PSImageEditorMode)mode {
+	
+	if (toolBar.isEditor) {
+		[self setupToolWithEditorMode:mode];
+	}else {
+		[self.currentTool cleanup];
+	}
+	
+	switch (mode) {
+		case PSImageEditorModeDraw:
+			break;
+		case PSImageEditorModeText:
+			break;
+		case PSImageEditorModeMosaic:
+			break;
+		case PSImageEditorModeClipping:
+			break;
+		default:
+			break;
+	}
+}
+
 #pragma mark- ScrollView
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
@@ -145,80 +234,58 @@
 - (void)configUI {
     
     self.view.backgroundColor = [UIColor blackColor];
-    [self.view addSubview:self.scrollView];
-    [self.scrollView addSubview:self.contentView];
-    [self.contentView addSubview:self.imageView];
-    [self.contentView addSubview:self.mosaicCanvasView];
-    [self.contentView addSubview:self.brushCanvasView];
-    
+	[self.view addSubview:self.scrollView];
+	[self.scrollView addSubview:self.contentView];
+	[self.contentView addSubview:self.imageView];
+	[self.view addSubview:self.topToolBar];
+	[self.view addSubview:self.bootomToolBar];
+	
+	[self.topToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
+		make.top.left.right.equalTo(self.view);
+		make.height.equalTo(@(PSTopToolBarHeight));
+	}];
+	[self.bootomToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
+		make.left.bottom.right.equalTo(self.view);
+		make.height.equalTo(@(PSBottomToolBarHeight));
+	}];
     [self.scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
-        
-        if (@available(iOS 11.0, *)) {
-            make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop);
-        } else {
-            make.top.equalTo(self.mas_topLayoutGuide);
-        }
-        make.left.right.equalTo(self.view);
-        if (@available(iOS 11.0, *)) {
-            make.bottom.equalTo(self.view.mas_safeAreaLayoutGuideBottom);
-        } else {
-            make.bottom.equalTo(self.mas_bottomLayoutGuide);
-        }
+		make.edges.equalTo(self.view);
     }];
-//    [self.contentView mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.edges.equalTo(self.scrollView);
-//        make.center.equalTo(self.scrollView);
-//    }];
-//    [self.imageView mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.edges.equalTo(self.contentView);
-//    }];
-//    [self.mosaicCanvasView mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.edges.equalTo(self.contentView);
-//    }];
-//    [self.brushCanvasView mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.edges.equalTo(self.contentView);
-//    }];
-    
-    self.mosaicCanvasView.backgroundColor = [UIColor redColor];
-    self.textCanvasView.backgroundColor = [UIColor greenColor];
-    self.brushCanvasView.backgroundColor = [UIColor blueColor];
+	
+//	self.topToolBar.backgroundColor = [UIColor yellowColor];
+//	self.bootomToolBar.backgroundColor = [UIColor greenColor];
+	
+	//DEBUG_VIEW(self.view);
 }
 
 #pragma mark - Getter/Setter
 
-- (PSImageEditorTopBar *)topBar {
-    
-    return LAZY_LOAD(_topBar, ({
-        
-        _topBar = [[PSImageEditorTopBar alloc] init];
-        _topBar;
-    }));
+- (void)setCurrentTool:(PSImageToolBase *)currentTool {
+	
+	if (currentTool != _currentTool){
+		[_currentTool cleanup];
+		_currentTool = currentTool;
+		[_currentTool setup];
+	}
 }
 
-- (PSTextCanvasView *)textCanvasView {
-    
-    return LAZY_LOAD(_textCanvasView, ({
-        
-        _textCanvasView = [[PSTextCanvasView alloc] init];
-        _textCanvasView;
-    }));
+- (PSBootomToolBar *)bootomToolBar {
+	
+	return LAZY_LOAD(_bootomToolBar, ({
+		
+		_bootomToolBar = [[PSBootomToolBar alloc] init];
+		_bootomToolBar.delegate = self;
+		_bootomToolBar;
+	}));
 }
 
-- (PSMosaicCanvasView *)mosaicCanvasView {
+- (PSTopToolBar *)topToolBar {
     
-    return LAZY_LOAD(_mosaicCanvasView, ({
+    return LAZY_LOAD(_topToolBar, ({
         
-        _mosaicCanvasView = [[PSMosaicCanvasView alloc] init];
-        _mosaicCanvasView;
-    }));
-}
-
-- (PSBrushCanvasView *)brushCanvasView {
-    
-    return LAZY_LOAD(_brushCanvasView, ({
-        
-        _brushCanvasView = [[PSBrushCanvasView alloc] init];
-        _brushCanvasView;
+        _topToolBar = [[PSTopToolBar alloc] init];
+		_topToolBar.delegate = self;
+        _topToolBar;
     }));
 }
 
