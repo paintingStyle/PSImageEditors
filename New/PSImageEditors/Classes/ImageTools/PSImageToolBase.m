@@ -19,6 +19,8 @@
 	return self;
 }
 
+- (void)initialize {}
+
 - (void)setup {}
 
 - (void)cleanup {}

@@ -7,7 +7,10 @@
 
 #import "PSImageToolBase.h"
 
-@interface PSDrawTool : PSImageToolBase
+@interface PSDrawTool : PSImageToolBase {
+    @public UIImageView *_drawingView;
+    @public CGSize _originalImageSize;
+}
 
 @end
 

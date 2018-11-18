@@ -37,5 +37,6 @@
 @optional
 - (UIColor *)imageEditorDefaultColor;
 - (CGFloat)imageEditorDrawPathWidth;
+- (UIFont *)imageEditorTextFont;
 
 @end

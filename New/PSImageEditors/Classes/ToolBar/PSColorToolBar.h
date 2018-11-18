@@ -8,6 +8,12 @@
 #import "PSEditorToolBar.h"
 @class PSColorToolBar;
 
+typedef NS_ENUM(NSInteger, PSColorToolBarType) {
+    
+    PSColorToolBarTypeColor =0,
+    PSColorToolBarTypeText
+};
+
 typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 	
 	PSColorToolBarEventSelectColor = 0,
@@ -25,7 +31,7 @@ typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 
 @interface PSColorToolBar : PSEditorToolBar
 
-- (instancetype)initWithEditorMode:(PSImageEditorMode)model;
+- (instancetype)initWithType:(PSColorToolBarType)type;
 
 // 当前颜色
 @property (nonatomic, strong) UIColor *currentColor;

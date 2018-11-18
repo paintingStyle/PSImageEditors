@@ -6,16 +6,33 @@
 //
 
 #import "PSEditorToolBar.h"
+@class PSTopToolBar;
+
+typedef NS_ENUM(NSUInteger, PSTopToolBarType) {
+    
+    PSTopToolBarTypeCancelAndDoneText = 0,
+    PSTopToolBarTypeCancelAndDoneIcon,
+};
+
+typedef NS_ENUM(NSUInteger, PSTopToolBarEvent) {
+    
+    PSTopToolBarEventCancel = 0,
+    PSTopToolBarEventDone,
+};
 
 @protocol PSTopToolBarDelegate<NSObject>
 
-- (void)topToolBarBackItemDidClick;
-- (void)topToolBarDoneItemDidClick;
+
+- (void)topToolBar:(PSTopToolBar *)toolBar event:(PSTopToolBarEvent)event;
 
 @end
 
 @interface PSTopToolBar : PSEditorToolBar
 
 @property (nonatomic, weak) id<PSTopToolBarDelegate> delegate;
+
+@property (nonatomic, assign) PSTopToolBarType type;
+
+- (instancetype)initWithType:(PSTopToolBarType)type;
 
 @end

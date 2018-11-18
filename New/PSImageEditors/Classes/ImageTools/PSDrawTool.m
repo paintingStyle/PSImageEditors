@@ -12,16 +12,14 @@
 
 @property (nonatomic, assign) CGFloat drawLineWidth;
 @property (nonatomic, strong) UIColor *drawLineColor;
+@property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
+
+@property (nonatomic, strong) PSColorToolBar *colorToolBar;
+@property (nonatomic, strong) NSMutableArray<PSDrawPath *> *drawPaths;
 
 @end
 
-@implementation PSDrawTool {
-	UIImageView *_drawingView;
-	CGSize _originalImageSize;
-	CGPoint _prevDraggingPosition;
-	PSColorToolBar *_colorToolBar;
-    NSMutableArray<PSDrawPath *> *_drawPaths;
-}
+@implementation PSDrawTool
 
 - (instancetype)initWithImageEditor:(_PSImageEditorViewController *)editor
                          withOption:(NSDictionary *)option {
@@ -34,50 +32,68 @@
 
 #pragma mark - Subclasses Override
 
+- (void)initialize {
+    
+    if (!_drawingView) {
+        _drawingView = [[UIImageView alloc] initWithFrame:self.editor.imageView.bounds];
+        _drawingView.clipsToBounds = YES;
+        [self.editor.imageView addSubview:_drawingView];
+    }
+}
+
+- (void)resetSize {
+    
+    _originalImageSize = self.editor.imageView.image.size;
+    _drawingView.frame = self.editor.imageView.bounds;
+    [self drawLine];
+}
+
 - (void)setup {
 	
 	_originalImageSize = self.editor.imageView.image.size;
-	_drawingView = [[UIImageView alloc] initWithFrame:self.editor.imageView.bounds];
 	
+    _drawingView.frame = self.editor.imageView.bounds;
+    _drawingView.userInteractionEnabled = YES;
+    _drawingView.layer.shouldRasterize = YES;
+    _drawingView.layer.minificationFilter = kCAFilterTrilinear;
 	_drawLineColor = self.option[kImageToolDrawLineColorKey];
 	_drawLineWidth = [self.option[kImageToolDrawLineWidthKey] floatValue];
 	
-	UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(drawingViewDidPan:)];
-	panGesture.maximumNumberOfTouches = 1;
+    if (!self.panGesture) {
+        self.panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(drawingViewDidPan:)];
+        self.panGesture.maximumNumberOfTouches = 1;
+    }
+    if (!self.panGesture.isEnabled) {
+        self.panGesture.enabled = YES;
+    }
 	
-	_drawingView.userInteractionEnabled = YES;
-	[_drawingView addGestureRecognizer:panGesture];
+	[_drawingView addGestureRecognizer:self.panGesture];
 	
-	[self.editor.imageView addSubview:_drawingView];
 	self.editor.imageView.userInteractionEnabled = YES;
 	self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 2;
 	self.editor.scrollView.panGestureRecognizer.delaysTouchesBegan = NO;
 	self.editor.scrollView.pinchGestureRecognizer.delaysTouchesBegan = NO;
 	
-	_colorToolBar = [[PSColorToolBar alloc] initWithEditorMode:PSImageEditorModeDraw];
-    _colorToolBar.delegate = self;
-	[self.editor.view addSubview:_colorToolBar];
-	
-	[_colorToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
-		make.bottom.equalTo(self.editor.bootomToolBar.mas_top);
-		make.left.right.equalTo(self.editor.view);
-		make.height.equalTo(@(PSColorToolBarHeight));
-	}];
-
-	_colorToolBar.alpha = 0.2;
-	[UIView animateWithDuration:kImageToolAnimationDuration
-					 animations:^{
-						 _colorToolBar.alpha = 1;
-					 }
-	 ];
+    if (!self.colorToolBar) {
+        self.colorToolBar = [[PSColorToolBar alloc] initWithType:PSColorToolBarTypeColor];
+        self.colorToolBar.delegate = self;
+        [self.editor.view addSubview:self.colorToolBar];
+        [self.colorToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.bottom.equalTo(self.editor.bottomToolBar.mas_top);
+            make.left.right.equalTo(self.editor.view);
+            make.height.equalTo(@(PSDrawColorToolBarHeight));
+        }];
+    }
+    [self.colorToolBar setToolBarShow:YES animation:YES];
 }
 
 - (void)cleanup {
 	
-	[_drawingView removeFromSuperview];
-	[_colorToolBar removeFromSuperview];
+    [self.colorToolBar setToolBarShow:NO animation:NO];
+    _drawingView.userInteractionEnabled = NO;
 	self.editor.imageView.userInteractionEnabled = NO;
 	self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 1;
+    self.panGesture.enabled = NO;
 }
 
 - (void)executeWithCompletionBlock:(void (^)(UIImage *, NSError *, NSDictionary *))completionBlock {
@@ -93,7 +109,12 @@
 	});
 }
 
-- (UIImage*)buildImageWithBackgroundImage:(UIImage*)backgroundImage
+- (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation {
+    
+    [self.colorToolBar setToolBarShow:!hidden animation:animation];
+}
+
+- (UIImage *)buildImageWithBackgroundImage:(UIImage*)backgroundImage
 						  foregroundImage:(UIImage*)foregroundImage {
 	
 	UIGraphicsBeginImageContextWithOptions(_originalImageSize, NO, backgroundImage.scale);
@@ -115,7 +136,7 @@
 
 - (void)refreshCanUndoButtonState {
     
-    _colorToolBar.canUndo = _drawPaths.count;
+    self.colorToolBar.canUndo = _drawPaths.count;
 }
 
 #pragma mark - PSColorToolBarDelegate
@@ -141,7 +162,6 @@
 	CGPoint currentDraggingPosition = [sender locationInView:_drawingView];
 	
 	if(sender.state == UIGestureRecognizerStateBegan){
-		_prevDraggingPosition = currentDraggingPosition;
         // 初始化一个UIBezierPath对象, 把起始点存储到UIBezierPath对象中, 用来存储所有的轨迹点
         PSDrawPath *path = [PSDrawPath pathToPoint:currentDraggingPosition pathWidth:MAX(1, self.drawLineWidth)];
         path.pathColor         = self.drawLineColor;

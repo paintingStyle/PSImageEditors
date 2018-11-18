@@ -62,4 +62,9 @@
     return 5;
 }
 
+- (UIFont *)imageEditorTextFont {
+    
+    return [UIFont systemFontOfSize:24.f weight:UIFontWeightRegular];
+}
+
 @end

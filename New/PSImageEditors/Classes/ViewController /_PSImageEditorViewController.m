@@ -9,21 +9,17 @@
 #import "PSDrawTool.h"
 #import "PSMosaicTool.h"
 #import "PSTexTool.h"
+#import "PSTexItem.h"
 #import "PSClippingTool.h"
 
-static inline NSDictionary *PSImageToolMappings (void) {
-	
-	return @{
-			@(PSImageEditorModeDraw):@"PSDrawTool",
-			@(PSImageEditorModeText):@"PSTexTool",
-			@(PSImageEditorModeMosaic):@"PSMosaicTool",
-			@(PSImageEditorModeClipping):@"PSClippingTool",
-			};
-}
+#import <TOCropViewController.h>
 
 
 @interface _PSImageEditorViewController ()
-<UIScrollViewDelegate,PSTopToolBarDelegate,PSBottomToolBarDelegate> {
+<UIScrollViewDelegate,
+PSTopToolBarDelegate,
+PSBottomToolBarDelegate,
+TOCropViewControllerDelegate> {
     BOOL _originalNavBarHidden;
     UIImage *_originalImage;
 }
@@ -36,9 +32,8 @@ static inline NSDictionary *PSImageToolMappings (void) {
 @property (nonatomic, strong) PSTexTool *texTool;
 @property (nonatomic, strong) PSClippingTool *clippingTool;
 
-@property (nonatomic, strong) NSMutableDictionary *option;
 @property (nonatomic, strong, readwrite) PSTopToolBar *topToolBar;
-@property (nonatomic, strong, readwrite) PSBootomToolBar *bootomToolBar;
+@property (nonatomic, strong, readwrite) PSBottomToolBar *bootomToolBar;
 
 @end
 
@@ -77,9 +72,20 @@ static inline NSDictionary *PSImageToolMappings (void) {
     [self.navigationController setNavigationBarHidden:_originalNavBarHidden animated:NO];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    
+    [super viewDidAppear:animated];
+    [self.topToolBar setToolBarShow:YES animation:YES];
+    [self.bottomToolBar setToolBarShow:YES animation:YES];
+}
+
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     [self refreshImageView];
+    // 绘图画布的加载顺序：text >draw > mosaic，马赛克显示在页面最底层
+    [self.mosaicTool initialize];
+    [self.drawTool initialize];
+    [self.texTool initialize];
 }
 
 - (BOOL)prefersStatusBarHidden {
@@ -103,24 +109,90 @@ static inline NSDictionary *PSImageToolMappings (void) {
 
 #pragma mark - Method
 
-- (void)setupToolWithEditorMode:(PSImageEditorMode)mode {
-	
+- (void)buildClipImageCallback:(void(^)(UIImage *clipedImage))clipedCallback {
     
+    UIImageView *imageView =  self.imageView;
+    UIImageView *drawingView =  self.drawTool->_drawingView;
+    UIImage *mosaicImage = [self.mosaicTool mosaicImage];
     
-	NSString *className = PSImageToolMappings()[@(mode)];
-	if (!className) { return; }
-	Class toolClass = NSClassFromString(className);
-	if(toolClass){
-		id instance = [toolClass alloc];
-		if (instance && [instance isKindOfClass:[PSImageToolBase class]]){
-			instance = [instance initWithImageEditor:self withOption:self.option];
-			if (![self.currentTool isKindOfClass:toolClass]) {
-				self.currentTool = instance;
-			}
-		}
-	}
-	
-	
+    UIGraphicsBeginImageContextWithOptions(imageView.image.size, NO, imageView.image.scale);
+    // 画笔
+    [imageView.image drawAtPoint:CGPointZero];
+    [mosaicImage drawAtPoint:CGPointZero];
+    [drawingView.image drawInRect:CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height)];
+    // text
+    for (UIView *view in self.view.subviews) {
+        if (![view isKindOfClass:[PSTexItem class]]) { continue; }
+        
+        PSTexItem *texItem = (PSTexItem *)view;
+        [PSTexItem setInactiveTextView:texItem];
+        
+        CGFloat rotation = [[texItem.layer valueForKeyPath:@"transform.rotation.z"] doubleValue];
+        CGFloat selfRw = imageView.bounds.size.width / imageView.image.size.width;
+        CGFloat selfRh = imageView.bounds.size.height / imageView.image.size.height;
+        
+        CGRect texItemRect = [texItem.superview convertRect:texItem.frame toView:self.imageView.superview];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIImage *textImg = [self screenshot:texItem];
+            textImg = [textImg ps_imageRotatedByRadians:rotation];
+            CGFloat sw = textImg.size.width / selfRw;
+            CGFloat sh = textImg.size.height / selfRh;
+            [textImg drawInRect:CGRectMake(texItemRect.origin.x/selfRw, texItemRect.origin.y/selfRh, sw, sh)];
+        });
+    }
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIImage *tmp = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        UIImage *image = [UIImage imageWithCGImage:tmp.CGImage scale:[UIScreen mainScreen].scale orientation:UIImageOrientationUp];
+        clipedCallback(image);
+    });
+}
+
+- (void)clippingWithImage:(UIImage *)image {
+    
+    TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:
+                                            TOCropViewCroppingStyleDefault image:image];
+    cropController.aspectRatioPickerButtonHidden = YES;
+    cropController.delegate = self;
+    @weakify(self);
+    CGRect viewFrame = [self.view convertRect:self.imageView.frame
+                                       toView:self.navigationController.view];
+    [cropController presentAnimatedFromParentViewController:self
+                                                  fromImage:image
+                                                   fromView:nil
+                                                  fromFrame:viewFrame
+                                                      angle:0
+                                               toImageFrame:CGRectZero
+                                                      setup:^{
+                                                          @strongify(self);
+                                                          //[self.colorToolBar setToolBarShow:NO animation:NO];
+                                                         // self.currentMode = PSEditorModeClipping;
+                                                          self.currentTool = nil;
+                                                      }
+                                                 completion:nil];
+}
+
+- (UIImage *)screenshot:(UIView *)view {
+    
+    CGSize targetSize = CGSizeZero;
+    
+    CGFloat transformScaleX = [[view.layer valueForKeyPath:@"transform.scale.x"] doubleValue];
+    CGFloat transformScaleY = [[view.layer valueForKeyPath:@"transform.scale.y"] doubleValue];
+    CGSize size = view.bounds.size;
+    targetSize = CGSizeMake(size.width * transformScaleX, size.height *  transformScaleY);
+    
+    UIGraphicsBeginImageContextWithOptions(targetSize, NO, [UIScreen mainScreen].scale);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSaveGState(ctx);
+    [view drawViewHierarchyInRect:CGRectMake(0, 0, targetSize.width, targetSize.height) afterScreenUpdates:NO];
+    CGContextRestoreGState(ctx);
+    
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return image;
 }
 
 - (void)resetImageViewFrame {
@@ -173,28 +245,93 @@ static inline NSDictionary *PSImageToolMappings (void) {
     return option;
 }
 
-#pragma mark - PSTopToolBarDelegate
-
-- (void)topToolBarBackItemDidClick {
-	
-	if (self.presentingViewController
-		&& self.navigationController.viewControllers.count == 1) {
-		[self dismissViewControllerAnimated:YES completion:nil];
-	} else {
-		[self.navigationController popViewControllerAnimated:YES];
-	}
+- (NSDictionary *)textToolOption {
+    
+    NSMutableDictionary *option = [NSMutableDictionary dictionary];
+    if (self.dataSource && [self.dataSource respondsToSelector:@selector(imageEditorDefaultColor)]) {
+        UIColor *defaultColor = [self.dataSource imageEditorDefaultColor];
+        [option setObject:defaultColor ?:[UIColor redColor] forKey:kImageToolTextColorKey];
+    }
+    if (self.dataSource && [self.dataSource respondsToSelector:
+                            @selector(imageEditorTextFont)]) {
+        UIFont *textFont = [self.dataSource imageEditorTextFont];
+        [option setObject:(textFont ? :[UIFont systemFontOfSize:24.0f]) forKey:kImageToolTextFontKey];
+    }
+    
+    return option;
 }
 
-- (void)topToolBarDoneItemDidClick {
-	
-	[self.currentTool executeWithCompletionBlock:^(UIImage *image, NSError *error, NSDictionary *userInfo) {
-		UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
-	}];
+- (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation {
+    
+    [self.topToolBar setToolBarShow:!hidden animation:animation];
+    [self.bottomToolBar setToolBarShow:!hidden animation:animation];
+    [self.drawTool hiddenToolBar:hidden animation:animation];
+    [self.texTool hiddenToolBar:hidden animation:animation];
+}
+
+#pragma mark - TOCropViewControllerDelegate
+
+
+- (void)cropViewController:(TOCropViewController *)cropViewController
+            didCropToImage:(UIImage *)image
+                  withRect:(CGRect)cropRect
+                     angle:(NSInteger)angle {
+    
+    UIImage *rectImage = [self.imageView.image ps_imageAtRect:cropRect];
+    self.imageView.image = rectImage;
+    [self refreshImageView];
+    [self.drawTool resetSize];
+    [self.mosaicTool resetSize];
+    
+    if (cropViewController.croppingStyle != TOCropViewCroppingStyleCircular) {
+        [cropViewController dismissAnimatedFromParentViewController:self
+                                                   withCroppedImage:image
+                                                             toView:self.imageView
+                                                            toFrame:CGRectZero
+                                                              setup:nil
+                                                         completion:nil];
+    }else {
+        [cropViewController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+    }
+}
+
+#pragma mark - PSTopToolBarDelegate
+
+- (void)topToolBar:(PSTopToolBar *)toolBar event:(PSTopToolBarEvent)event {
+    
+    switch (event) {
+        case PSTopToolBarEventCancel: {
+            if (toolBar.type == PSTopToolBarTypeCancelAndDoneText) {
+                if (self.presentingViewController
+                    && self.navigationController.viewControllers.count == 1) {
+                    [self dismissViewControllerAnimated:YES completion:nil];
+                } else {
+                    [self.navigationController popViewControllerAnimated:YES];
+                }
+            }else {
+                // text
+               
+            }
+        }
+        break;
+        case PSTopToolBarEventDone: {
+            if (toolBar.type == PSTopToolBarTypeCancelAndDoneText) {
+                [self buildClipImageCallback:^(UIImage *clipedImage) {
+                    UIImageWriteToSavedPhotosAlbum(clipedImage, nil, nil, nil);
+                }];
+            }else {
+                // text
+            }
+        }
+        break;
+        default:
+            break;
+    }
 }
 
 #pragma mark - PSBottomToolBarDelegate
 
-- (void)bottomToolBar:(PSBootomToolBar *)toolBar
+- (void)bottomToolBar:(PSBottomToolBar *)toolBar
  didClickAtEditorMode:(PSImageEditorMode)mode {
 	
 	//if (!toolBar.isEditor) { [self.currentTool cleanup]; }
@@ -210,7 +347,14 @@ static inline NSDictionary *PSImageToolMappings (void) {
             self.currentTool = self.mosaicTool;
 			break;
 		case PSImageEditorModeClipping:
-            self.currentTool = self.clippingTool;
+            //self.currentTool = self.clippingTool;
+        {
+            
+            [self buildClipImageCallback:^(UIImage *clipedImage) {
+               [self clippingWithImage:clipedImage];
+                //UIImageWriteToSavedPhotosAlbum(clipedImage, nil, nil, nil);
+            }];
+        }
 			break;
 		default:
 			break;
@@ -246,22 +390,27 @@ static inline NSDictionary *PSImageToolMappings (void) {
 	[self.scrollView addSubview:self.contentView];
 	[self.contentView addSubview:self.imageView];
 	[self.view addSubview:self.topToolBar];
-	[self.view addSubview:self.bootomToolBar];
+	[self.view addSubview:self.bottomToolBar];
 	
 	[self.topToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
 		make.top.left.right.equalTo(self.view);
 		make.height.equalTo(@(PSTopToolBarHeight));
 	}];
-	[self.bootomToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
+	[self.bottomToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
 		make.left.bottom.right.equalTo(self.view);
 		make.height.equalTo(@(PSBottomToolBarHeight));
 	}];
     [self.scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
 		make.edges.equalTo(self.view);
     }];
+    
+    [self.topToolBar setToolBarShow:NO animation:NO];
+    [self.bottomToolBar setToolBarShow:NO animation:NO];
+    
+ 
 	
 //	self.topToolBar.backgroundColor = [UIColor yellowColor];
-//	self.bootomToolBar.backgroundColor = [UIColor greenColor];
+//	self.bottomToolBar.backgroundColor = [UIColor greenColor];
 	
 	//DEBUG_VIEW(self.view);
 }
@@ -300,7 +449,13 @@ static inline NSDictionary *PSImageToolMappings (void) {
     
     return LAZY_LOAD(_texTool, ({
         
-        _texTool = [[PSTexTool alloc] initWithImageEditor:self withOption:nil];
+        _texTool = [[PSTexTool alloc] initWithImageEditor:self withOption:[self textToolOption]];
+        @weakify(self);
+        _texTool.dissmissCallback = ^(NSString *currentText) {
+            @strongify(self);
+            self.currentTool = nil;
+            [self.bottomToolBar reset];
+        };
         _texTool;
     }));
 }
@@ -314,11 +469,11 @@ static inline NSDictionary *PSImageToolMappings (void) {
     }));
 }
 
-- (PSBootomToolBar *)bootomToolBar {
+- (PSBottomToolBar *)bottomToolBar {
 	
 	return LAZY_LOAD(_bootomToolBar, ({
 		
-		_bootomToolBar = [[PSBootomToolBar alloc] init];
+		_bootomToolBar = [[PSBottomToolBar alloc] initWithType:PSBottomToolTypeEditor];
 		_bootomToolBar.delegate = self;
 		_bootomToolBar;
 	}));
@@ -328,7 +483,7 @@ static inline NSDictionary *PSImageToolMappings (void) {
     
     return LAZY_LOAD(_topToolBar, ({
         
-        _topToolBar = [[PSTopToolBar alloc] init];
+        _topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolBarTypeCancelAndDoneText];
 		_topToolBar.delegate = self;
         _topToolBar;
     }));
@@ -370,15 +525,6 @@ static inline NSDictionary *PSImageToolMappings (void) {
             UIScrollViewContentInsetAdjustmentNever;
         }
         _scrollView;
-    }));
-}
-
-- (NSMutableDictionary *)option  {
-    
-    return LAZY_LOAD(_option, ({
-        
-        _option = [NSMutableDictionary dictionary];
-        _option;
     }));
 }
 

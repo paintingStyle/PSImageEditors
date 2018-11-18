@@ -7,7 +7,7 @@
 
 #import "PSImageEditor.h"
 #import "PSTopToolBar.h"
-#import "PSBootomToolBar.h"
+#import "PSBottomToolBar.h"
 
 @interface _PSImageEditorViewController : PSImageEditor
 
@@ -18,6 +18,8 @@
 
 /// 用于布局参照
 @property (nonatomic, strong, readonly) PSTopToolBar *topToolBar;
-@property (nonatomic, strong, readonly) PSBootomToolBar *bootomToolBar;
+@property (nonatomic, strong, readonly) PSBottomToolBar *bottomToolBar;
+
+- (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation;
 
 @end

@@ -9,4 +9,11 @@
 
 @implementation PSClippingTool
 
+#pragma mark - Subclasses Override
+
+- (void)initialize {
+    
+    
+}
+
 @end

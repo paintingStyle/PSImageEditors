@@ -20,56 +20,95 @@
 
 - (void)buttonDidClickSender:(UIButton *)btn {
 	
-	SEL sel = (btn == self.backButton ?
-			   @selector(topToolBarBackItemDidClick):
-			   @selector(topToolBarDoneItemDidClick));
-	if (self.delegate && [self.delegate respondsToSelector:sel]) {
-		[self.delegate performSelector:sel];
-	}
+    
+    PSTopToolBarEvent event = (btn == self.backButton ? PSTopToolBarEventCancel:PSTopToolBarEventDone);
+    if (self.delegate && [self.delegate respondsToSelector:@selector(topToolBar:event:)]) {
+        [self.delegate topToolBar:self event:event];
+    }
 }
 
-- (void)setTabBarShow:(BOOL)show animation:(BOOL)animation {
-	
-	[UIView animateWithDuration:(animation ? 0.15:0) animations:^{
-		if (show) {
-			self.transform = CGAffineTransformIdentity;
-		}else{
-			self.transform = CGAffineTransformMakeTranslation(0, -PS_NAV_BAR_H);
-		}
-	} completion:^(BOOL finished) {
-		//self.show = show;
-	}];
+- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation {
+    
+    [UIView animateWithDuration:(animation ? kEditorToolBarAnimationDuration:0)
+                     animations:^{
+        if (show) {
+            self.transform = CGAffineTransformIdentity;
+        }else{
+            self.transform = CGAffineTransformMakeTranslation(0, -PSTopToolBarHeight);
+        }
+    }];
 }
 
-- (instancetype)init {
+- (instancetype)initWithType:(PSTopToolBarType)type {
+    
+    if (self = [super init]) {
+        _type = type;
+        switch (type) {
+            case PSTopToolBarTypeCancelAndDoneText:
+                [self configCancelAndDoneTextUI];
+                break;
+            case PSTopToolBarTypeCancelAndDoneIcon:
+                [self configCancelAndDoneIconUI];
+                break;
+            default:
+                break;
+        }
+    }
+    return self;
+}
+
+- (void)configCancelAndDoneTextUI {
 	
-	if (self = [super init]) {
-		
-		[self addSubview:self.maskImageView];
-		[self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
-			make.edges.equalTo(self);
-		}];
-		
-		[self.backButton setTitle:@"取消" forState:UIControlStateNormal];
-		[self.backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-		[self addSubview:self.backButton];
-		
-		[self.doneButton setTitle:@"完成" forState:UIControlStateNormal];
-		[self.doneButton setTitleColor:PSColorFromRGB(0x4393f9) forState:UIControlStateNormal];
-		[self addSubview:self.doneButton];
-		
-		[self.backButton mas_makeConstraints:^(MASConstraintMaker *make) {
-			make.size.equalTo(@44);
-			make.left.equalTo(@18);
-			make.top.equalTo(@(PSTopToolBarHeight *0.4));
-		}];
-		[self.doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
-			make.size.equalTo(@44);
-			make.right.equalTo(@(-18));
-			make.centerY.equalTo(self.backButton);
-		}];
-	}
-	return self;
+    [self addSubview:self.maskImageView];
+    [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self);
+    }];
+    
+    [self.backButton setTitle:@"取消" forState:UIControlStateNormal];
+    [self.backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [self addSubview:self.backButton];
+    
+    [self.doneButton setTitle:@"完成" forState:UIControlStateNormal];
+    [self.doneButton setTitleColor:PSColorFromRGB(0x4393f9) forState:UIControlStateNormal];
+    [self addSubview:self.doneButton];
+    
+    [self.backButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.equalTo(@44);
+        make.left.equalTo(@18);
+        make.top.equalTo(@(PSTopToolBarHeight *0.4));
+    }];
+    [self.doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.size.equalTo(@44);
+        make.right.equalTo(@(-18));
+        make.centerY.equalTo(self.backButton);
+    }];
+}
+
+- (void)configCancelAndDoneIconUI {
+    
+    
+    [self.backButton setImage:[UIImage ps_imageNamed:@"btn_cancel"]
+                     forState:UIControlStateNormal];
+    [self addSubview:self.backButton];
+    
+    [self.doneButton setImage:[UIImage ps_imageNamed:@"btn_done"]
+                      forState:UIControlStateNormal];
+    [self addSubview:self.doneButton];
+    
+    
+    [self.backButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        
+        make.size.equalTo(@44);
+        make.left.equalTo(@15);
+        make.centerY.equalTo(self);
+    }];
+    
+    [self.doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        
+        make.size.equalTo(@44);
+        make.right.equalTo(@(-15));
+        make.centerY.equalTo(self.backButton);
+    }];
 }
 
 #pragma mark - Getter/Setter

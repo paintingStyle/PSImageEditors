@@ -6,7 +6,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "PSExpandClickAreaButton.h"
 
 @interface PSColorFullButton : UIButton
 

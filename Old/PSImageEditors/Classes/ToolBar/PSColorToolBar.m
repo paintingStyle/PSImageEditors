@@ -55,7 +55,7 @@
 
 - (void)configTextUI {
     
-    _changeBgColorButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
+    _changeBgColorButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_changeBgColorButton setImage:[UIImage ps_imageNamed:@"btn_changeTextBgColor_normal"]
                        forState:UIControlStateNormal];
     [_changeBgColorButton setImage:[UIImage ps_imageNamed:@"btn_changeTextBgColor_selected"]
@@ -118,7 +118,7 @@
     [_colorFullButtonViews addSubview:self.lightBlueButton];
     [_colorFullButtonViews addSubview:self.blueButton];
     
-    _undoButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
+    _undoButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_normal"]
                        forState:UIControlStateNormal];
     [_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_disabled"]

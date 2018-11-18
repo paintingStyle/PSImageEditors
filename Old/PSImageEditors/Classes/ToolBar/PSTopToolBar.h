@@ -22,7 +22,6 @@ typedef NS_ENUM(NSUInteger, PSTopToolEvent) {
 	PSTopToolEventMore,
 	PSTopToolEventCancel,
 	PSTopToolEventDone,
-	
 };
 
 @protocol PSTopToolBarDelegate<NSObject>
