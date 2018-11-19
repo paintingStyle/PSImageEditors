@@ -1,8 +1,7 @@
 Pod::Spec.new do |s|
-pod repo push PSImageEditors.podspec --allow-warnings --verbose
 
     s.name         = "PSImageEditors"
-    s.version      = "0.1.2"
+    s.version      = "0.1.3"
     s.summary      = "一个简而至美的图片编辑器"
 
     s.homepage     = "https://github.com/paintingStyle/PSImageEditors"
