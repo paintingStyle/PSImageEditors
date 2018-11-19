@@ -38,7 +38,6 @@
     
     if (!_drawingView) {
         _drawingView = [[UIImageView alloc] initWithFrame:self.editor.imageView.bounds];
-        _drawingView.clipsToBounds = YES;
         [self.editor.imageView addSubview:_drawingView];
     }
 }

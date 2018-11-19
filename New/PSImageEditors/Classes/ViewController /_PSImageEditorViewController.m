@@ -428,6 +428,7 @@ PSBottomToolBarDelegate> {
     return LAZY_LOAD(_imageView, ({
         
         _imageView = [[UIImageView alloc] initWithImage:_originalImage];
+		_imageView.clipsToBounds = YES;
         _imageView;
     }));
 }

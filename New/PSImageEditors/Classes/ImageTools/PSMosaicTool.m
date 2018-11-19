@@ -254,9 +254,9 @@ static const CGFloat kDrawLineWidth = 30.0f;
 - (void)layoutSubviews {
 	
 	[super layoutSubviews];
-	//self.topImageView.frame = self.bounds;
-//	self.mosaicImageLayer.frame  = self.bounds;
-//	self.shapeLayer.frame = self.bounds;
+	self.topImageView.frame = self.bounds;
+	self.mosaicImageLayer.frame  = self.bounds;
+	self.shapeLayer.frame = self.bounds;
 }
 
 - (void)setOriginalImage:(UIImage *)originalImage{
