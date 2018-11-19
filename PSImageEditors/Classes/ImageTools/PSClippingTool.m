@@ -6,7 +6,7 @@
 //
 
 #import "PSClippingTool.h"
-#import <TOCropViewController.h>
+#import "TOCropViewController.h"
 
 @interface PSClippingTool()<TOCropViewControllerDelegate>
 

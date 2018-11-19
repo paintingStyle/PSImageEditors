@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
     s.name         = "PSImageEditors"
-    s.version      = "0.1.0"
+    s.version      = "0.1.1"
     s.summary      = "一个简而至美的图片编辑器"
 
     s.homepage     = "https://github.com/paintingStyle/PSImageEditors"
@@ -14,9 +14,8 @@ Pod::Spec.new do |s|
 
     prefix_header_contents = <<-EOS
     #import <Masonry/Masonry.h>
-    #import "PSImageEditorsDefine.h"
-    #import "UIImage+PSImageEditors.h"
-	#import "UIColor+PSImageEditors.h"
+    #import "PSImageEditorDefine.h"
+	#import "UIImage+PSImageEditors.h"
     EOS
     s.prefix_header_contents = prefix_header_contents
 
@@ -26,9 +25,7 @@ Pod::Spec.new do |s|
 
     s.framework    = "UIKit"
     s.dependency   'Masonry', '~> 1.1.0'
-    s.dependency   "SDWebImage", '~> 4.4.2'
-    s.dependency   "SDWebImage/GIF"
-	s.dependency   "TOCropViewController"
+    s.dependency   "TOCropViewController"
     s.requires_arc = true
 
 end
