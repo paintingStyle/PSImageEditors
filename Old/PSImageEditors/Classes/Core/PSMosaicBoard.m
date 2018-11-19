@@ -94,6 +94,8 @@ static const CGFloat kDrawLineWidth = 30.0f;
 		[_cacheArray removeObjectsInRange:NSMakeRange(_currentIndex+1 , _cacheArray.count - 1 - _currentIndex)];
 	}
 	[_cacheArray addObject:image];
+    
+    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
 	_currentIndex++;
 }
 

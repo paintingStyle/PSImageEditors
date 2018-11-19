@@ -25,7 +25,7 @@ Pod::Spec.new do |s|
 
     s.framework    = "UIKit"
     s.dependency   'Masonry', '~> 1.1.0'
-#    s.dependency   "TOCropViewController"
+    s.dependency   "TOCropViewController"
     s.requires_arc = true
 
 end

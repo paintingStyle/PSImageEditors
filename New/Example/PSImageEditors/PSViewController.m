@@ -29,15 +29,15 @@
 
 - (IBAction)imageBrowsingDidClicked {
 	
-	UIImage *image = [UIImage imageNamed:@"localImage_01@2x.jpg"];
-	PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
-                                                             delegate:self
-                                                           dataSource:self];
-	[self.navigationController pushViewController:imageEditor animated:YES];
 }
 
 - (IBAction)imageEditorsDidClicked {
 	
+	UIImage *image = [UIImage imageNamed:@"localImage_01@2x.jpg"];
+	PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
+															 delegate:self
+														   dataSource:self];
+	[self.navigationController pushViewController:imageEditor animated:YES];
 }
 
 #pragma mark - PSImageEditorDelegate
@@ -58,8 +58,13 @@
 }
 
 - (CGFloat)imageEditorDrawPathWidth {
+	
+    return 5;
+}
+
+- (UIFont *)imageEditorTextFont {
     
-    return 10;
+	return [UIFont systemFontOfSize:24.f weight:UIFontWeightRegular];
 }
 
 @end

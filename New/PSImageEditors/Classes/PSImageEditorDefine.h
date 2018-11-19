@@ -8,19 +8,11 @@
 #ifndef PSImageEditorDefine_h
 #define PSImageEditorDefine_h
 
-typedef NS_ENUM(NSUInteger, PSImageEditorMode) {
-	
-	PSImageEditorModeNone,
-	PSImageEditorModeDraw,
-	PSImageEditorModeText,
-	PSImageEditorModeMosaic,
-	PSImageEditorModeClipping
-};
-
 #define PSTopToolBarHeight PS_NAV_BAR_H
 #define PSBottomToolBarHeight PS_TAB_BAR_H +6
 #define PSBottomToolDeleteBarHeight PS_TAB_BAR_H +16
-#define PSColorToolBarHeight 55
+#define PSDrawColorToolBarHeight 55
+#define PSTextColorToolBarHeight 48
 
 #define PS_SCREEN_W [UIScreen mainScreen].bounds.size.width
 #define PS_SCREEN_H [UIScreen mainScreen].bounds.size.height

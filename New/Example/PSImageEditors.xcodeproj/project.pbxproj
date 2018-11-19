@@ -312,10 +312,12 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-PSImageEditors/Pods-PSImageEditors-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/PSImageEditors/PSImageEditors.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/TOCropViewController/TOCropViewControllerBundle.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/PSImageEditors.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/TOCropViewControllerBundle.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

@@ -6,7 +6,6 @@
 //
 
 #import "PSMosaicToolBar.h"
-#import "PSExpandClickAreaButton.h"
 
 @interface PSMosaicToolBar ()
 
@@ -31,7 +30,7 @@
 	
 	if (self = [super init]) {
 		
-		_rectangularMosaicStyleButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
+		_rectangularMosaicStyleButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[_rectangularMosaicStyleButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_rectangular_normal"]
 									   forState:UIControlStateNormal];
 		[_rectangularMosaicStyleButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_rectangular_selected"]
@@ -40,7 +39,7 @@
 								forControlEvents:UIControlEventTouchUpInside];
 		[self addSubview:_rectangularMosaicStyleButton];
 		
-		_grindArenaceousMosaicStyleButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
+		_grindArenaceousMosaicStyleButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[_grindArenaceousMosaicStyleButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_grindArenaceous_normal"]
 									   forState:UIControlStateNormal];
 		[_grindArenaceousMosaicStyleButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_grindArenaceous_selected"]
@@ -49,7 +48,7 @@
 									forControlEvents:UIControlEventTouchUpInside];
 		[self addSubview:_grindArenaceousMosaicStyleButton];
 		
-		_undoButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
+		_undoButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_normal"]
 						   forState:UIControlStateNormal];
 		[_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_disabled"]

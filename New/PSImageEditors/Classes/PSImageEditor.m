@@ -25,8 +25,4 @@
     return [[_PSImageEditorViewController alloc] initWithImage:image delegate:delegate dataSource:dataSource];
 }
 
-- (void)refreshToolSettings {
-    
-}
-
 @end

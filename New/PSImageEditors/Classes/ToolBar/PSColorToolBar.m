@@ -36,19 +36,19 @@
 	self.undoButton.enabled = canUndo;
 }
 
-- (instancetype)initWithEditorMode:(PSImageEditorMode)model {
+- (instancetype)initWithType:(PSColorToolBarType)type {
 	
-	if (self = [super init]) {
-		switch (model) {
-			case PSImageEditorModeDraw:
-				[self configDrawUI];
-				break;
-			case PSImageEditorModeText:
-				[self configTextUI];
-				break;
-		}
-	}
-	return self;
+    if (self = [super init]) {
+        switch (type) {
+            case PSColorToolBarTypeColor:
+                [self configDrawUI];
+                break;
+            case PSColorToolBarTypeText:
+                [self configTextUI];
+                break;
+        }
+    }
+    return self;
 }
 
 - (void)configTextUI {
@@ -201,7 +201,7 @@
 	
 	if (self.delegate && [self.delegate respondsToSelector:
 						  @selector(colorToolBar:event:)]) {
-		[self.delegate colorToolBar:self event:PSColorToolBarEventRevocation];
+		[self.delegate colorToolBar:self event:PSColorToolBarEventUndo];
 	}
 }
 

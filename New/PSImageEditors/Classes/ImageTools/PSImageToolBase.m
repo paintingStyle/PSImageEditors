@@ -19,9 +19,13 @@
 	return self;
 }
 
+- (void)initialize {}
+
 - (void)setup {}
 
 - (void)cleanup {}
+
+- (void)resetRect:(CGRect)rect {};
 
 - (void)executeWithCompletionBlock:(void(^)(UIImage *image, NSError *error, NSDictionary *userInfo))completionBlock {
 	completionBlock(self.editor.imageView.image, nil, nil);

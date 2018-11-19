@@ -15,6 +15,9 @@ static const CGFloat kImageToolBaseFadeoutDuration = 0.2;
 static NSString *kImageToolDrawLineWidthKey = @"drawLineWidth";
 static NSString *kImageToolDrawLineColorKey = @"drawLineColor";
 
+static NSString *kImageToolTextColorKey = @"textColor";
+static NSString *kImageToolTextFontKey = @"textFont";
+
 @interface PSImageToolBase : NSObject
 
 @property (nonatomic, weak) _PSImageEditorViewController *editor;
@@ -23,9 +26,13 @@ static NSString *kImageToolDrawLineColorKey = @"drawLineColor";
 - (instancetype)initWithImageEditor:(_PSImageEditorViewController *)editor
 						 withOption:(NSDictionary *)option;
 
+- (void)initialize;
 - (void)setup;
 - (void)cleanup;
+- (void)resetRect:(CGRect)rect;
 - (void)executeWithCompletionBlock:(void(^)(UIImage *image, NSError *error, NSDictionary *userInfo))completionBlock;
+
+- (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation;
 
 @end
 
