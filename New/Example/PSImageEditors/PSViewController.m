@@ -54,12 +54,12 @@
 
 - (UIColor *)imageEditorDefaultColor {
     
-    return [UIColor blueColor];
+    return [UIColor redColor];
 }
 
 - (CGFloat)imageEditorDrawPathWidth {
     
-    return 44;
+    return 10;
 }
 
 @end
