@@ -23,6 +23,7 @@ typedef NS_ENUM(NSInteger, PSImageEditorMode) {
 @property (nonatomic, weak) id<PSImageEditorDelegate> delegate;
 @property (nonatomic, weak) id<PSImageEditorDataSource> dataSource;
 @property (nonatomic, assign) PSImageEditorMode editorMode;
+@property (nonatomic, assign) BOOL produceChanges; // 是否使用过该工具,即图片产生了编辑操作
 
 - (instancetype)initWithImage:(UIImage*)image;
 - (instancetype)initWithImage:(UIImage*)image

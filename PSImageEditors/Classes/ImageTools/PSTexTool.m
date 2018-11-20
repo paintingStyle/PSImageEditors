@@ -73,7 +73,7 @@ static const NSInteger kTextMaxLimitNumber = 100;
         }
         self.textView.inputView.text = activeTexItem.text;
         self.textView.attrs = attrs;
-    }
+	}
     
     self.textView.dissmissBlock = ^(NSString *text, NSDictionary *attrs, BOOL use) {
         
@@ -161,6 +161,19 @@ static const NSInteger kTextMaxLimitNumber = 100;
         }
     }];
     return activeItem;
+}
+
+- (BOOL)produceChanges {
+	
+	__block BOOL containsTexItem = NO;
+	[self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+		if ([obj isKindOfClass:[PSTexItem class]]) {
+			containsTexItem = YES;
+			*stop = YES;
+		}
+	}];
+	
+	return containsTexItem;
 }
 
 #pragma mark - PSTexItemDelegate

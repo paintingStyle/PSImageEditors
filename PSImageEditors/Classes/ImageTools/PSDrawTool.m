@@ -87,6 +87,7 @@
             make.height.equalTo(@(PSDrawColorToolBarHeight));
         }];
     }
+	[self refreshCanUndoButtonState];
     [self.colorToolBar setToolBarShow:YES animation:YES];
 }
 
@@ -140,6 +141,7 @@
 - (void)refreshCanUndoButtonState {
     
     self.colorToolBar.canUndo = _drawPaths.count;
+	self.produceChanges = _drawPaths.count;
 }
 
 #pragma mark - PSColorToolBarDelegate

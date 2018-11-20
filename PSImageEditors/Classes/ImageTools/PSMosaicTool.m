@@ -67,12 +67,14 @@ static const CGFloat kDrawLineWidth = 30.0f;
 	
 	self.mosaicView.userInteractionEnabled = YES;
     self.mosaicToolBar.canUndo = [self canUndo];
+	self.produceChanges = [self canUndo];
     [self.mosaicToolBar setToolBarShow:YES animation:YES];
     
     @weakify(self);
     self.mosaicView.drawEndBlock = ^(BOOL canUndo) {
         @strongify(self);
         self.mosaicToolBar.canUndo = canUndo;
+		self.produceChanges = canUndo;
     };
 }
 
@@ -169,8 +171,6 @@ static const CGFloat kDrawLineWidth = 30.0f;
         [_cacheArray removeObjectsInRange:NSMakeRange(_currentIndex+1 , _cacheArray.count - 1 - _currentIndex)];
     }
     [_cacheArray addObject:image];
-    
-    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
     _currentIndex++;
 }
 

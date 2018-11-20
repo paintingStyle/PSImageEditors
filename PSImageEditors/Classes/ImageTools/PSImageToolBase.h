@@ -22,6 +22,7 @@ static NSString *kImageToolTextFontKey = @"textFont";
 
 @property (nonatomic, weak) _PSImageEditorViewController *editor;
 @property (nonatomic, strong) NSDictionary *option;
+@property (nonatomic, assign) BOOL produceChanges; // 是否使用过该工具,即图片产生了编辑操作
 
 - (instancetype)initWithImageEditor:(_PSImageEditorViewController *)editor
 						 withOption:(NSDictionary *)option;

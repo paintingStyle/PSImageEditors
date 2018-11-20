@@ -42,7 +42,7 @@ PSBottomToolBarDelegate> {
     if (self = [super init]) {
         _originalNavBarHidden = self.navigationController.navigationBar.hidden;
         _originalImage = [image decode];
-        self.delegate = self;
+        self.delegate = delegate;
         self.dataSource = dataSource;
     }
     return self;
@@ -175,7 +175,8 @@ PSBottomToolBarDelegate> {
 }
 
 - (void)refreshImageView {
-    
+	
+	if (!_originalImage) { return; }
     [self resetImageViewFrame];
     [self resetZoomScaleWithAnimate:NO];
 }
@@ -231,33 +232,34 @@ PSBottomToolBarDelegate> {
 	}
 }
 
+- (void)dismiss {
+	
+	if (self.presentingViewController
+		&& self.navigationController.viewControllers.count == 1) {
+		[self dismissViewControllerAnimated:YES completion:nil];
+	} else {
+		[self.navigationController popViewControllerAnimated:YES];
+	}
+}
+
 #pragma mark - PSTopToolBarDelegate
 
 - (void)topToolBar:(PSTopToolBar *)toolBar event:(PSTopToolBarEvent)event {
     
     switch (event) {
         case PSTopToolBarEventCancel: {
-            if (toolBar.type == PSTopToolBarTypeCancelAndDoneText) {
-                if (self.presentingViewController
-                    && self.navigationController.viewControllers.count == 1) {
-                    [self dismissViewControllerAnimated:YES completion:nil];
-                } else {
-                    [self.navigationController popViewControllerAnimated:YES];
-                }
-            }else {
-                // text
-               
-            }
+			[self dismiss];
+			if (self.delegate && [self.delegate respondsToSelector:@selector(imageEditorDidCancel)]) {
+				[self.delegate imageEditorDidCancel];
+			}
         }
         break;
         case PSTopToolBarEventDone: {
-            if (toolBar.type == PSTopToolBarTypeCancelAndDoneText) {
-                [self buildClipImageCallback:^(UIImage *clipedImage) {
-                    UIImageWriteToSavedPhotosAlbum(clipedImage, nil, nil, nil);
-                }];
-            }else {
-                // text
-            }
+			[self buildClipImageCallback:^(UIImage *clipedImage) {
+				if (self.delegate && [self.delegate respondsToSelector:@selector(imageEditorDidFinishEdittingWithImage:)]) {
+					[self.delegate imageEditorDidFinishEdittingWithImage:clipedImage];
+				}
+			}];
         }
         break;
         default:
@@ -341,6 +343,14 @@ PSBottomToolBarDelegate> {
 }
 
 #pragma mark - Getter/Setter
+
+- (BOOL)produceChanges {
+	
+	return self.drawTool.produceChanges
+		   || self.texTool.produceChanges
+		   || self.mosaicTool.produceChanges
+		   || self.clippingTool.produceChanges;
+}
 
 - (void)setCurrentTool:(PSImageToolBase *)currentTool {
 	

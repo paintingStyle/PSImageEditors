@@ -43,11 +43,13 @@
 #pragma mark - PSImageEditorDelegate
 
 - (void)imageEditorDidFinishEdittingWithImage:(UIImage *)image {
-    
+	
+	NSLog(@"%s",__func__);
 }
 
 - (void)imageEditorDidCancel {
-    
+	
+	NSLog(@"%s",__func__);
 }
 
 #pragma mark - PSImageEditorDelegate

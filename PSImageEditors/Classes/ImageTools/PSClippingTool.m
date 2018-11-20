@@ -56,6 +56,7 @@
 					 angle:(NSInteger)angle {
 	
 	UIImage *rectImage = [self.editor.imageView.image ps_imageAtRect:cropRect];
+	self.produceChanges = YES;
 	if (self.clipedCompleteBlock) { self.clipedCompleteBlock(rectImage, cropRect); }
 	
 	if (cropViewController.croppingStyle != TOCropViewCroppingStyleCircular) {
