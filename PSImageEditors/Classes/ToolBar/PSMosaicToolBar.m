@@ -6,15 +6,16 @@
 //
 
 #import "PSMosaicToolBar.h"
+#import "PSExpandClickAreaButton.h"
 
 @interface PSMosaicToolBar ()
 
 /// 矩形马赛克
-@property (nonatomic, strong) UIButton *rectangularMosaicStyleButton;
+@property (nonatomic, strong) PSExpandClickAreaButton *rectangularMosaicStyleButton;
 /// 磨砂马赛克
-@property (nonatomic, strong) UIButton *grindArenaceousMosaicStyleButton;
+@property (nonatomic, strong) PSExpandClickAreaButton *grindArenaceousMosaicStyleButton;
 /// 撤销
-@property (nonatomic, strong) UIButton *undoButton;
+@property (nonatomic, strong) PSExpandClickAreaButton *undoButton;
 
 @property (nonatomic, strong) UIView *bottomLineView;
 
@@ -32,7 +33,7 @@
     
     if (self = [super init]) {
         
-        _rectangularMosaicStyleButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _rectangularMosaicStyleButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
         [_rectangularMosaicStyleButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_rectangular_normal"]
                                        forState:UIControlStateNormal];
         [_rectangularMosaicStyleButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_rectangular_selected"]
@@ -41,7 +42,7 @@
                                 forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_rectangularMosaicStyleButton];
         
-        _grindArenaceousMosaicStyleButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _grindArenaceousMosaicStyleButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
         [_grindArenaceousMosaicStyleButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_grindArenaceous_normal"]
                                            forState:UIControlStateNormal];
         [_grindArenaceousMosaicStyleButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_grindArenaceous_selected"]
@@ -50,7 +51,7 @@
                                     forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_grindArenaceousMosaicStyleButton];
         
-        _undoButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _undoButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
         [_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_normal"]
                      forState:UIControlStateNormal];
         [_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_disabled"]

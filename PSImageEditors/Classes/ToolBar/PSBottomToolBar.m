@@ -6,14 +6,15 @@
 //
 
 #import "PSBottomToolBar.h"
+#import "PSExpandClickAreaButton.h"
 
 @interface PSBottomToolBar ()
 
 @property (nonatomic, strong) UIImageView *maskImageView;
-@property (nonatomic, strong) UIButton *drawButton;
-@property (nonatomic, strong) UIButton *textButton;
-@property (nonatomic, strong) UIButton *mosaicButton;
-@property (nonatomic, strong) UIButton *clippingButton;
+@property (nonatomic, strong) PSExpandClickAreaButton *drawButton;
+@property (nonatomic, strong) PSExpandClickAreaButton *textButton;
+@property (nonatomic, strong) PSExpandClickAreaButton *mosaicButton;
+@property (nonatomic, strong) PSExpandClickAreaButton *clippingButton;
 
 @property (nonatomic, strong) UIView *deleteContainerView;
 @property (nonatomic, strong) UIButton *deleteButton;
@@ -168,11 +169,11 @@
     self.deleteDescButton.selected = (deleteState == PSBottomToolDeleteStateDid);
 }
 
-- (UIButton *)clippingButton {
+- (PSExpandClickAreaButton *)clippingButton {
     
     return LAZY_LOAD(_clippingButton, ({
         
-        _clippingButton = [[UIButton alloc] init];
+        _clippingButton = [[PSExpandClickAreaButton alloc] init];
         [_clippingButton setImage:[UIImage ps_imageNamed:@"btn_clipping_normal"]
                          forState:UIControlStateNormal];
         [_clippingButton addTarget:self action:@selector(buttonDidClickSender:) forControlEvents:UIControlEventTouchUpInside];
@@ -180,11 +181,11 @@
     }));
 }
 
-- (UIButton *)mosaicButton {
+- (PSExpandClickAreaButton *)mosaicButton {
     
     return LAZY_LOAD(_mosaicButton, ({
         
-        _mosaicButton = [[UIButton alloc] init];
+        _mosaicButton = [[PSExpandClickAreaButton alloc] init];
         [_mosaicButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_normal"]
                        forState:UIControlStateNormal];
         [_mosaicButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_selected"]
@@ -194,11 +195,11 @@
     }));
 }
 
-- (UIButton *)textButton {
+- (PSExpandClickAreaButton *)textButton {
     
     return LAZY_LOAD(_textButton, ({
         
-        _textButton = [[UIButton alloc] init];
+        _textButton = [[PSExpandClickAreaButton alloc] init];
         [_textButton setImage:[UIImage ps_imageNamed:@"btn_text_normal"]
                      forState:UIControlStateNormal];
         [_textButton setImage:[UIImage ps_imageNamed:@"btn_text_selected"]
@@ -208,11 +209,11 @@
     }));
 }
 
-- (UIButton *)drawButton {
+- (PSExpandClickAreaButton *)drawButton {
     
     return LAZY_LOAD(_drawButton, ({
         
-        _drawButton = [[UIButton alloc] init];
+        _drawButton = [[PSExpandClickAreaButton alloc] init];
         [_drawButton setImage:[UIImage ps_imageNamed:@"btn_brush_normal"]
                      forState:UIControlStateNormal];
         [_drawButton setImage:[UIImage ps_imageNamed:@"btn_brush_selected"]
