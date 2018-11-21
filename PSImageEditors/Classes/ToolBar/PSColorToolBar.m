@@ -137,7 +137,6 @@
 	_bottomLineView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
 	[self addSubview:_bottomLineView];
 	
-	
 	[_undoButton mas_makeConstraints:^(MASConstraintMaker *make) {
 		
 		make.right.equalTo(@(-15));

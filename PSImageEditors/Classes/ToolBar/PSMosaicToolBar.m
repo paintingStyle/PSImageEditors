@@ -16,6 +16,8 @@
 /// 撤销
 @property (nonatomic, strong) UIButton *undoButton;
 
+@property (nonatomic, strong) UIView *bottomLineView;
+
 @end
 
 @implementation PSMosaicToolBar
@@ -70,7 +72,19 @@
             make.top.equalTo(self);
             make.height.equalTo(@28);
         }];
-        
+		
+		_bottomLineView = [[UIView alloc] init];
+		_bottomLineView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
+		[self addSubview:_bottomLineView];
+		
+		[_bottomLineView mas_makeConstraints:^(MASConstraintMaker *make) {
+			
+			make.left.equalTo(@15);
+			make.right.equalTo(@(-15));
+			make.bottom.equalTo(self);
+			make.height.equalTo(@0.5);
+		}];
+		
         // 默认选中
         _rectangularMosaicStyleButton.selected = YES;
         [self buttonDidClick:_rectangularMosaicStyleButton];

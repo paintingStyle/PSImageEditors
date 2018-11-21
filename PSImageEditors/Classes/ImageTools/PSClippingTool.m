@@ -7,6 +7,7 @@
 
 #import "PSClippingTool.h"
 #import "TOCropViewController.h"
+#import "UIImage+CropRotate.h"
 
 @interface PSClippingTool()<TOCropViewControllerDelegate>
 
@@ -37,14 +38,20 @@
 	cropController.delegate = self;
 	CGRect viewFrame = [self.editor.view convertRect:self.editor.imageView.frame
 									   toView:self.editor.navigationController.view];
+	
+	@weakify(self);
+	self.presentCropViewController = YES;
 	[cropController presentAnimatedFromParentViewController:self.editor
 												  fromImage:image
-												   fromView:nil
+												   fromView:self.editor.imageView
 												  fromFrame:viewFrame
 													  angle:0
 											   toImageFrame:CGRectZero
 													  setup:nil
-												 completion:nil];
+												 completion:^{
+													 @strongify(self);
+													 self.presentCropViewController = NO;
+												 }];
 }
 
 #pragma mark - TOCropViewControllerDelegate
@@ -55,7 +62,7 @@
 				  withRect:(CGRect)cropRect
 					 angle:(NSInteger)angle {
 	
-	UIImage *rectImage = [self.editor.imageView.image ps_imageAtRect:cropRect];
+	UIImage *rectImage = [self.editor.imageView.image croppedImageWithFrame:cropRect angle:angle circularClip:NO];;//[self.editor.imageView.image ps_imageAtRect:cropRect];
 	self.produceChanges = YES;
 	if (self.clipedCompleteBlock) { self.clipedCompleteBlock(rectImage, cropRect); }
 	

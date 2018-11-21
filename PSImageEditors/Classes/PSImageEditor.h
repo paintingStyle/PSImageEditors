@@ -29,13 +29,14 @@ typedef NS_ENUM(NSInteger, PSImageEditorMode) {
 - (instancetype)initWithImage:(UIImage*)image
                      delegate:(id<PSImageEditorDelegate>)delegate
                    dataSource:(id<PSImageEditorDataSource>)dataSource;
+- (void)dismiss;
 
 @end
 
 @protocol PSImageEditorDelegate <NSObject>
 
 @optional
-- (void)imageEditorDidFinishEdittingWithImage:(UIImage *)image;
+- (void)imageEditor:(PSImageEditor *)editor didFinishEdittingWithImage:(UIImage *)image;
 - (void)imageEditorDidCancel;
 
 @end

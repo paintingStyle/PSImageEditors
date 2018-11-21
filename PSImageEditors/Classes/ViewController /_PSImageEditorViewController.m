@@ -17,6 +17,8 @@
 PSTopToolBarDelegate,
 PSBottomToolBarDelegate> {
     BOOL _originalNavBarHidden;
+	BOOL _originalStatusBarHidden;
+	BOOL _originalInteractivePopGestureRecognizer;
     UIImage *_originalImage;
 }
 
@@ -40,7 +42,11 @@ PSBottomToolBarDelegate> {
                    dataSource:(id<PSImageEditorDataSource>)dataSource {
     
     if (self = [super init]) {
-        _originalNavBarHidden = self.navigationController.navigationBar.hidden;
+		_originalNavBarHidden = self.navigationController.navigationBar.hidden;
+		_originalStatusBarHidden = [UIApplication sharedApplication].statusBarHidden;
+		if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]){
+			_originalInteractivePopGestureRecognizer = self.navigationController.interactivePopGestureRecognizer.enabled;
+		}
         _originalImage = [image decode];
         self.delegate = delegate;
         self.dataSource = dataSource;
@@ -59,13 +65,23 @@ PSBottomToolBarDelegate> {
 - (void)viewWillAppear:(BOOL)animated {
     
     [super viewWillAppear:animated];
+	[UIApplication sharedApplication].statusBarHidden = YES;
     [self.navigationController setNavigationBarHidden:YES animated:NO];
+	if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]){
+		self.navigationController.interactivePopGestureRecognizer.enabled = NO;
+	}
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     
     [super viewWillDisappear:animated];
-    [self.navigationController setNavigationBarHidden:_originalNavBarHidden animated:NO];
+	if (!self.clippingTool.presentCropViewController) {
+		[UIApplication sharedApplication].statusBarHidden = _originalStatusBarHidden;
+		[self.navigationController setNavigationBarHidden:_originalNavBarHidden animated:NO];
+		if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]){
+			self.navigationController.interactivePopGestureRecognizer.enabled = _originalInteractivePopGestureRecognizer;
+		}
+	}
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -106,7 +122,12 @@ PSBottomToolBarDelegate> {
 #pragma mark - Method
 
 - (void)buildClipImageCallback:(void(^)(UIImage *clipedImage))callback {
-    
+	
+	if (!self.produceChanges) { // 没有产生改变直接返回原图
+		if (callback) { callback(_originalImage); }
+		return;
+	}
+	
     UIImageView *imageView =  self.imageView;
     UIImageView *drawingView =  self.drawTool->_drawingView;
     UIImage *mosaicImage = [self.mosaicTool mosaicImage];
@@ -256,8 +277,8 @@ PSBottomToolBarDelegate> {
         break;
         case PSTopToolBarEventDone: {
 			[self buildClipImageCallback:^(UIImage *clipedImage) {
-				if (self.delegate && [self.delegate respondsToSelector:@selector(imageEditorDidFinishEdittingWithImage:)]) {
-					[self.delegate imageEditorDidFinishEdittingWithImage:clipedImage];
+				if (self.delegate && [self.delegate respondsToSelector:@selector(imageEditor:didFinishEdittingWithImage:)]) {
+					[self.delegate imageEditor:self didFinishEdittingWithImage:clipedImage];
 				}
 			}];
         }

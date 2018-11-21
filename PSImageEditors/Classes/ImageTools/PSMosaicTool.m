@@ -99,7 +99,7 @@ static const CGFloat kDrawLineWidth = 30.0f;
 
 - (void)changeRectangularMosaic {
 	
-	UIImage *image = [self mosaicImage] ? : self.editor.imageView.image;
+	UIImage *image = self.editor.imageView.image;//[self mosaicImage] ? : self.editor.imageView.image;
     self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:image level:kMosaiclevel];
 }
 
