@@ -20,6 +20,8 @@
 @property (nonatomic, strong, readonly) PSTopToolBar *topToolBar;
 @property (nonatomic, strong, readonly) PSBottomToolBar *bottomToolBar;
 
+@property (nonatomic, copy) void(^scrollViewDidZoomBlock) (CGFloat zoomScale);
+
 - (void)buildClipImageCallback:(void(^)(UIImage *clipedImage))callback;
 - (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation;
 

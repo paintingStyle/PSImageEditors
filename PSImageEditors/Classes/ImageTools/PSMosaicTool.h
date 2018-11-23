@@ -28,10 +28,12 @@
 
 @property (nonatomic,strong) PSMosaicCache *mosaicCache;
 
+@property (nonatomic, copy) void(^drawBeganBlock)(void);
 @property (nonatomic, copy) void(^drawEndBlock)(BOOL canUndo);
 
 - (void)undo;
 - (BOOL)canUndo;
+- (void)reset;
 
 @end
 

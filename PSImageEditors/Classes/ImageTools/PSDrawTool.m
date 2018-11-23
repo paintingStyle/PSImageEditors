@@ -37,26 +37,33 @@
 - (void)initialize {
     
     if (!_drawingView) {
+		_originalImageSize = self.editor.imageView.image.size;
         _drawingView = [[UIImageView alloc] initWithFrame:self.editor.imageView.bounds];
+		_drawingView.layer.shouldRasterize = YES;
+		_drawingView.layer.minificationFilter = kCAFilterTrilinear;
         [self.editor.imageView addSubview:_drawingView];
     }
 }
 
 - (void)resetRect:(CGRect)rect {
-    
+	
+	_drawingView.image = nil;
     _originalImageSize = self.editor.imageView.image.size;
     _drawingView.frame = self.editor.imageView.bounds;
-    [self drawLine];
+	[_drawPaths removeAllObjects];
+	[self refreshCanUndoButtonState];
 }
 
 - (void)setup {
 	
 	_originalImageSize = self.editor.imageView.image.size;
-	
     _drawingView.frame = self.editor.imageView.bounds;
+	
     _drawingView.userInteractionEnabled = YES;
-    _drawingView.layer.shouldRasterize = YES;
-    _drawingView.layer.minificationFilter = kCAFilterTrilinear;
+	self.editor.imageView.userInteractionEnabled = YES;
+	self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 2;
+	self.editor.scrollView.panGestureRecognizer.delaysTouchesBegan = NO;
+	self.editor.scrollView.pinchGestureRecognizer.delaysTouchesBegan = NO;
 	
 	if (!_drawLineColor) {
 		_drawLineColor = self.option[kImageToolDrawLineColorKey];
@@ -71,11 +78,6 @@
     if (!self.panGesture.isEnabled) {
         self.panGesture.enabled = YES;
     }
-	
-	self.editor.imageView.userInteractionEnabled = YES;
-	self.editor.scrollView.panGestureRecognizer.minimumNumberOfTouches = 2;
-	self.editor.scrollView.panGestureRecognizer.delaysTouchesBegan = NO;
-	self.editor.scrollView.pinchGestureRecognizer.delaysTouchesBegan = NO;
 	
     if (!self.colorToolBar) {
         self.colorToolBar = [[PSColorToolBar alloc] initWithType:PSColorToolBarTypeColor];
@@ -172,6 +174,7 @@
         path.pathColor         = self.drawLineColor;
         path.shape.strokeColor = self.drawLineColor.CGColor;
         [_drawPaths addObject:path];
+		[self.editor hiddenToolBar:YES animation:YES];
 	}
 	
 	if(sender.state == UIGestureRecognizerStateChanged){
@@ -183,6 +186,7 @@
     
     if (sender.state == UIGestureRecognizerStateEnded) {
         [self refreshCanUndoButtonState];
+		[self.editor hiddenToolBar:NO animation:YES];
     }
 }
 

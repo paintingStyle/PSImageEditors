@@ -33,9 +33,13 @@ static const CGFloat kDrawLineWidth = 30.0f;
 #pragma mark - Subclasses Override
 
 - (void)resetRect:(CGRect)rect {
-    
+	
     _drawingView.frame = self.editor.imageView.bounds;
     self.mosaicView.frame = _drawingView.bounds;
+
+	[self.mosaicView reset];
+	self.mosaicToolBar.canUndo = [self canUndo];
+	self.produceChanges = [self canUndo];
 }
 
 - (void)setup {
@@ -48,8 +52,6 @@ static const CGFloat kDrawLineWidth = 30.0f;
 	
     if (!_mosaicView) {
         self.mosaicView = [[PSMosaicView alloc] initWithFrame:_drawingView.bounds];
-        self.mosaicView.originalImage = self.editor.imageView.image;
-        self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:self.editor.imageView.image level:kMosaiclevel];
         self.mosaicView.clipsToBounds = YES;
         [_drawingView addSubview:self.mosaicView];
     }
@@ -65,16 +67,24 @@ static const CGFloat kDrawLineWidth = 30.0f;
         }];
     }
 	
+	self.mosaicView.frame = _drawingView.bounds;
+	self.mosaicView.originalImage = self.editor.imageView.image;
+	self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:self.editor.imageView.image level:kMosaiclevel];
 	self.mosaicView.userInteractionEnabled = YES;
     self.mosaicToolBar.canUndo = [self canUndo];
 	self.produceChanges = [self canUndo];
     [self.mosaicToolBar setToolBarShow:YES animation:YES];
     
     @weakify(self);
+	self.mosaicView.drawBeganBlock = ^{
+		@strongify(self);
+		[self.editor hiddenToolBar:YES animation:YES];
+	};
     self.mosaicView.drawEndBlock = ^(BOOL canUndo) {
         @strongify(self);
         self.mosaicToolBar.canUndo = canUndo;
 		self.produceChanges = canUndo;
+		[self.editor hiddenToolBar:NO animation:YES];
     };
 }
 
@@ -298,7 +308,6 @@ static const CGFloat kDrawLineWidth = 30.0f;
     [self.layer addSublayer:self.mosaicImageLayer];
     self.mosaicImageLayer.contents = (__bridge id _Nullable)([self.mosaicImage CGImage]);//将马赛克图层内容设置为马赛克图片内容
     
-    
     //初始化遮罩图层
     self.shapeLayer = [CAShapeLayer layer];
     self.shapeLayer.frame = self.bounds;
@@ -326,6 +335,10 @@ static const CGFloat kDrawLineWidth = 30.0f;
     CGSize size = self.topImageView.image.size;
     CGFloat rate = size.width/self.topImageView.bounds.size.width;
     _currentPath.startPoint = CGPointMake(point.x * rate, point.y * rate);
+	
+	if (self.drawBeganBlock) {
+		self.drawBeganBlock();
+	}
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -415,6 +428,23 @@ static const CGFloat kDrawLineWidth = 30.0f;
         return YES;
     }
     return NO;
+}
+
+- (void)reset {
+	
+	[self.mosaicCache clear];
+	self.mosaiFinalImage = nil;
+	self.topImageView.image = nil;
+	
+	//移除轨迹
+	[self.pathArray removeAllObjects];
+	[_currentPath resetStatus];
+	
+	[self.shapeLayer removeFromSuperlayer];
+	self.shapeLayer = nil;
+	
+	[self.mosaicImageLayer removeFromSuperlayer];
+	self.mosaicImageLayer = nil;
 }
 
 @end

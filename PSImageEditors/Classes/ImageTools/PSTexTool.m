@@ -29,6 +29,16 @@ static const NSInteger kTextMaxLimitNumber = 100;
     [super initialize];
 }
 
+- (void)resetRect:(CGRect)rect {
+	
+	[self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+		if ([obj isKindOfClass:[PSTexItem class]]) {
+			[obj removeFromSuperview];
+		}
+	}];
+	self.produceChanges = NO;
+}
+
 - (void)setup {
     
     [super setup];
@@ -74,6 +84,14 @@ static const NSInteger kTextMaxLimitNumber = 100;
         self.textView.inputView.text = activeTexItem.text;
         self.textView.attrs = attrs;
 	}
+	
+	self.editor.scrollViewDidZoomBlock = ^(CGFloat zoomScale) {
+		[self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			if ([obj isKindOfClass:[PSTexItem class]]) {
+				obj.transform = CGAffineTransformMakeScale(zoomScale, zoomScale);
+			}
+		}];
+	};
     
     self.textView.dissmissBlock = ^(NSString *text, NSDictionary *attrs, BOOL use) {
         
@@ -94,7 +112,9 @@ static const NSInteger kTextMaxLimitNumber = 100;
              weakSelf.dissmissCallback(text);
         }
     };
-	[self.editor.view addSubview:self.textView];
+	if (!self.textView.superview) {
+		[self.editor.view addSubview:self.textView];
+	}
 }
 
 - (void)cleanup {
@@ -154,11 +174,12 @@ static const NSInteger kTextMaxLimitNumber = 100;
 
     __block PSTexItem *activeItem;
     [self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (![obj isKindOfClass:[PSTexItem class]]) { return; }
-        if (((PSTexItem *)obj).isActive) {
-            activeItem = obj;
-            *stop = YES;
-        }
+        if ([obj isKindOfClass:[PSTexItem class]]) {
+			if (((PSTexItem *)obj).isActive) {
+				activeItem = obj;
+				*stop = YES;
+			}
+		}
     }];
     return activeItem;
 }
@@ -381,13 +402,11 @@ translationGesture:(UIPanGestureRecognizer *)gesture
         frame.origin.y = CGRectGetHeight(self.effectView.frame);
         self.frame = frame;
     } completion:^(BOOL finished) {
-        
+		[self dismissTextEditing:YES];
     }];
 }
 
 - (void)dismissTextEditing:(BOOL)done {
-    
-    [self.inputView resignFirstResponder];
     
     NSDictionary *attrs = nil;
     if (self.inputView.text.length) {

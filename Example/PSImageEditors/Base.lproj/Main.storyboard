@@ -28,20 +28,11 @@
                                     <action selector="imageEditorsDidClicked" destination="BYZ-38-t0r" eventType="touchUpInside" id="VBg-7A-mzw"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3GA-3b-0e9">
-                                <rect key="frame" x="156" y="268.5" width="62" height="30"/>
-                                <state key="normal" title="图片浏览"/>
-                                <connections>
-                                    <action selector="imageBrowsingDidClicked" destination="BYZ-38-t0r" eventType="touchUpInside" id="oJu-qH-XE3"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="LaV-wc-P6x" firstAttribute="top" secondItem="3GA-3b-0e9" secondAttribute="bottom" constant="20" id="Wzf-U1-wPf"/>
                             <constraint firstItem="LaV-wc-P6x" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="llw-ny-klv"/>
                             <constraint firstItem="LaV-wc-P6x" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="qOT-tL-9oR"/>
-                            <constraint firstItem="3GA-3b-0e9" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="yIQ-WC-F58"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="PSImageEditors" id="csA-eg-0od"/>

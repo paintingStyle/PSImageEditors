@@ -38,20 +38,15 @@
 	cropController.delegate = self;
 	CGRect viewFrame = [self.editor.view convertRect:self.editor.imageView.frame
 									   toView:self.editor.navigationController.view];
-	
-	@weakify(self);
-	self.presentCropViewController = YES;
 	[cropController presentAnimatedFromParentViewController:self.editor
 												  fromImage:image
 												   fromView:self.editor.imageView
 												  fromFrame:viewFrame
 													  angle:0
 											   toImageFrame:CGRectZero
-													  setup:nil
-												 completion:^{
-													 @strongify(self);
-													 self.presentCropViewController = NO;
-												 }];
+													  setup:^{
+												 [UIApplication sharedApplication].statusBarHidden = YES;
+													  } completion:nil];
 }
 
 #pragma mark - TOCropViewControllerDelegate
@@ -62,7 +57,7 @@
 				  withRect:(CGRect)cropRect
 					 angle:(NSInteger)angle {
 	
-	UIImage *rectImage = [self.editor.imageView.image croppedImageWithFrame:cropRect angle:angle circularClip:NO];;//[self.editor.imageView.image ps_imageAtRect:cropRect];
+	UIImage *rectImage = image;//[self.editor.imageView.image ps_imageAtRect:cropRect];
 	self.produceChanges = YES;
 	if (self.clipedCompleteBlock) { self.clipedCompleteBlock(rectImage, cropRect); }
 	
@@ -71,8 +66,9 @@
 												   withCroppedImage:image
 															 toView:self.editor.imageView
 															toFrame:CGRectZero
-															  setup:nil
-														 completion:nil];
+															  setup:^{
+														[UIApplication sharedApplication].statusBarHidden = NO;
+															  } completion:nil];
 	}else {
 		[cropViewController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 	}

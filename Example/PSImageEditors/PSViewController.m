@@ -27,10 +27,6 @@
     return UIStatusBarStyleLightContent;
 }
 
-- (IBAction)imageBrowsingDidClicked {
-	
-}
-
 - (IBAction)imageEditorsDidClicked {
 	
 	UIImage *image = [UIImage imageNamed:@"localImage_01@2x.jpg"];
@@ -66,7 +62,7 @@
 
 - (UIFont *)imageEditorTextFont {
     
-	return [UIFont systemFontOfSize:24.f weight:UIFontWeightRegular];
+	return [UIFont boldSystemFontOfSize:24];
 }
 
 @end

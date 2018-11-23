@@ -32,6 +32,7 @@ PSBottomToolBarDelegate> {
 
 @property (nonatomic, strong, readwrite) PSTopToolBar *topToolBar;
 @property (nonatomic, strong, readwrite) PSBottomToolBar *bootomToolBar;
+@property (nonatomic, assign) BOOL wilDismiss;
 
 @end
 
@@ -75,8 +76,8 @@ PSBottomToolBarDelegate> {
 - (void)viewWillDisappear:(BOOL)animated {
     
     [super viewWillDisappear:animated];
-	if (!self.clippingTool.presentCropViewController) {
-		[UIApplication sharedApplication].statusBarHidden = _originalStatusBarHidden;
+	[UIApplication sharedApplication].statusBarHidden = _originalStatusBarHidden;
+	if (self.wilDismiss) {
 		[self.navigationController setNavigationBarHidden:_originalNavBarHidden animated:NO];
 		if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]){
 			self.navigationController.interactivePopGestureRecognizer.enabled = _originalInteractivePopGestureRecognizer;
@@ -132,7 +133,7 @@ PSBottomToolBarDelegate> {
     UIImageView *drawingView =  self.drawTool->_drawingView;
     UIImage *mosaicImage = [self.mosaicTool mosaicImage];
     
-    UIGraphicsBeginImageContextWithOptions(imageView.image.size, NO, imageView.image.scale);
+    UIGraphicsBeginImageContextWithOptions(imageView.image.size, NO, [UIScreen mainScreen].scale);
     // 画笔
     [imageView.image drawAtPoint:CGPointZero];
 	// 马赛克
@@ -240,7 +241,7 @@ PSBottomToolBarDelegate> {
 }
 
 - (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation {
-    
+	
     [self.topToolBar setToolBarShow:!hidden animation:animation];
     [self.bottomToolBar setToolBarShow:!hidden animation:animation];
 	
@@ -255,6 +256,7 @@ PSBottomToolBarDelegate> {
 
 - (void)dismiss {
 	
+	self.wilDismiss = YES;
 	if (self.presentingViewController
 		&& self.navigationController.viewControllers.count == 1) {
 		[self dismissViewControllerAnimated:YES completion:nil];
@@ -324,7 +326,13 @@ PSBottomToolBarDelegate> {
 }
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView {
-    
+	
+	NSLog(@"zoomScale =%lf",scrollView.zoomScale);
+	
+	if (self.scrollViewDidZoomBlock) {
+		self.scrollViewDidZoomBlock(scrollView.zoomScale);
+	}
+	
     CGFloat Ws = _scrollView.frame.size.width - _scrollView.contentInset.left - _scrollView.contentInset.right;
     CGFloat Hs = _scrollView.frame.size.height - _scrollView.contentInset.top - _scrollView.contentInset.bottom;
     CGFloat W = _imageView.superview.frame.size.width;
@@ -395,6 +403,7 @@ PSBottomToolBarDelegate> {
 			self.imageView.image = image;
 			[self refreshImageView];
 			[self.drawTool resetRect:cropRect];
+			[self.texTool resetRect:cropRect];
 			[self.mosaicTool resetRect:cropRect];
 		};
         _clippingTool;
@@ -418,7 +427,8 @@ PSBottomToolBarDelegate> {
         @weakify(self);
         _texTool.dissmissCallback = ^(NSString *currentText) {
             @strongify(self);
-            self.currentTool = nil;
+            [self.texTool cleanup];
+			self.currentTool = nil;
             [self.bottomToolBar reset];
         };
         _texTool;

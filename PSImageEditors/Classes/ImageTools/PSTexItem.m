@@ -71,13 +71,25 @@ static PSTexItem *activeView = nil;
         self.text = text;
         [self addSubview:_label];
 		
-        CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textTool.editor.view.frame) - 2*kTextBoardItemInset, FLT_MAX)];
-        _label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width, size.height);
-        self.frame = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
+//        CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textTool.editor.imageView.frame) - 2*kTextBoardItemInset, FLT_MAX)];
+//        _label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width, size.height);
+//        self.frame = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
+		
+		
+		
+//		CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textTool.editor.imageView.frame) - 2*kTextBoardItemInset, FLT_MAX)];
+//		if (CGSizeEqualToSize(size, CGSizeZero)) {
+//			size = CGSizeMake(kLabelMinSize, kLabelMinSize);
+//		}
+//		_label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width + 0, size.height);
+//
+//		self.bounds = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
+		
         
         _arg = 0;
         [self setScale:1];
         [self initGestures];
+		[self resizeSelf];
     }
     
     return self;
@@ -171,7 +183,7 @@ static PSTexItem *activeView = nil;
         
         [self hiddenToolBar:NO animation:YES];
     }
-    
+
     if (self.delegate && [self.delegate respondsToSelector:
                           @selector(texItem:translationGesture:activation:)]) {
         [self.delegate texItem:self translationGesture:recognizer activation:activation];
@@ -268,8 +280,9 @@ static PSTexItem *activeView = nil;
     if (CGSizeEqualToSize(size, CGSizeZero)) {
         size = CGSizeMake(kLabelMinSize, kLabelMinSize);
     }
-    _label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width + 0, size.height);
-    
+	// 处理计算误差 +2
+    _label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width +2, size.height);
+
     self.bounds = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
 }
 
