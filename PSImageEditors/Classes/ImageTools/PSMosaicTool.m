@@ -16,6 +16,8 @@ static const CGFloat kDrawLineWidth = 30.0f;
 @property (nonatomic, strong) PSMosaicToolBar *mosaicToolBar;
 @property (nonatomic, strong) PSMosaicView *mosaicView;
 
+@property (nonatomic, assign) BOOL rectangularMosaic;
+
 @end
 
 @implementation PSMosaicTool {
@@ -36,10 +38,16 @@ static const CGFloat kDrawLineWidth = 30.0f;
 	
     _drawingView.frame = self.editor.imageView.bounds;
     self.mosaicView.frame = _drawingView.bounds;
-
 	[self.mosaicView reset];
 	self.mosaicToolBar.canUndo = [self canUndo];
 	self.produceChanges = [self canUndo];
+    
+    self.mosaicView.originalImage = self.editor.imageView.image;
+    if (self.rectangularMosaic) {
+        [self changeRectangularMosaic];
+    }else {
+        [self changeGrindArenaceousMosaic];
+    }
 }
 
 - (void)setup {
@@ -58,6 +66,9 @@ static const CGFloat kDrawLineWidth = 30.0f;
     if (!self.mosaicToolBar) {
         self.mosaicToolBar = [[PSMosaicToolBar alloc] init];
         self.mosaicToolBar.delegate = self;
+        self.mosaicView.frame = _drawingView.bounds;
+        self.mosaicView.originalImage = self.editor.imageView.image;
+        self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:self.editor.imageView.image level:kMosaiclevel];
         self.mosaicToolBar.mosaicType = PSMosaicToolBarEventGrindArenaceous;
         [self.editor.view addSubview:self.mosaicToolBar];
         [self.mosaicToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -66,14 +77,6 @@ static const CGFloat kDrawLineWidth = 30.0f;
             make.height.equalTo(@44);
         }];
     }
-	
-	self.mosaicView.frame = _drawingView.bounds;
-	self.mosaicView.originalImage = self.editor.imageView.image;
-	self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:self.editor.imageView.image level:kMosaiclevel];
-	self.mosaicView.userInteractionEnabled = YES;
-    self.mosaicToolBar.canUndo = [self canUndo];
-	self.produceChanges = [self canUndo];
-    [self.mosaicToolBar setToolBarShow:YES animation:YES];
     
     @weakify(self);
 	self.mosaicView.drawBeganBlock = ^{
@@ -86,6 +89,11 @@ static const CGFloat kDrawLineWidth = 30.0f;
 		self.produceChanges = canUndo;
 		[self.editor hiddenToolBar:NO animation:YES];
     };
+    
+    self.mosaicView.userInteractionEnabled = YES;
+    self.mosaicToolBar.canUndo = [self canUndo];
+    self.produceChanges = [self canUndo];
+    [self.mosaicToolBar setToolBarShow:YES animation:YES];
 }
 
 - (void)cleanup {
@@ -111,13 +119,15 @@ static const CGFloat kDrawLineWidth = 30.0f;
 	
 	UIImage *image = self.editor.imageView.image;//[self mosaicImage] ? : self.editor.imageView.image;
     self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:image level:kMosaiclevel];
+    self.rectangularMosaic = YES;
 }
 
 - (void)changeGrindArenaceousMosaic {
     
     // 注意mosaicImage不能为带有alpha通道，否则画出的路径显示为黑色
 	UIImage *image = [UIImage ps_imageNamed:@"icon_mosaic_mask"];
-	self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:image level:kMosaiclevel];;
+	self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:image level:kMosaiclevel];
+    self.rectangularMosaic = NO;
 }
 
 - (void)undo {
@@ -435,7 +445,7 @@ static const CGFloat kDrawLineWidth = 30.0f;
 	[self.mosaicCache clear];
 	self.mosaiFinalImage = nil;
 	self.topImageView.image = nil;
-	
+    
 	//移除轨迹
 	[self.pathArray removeAllObjects];
 	[_currentPath resetStatus];

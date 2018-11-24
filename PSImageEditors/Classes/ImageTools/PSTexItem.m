@@ -37,14 +37,9 @@ static PSTexItem *activeView = nil;
         activeView = view;
         activeView.active = YES;
         [activeView.superview bringSubviewToFront:activeView];
-		// 1秒取消激活状态
-        if (activeView) {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [PSTexItem setActiveTextView:nil];
-            });
-        }
     }
 }
+
 
 + (void)setInactiveTextView:(PSTexItem *)view {
     if (activeView) {activeView = nil;}
@@ -71,25 +66,11 @@ static PSTexItem *activeView = nil;
         self.text = text;
         [self addSubview:_label];
 		
-//        CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textTool.editor.imageView.frame) - 2*kTextBoardItemInset, FLT_MAX)];
-//        _label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width, size.height);
-//        self.frame = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
-		
-		
-		
-//		CGSize size = [_label sizeThatFits:CGSizeMake(CGRectGetWidth(_textTool.editor.imageView.frame) - 2*kTextBoardItemInset, FLT_MAX)];
-//		if (CGSizeEqualToSize(size, CGSizeZero)) {
-//			size = CGSizeMake(kLabelMinSize, kLabelMinSize);
-//		}
-//		_label.frame = CGRectMake(kTextBoardItemInset, kTextBoardItemInset, size.width + 0, size.height);
-//
-//		self.bounds = CGRectMake(0, 0, CGRectGetWidth(_label.frame) + 2*kTextBoardItemInset, CGRectGetHeight(_label.frame) + 2*kTextBoardItemInset);
-		
-        
         _arg = 0;
         [self setScale:1];
         [self initGestures];
 		[self resizeSelf];
+        [self afterInactiveTextView];
     }
     
     return self;
@@ -138,6 +119,13 @@ static PSTexItem *activeView = nil;
 	[self removeFromSuperview];
 }
 
+- (void)afterInactiveTextView {
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [[self class]  setInactiveTextView:self];
+    });
+}
+
 #pragma mark- gesture events
 
 - (void)viewDidTap:(UITapGestureRecognizer*)sender {
@@ -147,6 +135,7 @@ static PSTexItem *activeView = nil;
             [self textBoardItemDidTap:sender];
         }
         [[self class] setActiveTextView:self];
+        [self afterInactiveTextView];
         [self hiddenToolBar:NO animation:YES];
     }
 }
@@ -168,7 +157,6 @@ static PSTexItem *activeView = nil;
     } else if (recognizer.state == UIGestureRecognizerStateEnded ||
                recognizer.state == UIGestureRecognizerStateFailed ||
                recognizer.state == UIGestureRecognizerStateCancelled) {
-        
         BOOL restrictedPanAreas = NO;
         if (self.delegate && [self.delegate respondsToSelector:
                               @selector(textItemRestrictedPanAreasWithTextItem:)]) {
@@ -182,6 +170,7 @@ static PSTexItem *activeView = nil;
         }
         
         [self hiddenToolBar:NO animation:YES];
+        [self afterInactiveTextView];
     }
 
     if (self.delegate && [self.delegate respondsToSelector:
@@ -194,6 +183,7 @@ static PSTexItem *activeView = nil;
 
 
 - (void)viewDidPinch:(UIPinchGestureRecognizer *)recognizer {
+    
     //缩放
     [[self class] setActiveTextView:self];
     
@@ -214,9 +204,7 @@ static PSTexItem *activeView = nil;
             return;
         }
         
-        NSLog(@"scale = %f", scale);
-        NSLog(@"currentScale = %f", currentScale);
-         self.transform = CGAffineTransformScale(self.transform, currentScale, currentScale);
+        self.transform = CGAffineTransformScale(self.transform, currentScale, currentScale);
         recognizer.scale = 1.0;
         [self layoutSubviews];
         [self hiddenToolBar:YES animation:YES];
@@ -225,6 +213,7 @@ static PSTexItem *activeView = nil;
                recognizer.state == UIGestureRecognizerStateFailed ||
                recognizer.state == UIGestureRecognizerStateCancelled) {
        [self hiddenToolBar:NO animation:YES];
+       [self afterInactiveTextView];
     }
 }
 
@@ -232,7 +221,6 @@ static PSTexItem *activeView = nil;
     //旋转
     if (recognizer.state == UIGestureRecognizerStateBegan ||
         recognizer.state == UIGestureRecognizerStateChanged) {
-        
         self.transform = CGAffineTransformRotate(self.transform, recognizer.rotation);
         _rotation = _rotation + recognizer.rotation;
         recognizer.rotation = 0;
@@ -242,6 +230,7 @@ static PSTexItem *activeView = nil;
                recognizer.state == UIGestureRecognizerStateFailed ||
                recognizer.state == UIGestureRecognizerStateCancelled) {
         [self hiddenToolBar:NO animation:YES];
+        [self afterInactiveTextView];
     }
 }
 

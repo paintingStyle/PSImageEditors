@@ -38,7 +38,7 @@
 
 #pragma mark - PSImageEditorDelegate
 
-- (void)imageEditorDidFinishEdittingWithImage:(UIImage *)image {
+- (void)imageEditor:(PSImageEditor *)editor didFinishEdittingWithImage:(UIImage *)image {
 	
 	NSLog(@"%s",__func__);
 }

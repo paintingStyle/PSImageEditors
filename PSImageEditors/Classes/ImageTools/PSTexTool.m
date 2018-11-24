@@ -248,6 +248,7 @@ translationGesture:(UIPanGestureRecognizer *)gesture
 @property (nonatomic, strong) PSColorToolBar *colorToolBar;
 @property (nonatomic, strong) NSString *needReplaceString;
 @property (nonatomic, assign) NSRange   needReplaceRange;
+@property (nonatomic, assign) BOOL wilDismiss;
 
 @end
 
@@ -272,6 +273,7 @@ translationGesture:(UIPanGestureRecognizer *)gesture
     if (self = [super initWithFrame:frame]) {
         
         self.backgroundColor = [UIColor clearColor];
+        self.wilDismiss = NO;
         
         __weak typeof(self)weakSelf = self;
         
@@ -402,11 +404,15 @@ translationGesture:(UIPanGestureRecognizer *)gesture
         frame.origin.y = CGRectGetHeight(self.effectView.frame);
         self.frame = frame;
     } completion:^(BOOL finished) {
-		[self dismissTextEditing:YES];
+        if (!self.wilDismiss) { // 处理非用户操作造成的键盘收起情况，关闭页面，比如收到通话邀请
+            [self dismissTextEditing:YES];
+        }
     }];
 }
 
 - (void)dismissTextEditing:(BOOL)done {
+    
+    self.wilDismiss = YES;
     
     NSDictionary *attrs = nil;
     if (self.inputView.text.length) {
