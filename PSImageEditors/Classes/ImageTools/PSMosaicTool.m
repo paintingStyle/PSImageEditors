@@ -117,7 +117,7 @@ static const CGFloat kDrawLineWidth = 30.0f;
 
 - (void)changeRectangularMosaic {
 	
-	UIImage *image = self.editor.imageView.image;//[self mosaicImage] ? : self.editor.imageView.image;
+	UIImage *image = self.editor.imageView.image;
     self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:image level:kMosaiclevel];
     self.rectangularMosaic = YES;
 }
@@ -126,7 +126,7 @@ static const CGFloat kDrawLineWidth = 30.0f;
     
     // 注意mosaicImage不能为带有alpha通道，否则画出的路径显示为黑色
 	UIImage *image = [UIImage ps_imageNamed:@"icon_mosaic_mask"];
-	self.mosaicView.mosaicImage = [UIImage ps_mosaicImage:image level:kMosaiclevel];
+	self.mosaicView.mosaicImage = image;
     self.rectangularMosaic = NO;
 }
 
