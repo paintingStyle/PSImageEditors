@@ -159,7 +159,7 @@
 	return newImage;
 }
 
-- (UIImage *)decode {
+- (UIImage *)ps_decode {
 	
 	if(!self){  return nil; }
 	
@@ -182,6 +182,66 @@
 	CGImageRef newImageRef = CGImageCreateWithImageInRect([self CGImage], dianRect);
 	UIImage *newImage = [UIImage imageWithCGImage:newImageRef scale:scale orientation:self.imageOrientation];
 	CGImageRelease(newImageRef);
+	return newImage;
+}
+
+- (UIImage *)ps_imageCompress {
+	
+	UIImage *image = self;
+	CGFloat imageWidth = image.size.width;
+	CGFloat imageHeight = image.size.height;
+	CGFloat boundary = 1280;
+	
+	// width, height <= 1280, Size remains the same
+	if (imageWidth <= boundary && imageHeight <= boundary) {
+		UIImage *reImage = [self resizedImage:imageWidth withHeight:imageHeight withImage:image];
+		return reImage;
+	}
+	
+	// aspect ratio
+	CGFloat s = MAX(imageWidth, imageHeight) / MIN(imageWidth, imageHeight);
+	
+	if (s <= 2) {
+		// Set the larger value to the boundary, the smaller the value of the compression
+		CGFloat x = MAX(imageWidth, imageHeight) / boundary;
+		if (imageWidth > imageHeight) {
+			imageWidth = boundary ;
+			imageHeight = imageHeight / x;
+		}else{
+			imageHeight = boundary;
+			imageWidth = imageWidth / x;
+		}
+	}else{
+		// width, height > 1280
+		if (MIN(imageWidth, imageHeight) >= boundary) {
+			//- parameter type: session image boundary is 800, timeline is 1280
+			// boundary = type == .session ? 800 : 1280
+			CGFloat x = MIN(imageWidth, imageHeight) / boundary;
+			if (imageWidth < imageHeight) {
+				imageWidth = boundary;
+				imageHeight = imageHeight / x;
+			} else {
+				imageHeight = boundary;
+				imageWidth = imageWidth / x;
+			}
+		}
+	}
+	
+	UIImage *reImage = [self resizedImage:imageWidth withHeight:imageHeight withImage:image];
+	return reImage;
+}
+
+- (UIImage *)resizedImage:(CGFloat)imageWidth
+			   withHeight:(CGFloat)imageHeight
+				withImage:(UIImage *)image {
+	
+	CGRect newRect = CGRectMake(0, 0, imageWidth, imageHeight);
+	UIImage *newImage;
+	UIGraphicsBeginImageContext(newRect.size);
+	newImage = [UIImage imageWithCGImage:image.CGImage scale:1 orientation:image.imageOrientation];
+	[newImage drawInRect:newRect];
+	newImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
 	return newImage;
 }
 

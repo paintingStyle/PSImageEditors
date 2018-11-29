@@ -48,7 +48,7 @@ PSBottomToolBarDelegate> {
 		if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]){
 			_originalInteractivePopGestureRecognizer = self.navigationController.interactivePopGestureRecognizer.enabled;
 		}
-        _originalImage = [image decode];
+		_originalImage = [image ps_imageCompress];
         self.delegate = delegate;
         self.dataSource = dataSource;
     }
