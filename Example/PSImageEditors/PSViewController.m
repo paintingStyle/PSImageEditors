@@ -29,7 +29,7 @@
 
 - (IBAction)imageEditorsDidClicked {
 	
-	UIImage *image = [UIImage imageNamed:@"localImage_01@2x.jpg"];
+	UIImage *image = [UIImage imageNamed:@"localImage_03@2x.PNG"];
 	PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
 															 delegate:self
 														   dataSource:self];
@@ -40,6 +40,7 @@
 
 - (void)imageEditor:(PSImageEditor *)editor didFinishEdittingWithImage:(UIImage *)image {
 	
+	[editor.navigationController popViewControllerAnimated:YES];
 	NSLog(@"%s",__func__);
 }
 

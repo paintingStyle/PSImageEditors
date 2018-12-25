@@ -8,9 +8,11 @@
 #ifndef PSImageEditorDefine_h
 #define PSImageEditorDefine_h
 
-#define PSTopToolBarHeight PS_NAV_BAR_H
-#define PSBottomToolBarHeight PS_TAB_BAR_H +6
-#define PSBottomToolDeleteBarHeight PS_TAB_BAR_H +16
+#define PSTopToolBarHeight 120
+#define PSBottomToolBarHeight 160
+#define PSBottomToolDeleteBarHeight 160
+
+#define PSTextTopToolBarHeight PS_NAV_BAR_H
 #define PSDrawColorToolBarHeight 55
 #define PSTextColorToolBarHeight 48
 

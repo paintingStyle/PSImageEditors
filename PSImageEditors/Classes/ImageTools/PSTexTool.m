@@ -218,7 +218,7 @@ translationGesture:(UIPanGestureRecognizer *)gesture
      activation:(BOOL)activation {
     
     BOOL hasDeleteCoordinate = CGRectIntersectsRect(self.deleteToolBar.frame, item.frame);
-    
+	
     if (hasDeleteCoordinate) {
         self.deleteToolBar.deleteState = PSBottomToolDeleteStateDid;
         if (!activation) {
@@ -227,7 +227,7 @@ translationGesture:(UIPanGestureRecognizer *)gesture
     }else {
         self.deleteToolBar.deleteState = PSBottomToolDeleteStateWill;
     }
-    
+	
     if (!self.deleteToolBar.isWilShow && activation) {
         [self.deleteToolBar setToolBarShow:YES animation:YES];
     }else if (self.deleteToolBar.isWilShow && !activation) {
@@ -284,7 +284,7 @@ translationGesture:(UIPanGestureRecognizer *)gesture
         
         self.topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolBarTypeCancelAndDoneIcon];
         self.topToolBar.delegate = self;
-        self.topToolBar.frame = CGRectMake(0, 0, PS_SCREEN_W, PSTopToolBarHeight);
+        self.topToolBar.frame = CGRectMake(0, 0, PS_SCREEN_W, PSTextTopToolBarHeight);
         [self addSubview:self.topToolBar];
         
         self.inputView = [[UITextView alloc] init];
@@ -300,7 +300,7 @@ translationGesture:(UIPanGestureRecognizer *)gesture
         
         self.colorToolBar = [[PSColorToolBar alloc] initWithType:PSColorToolBarTypeText];
         self.colorToolBar.delegate = self;
-        self.colorToolBar.frame = CGRectMake(0, 0, PS_SCREEN_W, PSBottomToolDeleteBarHeight);
+        self.colorToolBar.frame = CGRectMake(0, 0, PS_SCREEN_W, PSTextColorToolBarHeight);
         self.inputView.inputAccessoryView = self.colorToolBar;
         
         [[NSNotificationCenter defaultCenter] addObserver:self

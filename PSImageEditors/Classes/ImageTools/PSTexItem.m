@@ -147,7 +147,7 @@ static PSTexItem *activeView = nil;
     CGPoint translation = [recognizer translationInView:piece.superview];
     piece.center = CGPointMake(piece.center.x + translation.x, piece.center.y + translation.y);
     [recognizer setTranslation:CGPointZero inView:piece.superview];
-    
+	
     BOOL activation = (recognizer.state == UIGestureRecognizerStateBegan ||
                        recognizer.state == UIGestureRecognizerStateChanged);
     
@@ -168,7 +168,7 @@ static PSTexItem *activeView = nil;
                 self.center = piece.center;
             }];
         }
-        
+		
         [self hiddenToolBar:NO animation:YES];
         [self afterInactiveTextView];
     }

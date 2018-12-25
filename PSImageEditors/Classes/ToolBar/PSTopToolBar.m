@@ -77,7 +77,11 @@
     [self.backButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.size.equalTo(@44);
         make.left.equalTo(@18);
-        make.top.equalTo(@(PSTopToolBarHeight *0.4));
+		if (@available(iOS 11.0, *)) {
+			make.top.equalTo(self.mas_safeAreaLayoutGuideTop).offset(20);
+		} else {
+			make.top.equalTo(@20);
+		}
     }];
     [self.doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.size.equalTo(@44);

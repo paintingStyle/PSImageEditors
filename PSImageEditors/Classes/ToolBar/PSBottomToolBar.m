@@ -117,7 +117,12 @@
                                   leadSpacing:48
                                   tailSpacing:48];
     [editorItems mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerY.equalTo(self);
+		
+		if (@available(iOS 11.0, *)) {
+			make.bottom.equalTo(self.mas_safeAreaLayoutGuideBottom).offset(-20);
+		} else {
+			make.bottom.equalTo(@(-20));
+		}
         make.height.equalTo(@28);
     }];
 }
@@ -150,23 +155,33 @@
     }];
     
     [self.deleteButton mas_makeConstraints:^(MASConstraintMaker *make) {
-        
-        make.top.equalTo(self.deleteContainerView);
+		
         make.centerX.equalTo(self.deleteContainerView);
+		make.bottom.equalTo(self.deleteDescButton.mas_top).offset(-12);
     }];
     
     [self.deleteDescButton mas_makeConstraints:^(MASConstraintMaker *make) {
-        
-        make.top.equalTo(self.deleteButton.mas_bottom).offset(6);
+		
         make.centerX.equalTo(self.deleteButton);
+		if (@available(iOS 11.0, *)) {
+			make.bottom.equalTo(self.mas_safeAreaLayoutGuideBottom).offset(-20);
+		} else {
+			make.bottom.equalTo(@(-20));
+		}
     }];
 }
 
 - (void)setDeleteState:(PSBottomToolDeleteState)deleteState {
     
     _deleteState = deleteState;
-    self.deleteButton.selected = (deleteState == PSBottomToolDeleteStateDid);
-    self.deleteDescButton.selected = (deleteState == PSBottomToolDeleteStateDid);
+
+	if (deleteState == PSBottomToolDeleteStateDid) {
+		self.deleteButton.selected = YES;
+		self.deleteDescButton.selected = YES;
+	}else {
+		self.deleteButton.selected = NO;
+		self.deleteDescButton.selected = NO;
+	}
 }
 
 - (PSExpandClickAreaButton *)clippingButton {

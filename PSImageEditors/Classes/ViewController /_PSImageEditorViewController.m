@@ -33,6 +33,8 @@ PSBottomToolBarDelegate> {
 @property (nonatomic, strong, readwrite) PSTopToolBar *topToolBar;
 @property (nonatomic, strong, readwrite) PSBottomToolBar *bootomToolBar;
 @property (nonatomic, assign) BOOL wilDismiss;
+@property (nonatomic, assign) BOOL initializeTools;
+
 
 @end
 
@@ -94,11 +96,15 @@ PSBottomToolBarDelegate> {
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    [self refreshImageView];
-    // 绘图画布的加载顺序：text >draw > mosaic，马赛克显示在页面最底层
-    [self.mosaicTool initialize];
-    [self.drawTool initialize];
-    [self.texTool initialize];
+	
+	if (!self.initializeTools) {
+		[self refreshImageView];
+		// 绘图画布的加载顺序：text >draw > mosaic，马赛克显示在页面最底层
+		[self.mosaicTool initialize];
+		[self.drawTool initialize];
+		[self.texTool initialize];
+	}
+	self.initializeTools = YES;
 }
 
 - (BOOL)prefersStatusBarHidden {
@@ -326,8 +332,6 @@ PSBottomToolBarDelegate> {
 }
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView {
-	
-	NSLog(@"zoomScale =%lf",scrollView.zoomScale);
 	
 	if (self.scrollViewDidZoomBlock) {
 		self.scrollViewDidZoomBlock(scrollView.zoomScale);
