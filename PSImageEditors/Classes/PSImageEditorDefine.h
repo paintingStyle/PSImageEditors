@@ -10,7 +10,7 @@
 
 #define PSTopToolBarHeight 120
 #define PSBottomToolBarHeight 160
-#define PSBottomToolDeleteBarHeight 160
+#define PSBottomToolDeleteBarHeight 120
 
 #define PSTextTopToolBarHeight PS_NAV_BAR_H
 #define PSDrawColorToolBarHeight 55
