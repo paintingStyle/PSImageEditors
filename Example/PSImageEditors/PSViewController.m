@@ -40,7 +40,6 @@
 
 - (void)imageEditor:(PSImageEditor *)editor didFinishEdittingWithImage:(UIImage *)image {
 	
-	[editor.navigationController popViewControllerAnimated:YES];
 	NSLog(@"%s",__func__);
 }
 
