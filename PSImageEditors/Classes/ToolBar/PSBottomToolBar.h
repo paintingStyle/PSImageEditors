@@ -42,6 +42,9 @@ typedef NS_ENUM(NSInteger, PSBottomToolBarEvent) {
 
 @property (nonatomic, assign, getter=isWilShow) BOOL wilShow;
 
+/// 用于参照布局
+@property (nonatomic, strong) UIView *tempEditorItem;
+
 /// PSBottomToolTypeDelete模式下删除的样式
 @property (nonatomic, assign) PSBottomToolDeleteState deleteState;
 

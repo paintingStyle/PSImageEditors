@@ -13,8 +13,9 @@
 #define PSBottomToolDeleteBarHeight 120
 
 #define PSTextTopToolBarHeight PS_NAV_BAR_H
-#define PSDrawColorToolBarHeight 55
+#define PSDrawColorToolBarHeight 50
 #define PSTextColorToolBarHeight 48
+#define PSMosaicToolBarHeight 50
 
 #define PS_SCREEN_W [UIScreen mainScreen].bounds.size.width
 #define PS_SCREEN_H [UIScreen mainScreen].bounds.size.height

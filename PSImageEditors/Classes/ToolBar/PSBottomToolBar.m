@@ -103,10 +103,10 @@
     [self addSubview:self.textButton];
     [self addSubview:self.mosaicButton];
     [self addSubview:self.clippingButton];
-    
     [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self);
     }];
+	
     NSMutableArray *editorItems = [NSMutableArray array];
     [editorItems addObject:self.drawButton];
     [editorItems addObject:self.textButton];
@@ -125,6 +125,7 @@
 		}
         make.height.equalTo(@28);
     }];
+	self.tempEditorItem = editorItems.firstObject;
 }
 
 - (void)configDeleteUI {

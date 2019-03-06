@@ -248,9 +248,6 @@ PSBottomToolBarDelegate> {
 
 - (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation {
 	
-    [self.topToolBar setToolBarShow:!hidden animation:animation];
-    [self.bottomToolBar setToolBarShow:!hidden animation:animation];
-	
 	if (self.editorMode == PSImageEditorModeDraw) {
 		[self.drawTool hiddenToolBar:hidden animation:animation];
 	}else if (self.editorMode == PSImageEditorModeText) {
@@ -258,6 +255,9 @@ PSBottomToolBarDelegate> {
 	}else if (self.editorMode == PSImageEditorModeMosaic) {
 		[self.mosaicTool hiddenToolBar:hidden animation:animation];
 	}
+	
+	[self.topToolBar setToolBarShow:!hidden animation:animation];
+	[self.bottomToolBar setToolBarShow:!hidden animation:animation];
 }
 
 - (void)dismiss {

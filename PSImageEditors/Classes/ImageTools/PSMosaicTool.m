@@ -72,9 +72,9 @@ static const CGFloat kDrawLineWidth = 30.0f;
         self.mosaicToolBar.mosaicType = PSMosaicToolBarEventGrindArenaceous;
         [self.editor.view addSubview:self.mosaicToolBar];
         [self.mosaicToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.bottom.equalTo(self.editor.bottomToolBar).offset(-64);
+			make.bottom.equalTo(self.editor.bottomToolBar.tempEditorItem.mas_top).offset(-15);
             make.left.right.equalTo(self.editor.bottomToolBar);
-            make.height.equalTo(@44);
+            make.height.equalTo(@(PSMosaicToolBarHeight));
         }];
     }
     
