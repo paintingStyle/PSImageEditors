@@ -141,11 +141,11 @@
 		
 		make.right.equalTo(@(-15));
 		make.bottom.equalTo(@(-30));
+		make.size.equalTo(@23);
 	}];
 	
 	[_colorFullButtonViews mas_makeConstraints:^(MASConstraintMaker *make) {
 		
-		make.top.equalTo(self);
 		make.left.equalTo(@15);
 		make.height.equalTo(@(kColorFullButtonSize.height));
 		make.right.equalTo(_undoButton.mas_left).offset(-5);
@@ -169,7 +169,7 @@
 		make.bottom.equalTo(self);
 		make.height.equalTo(@0.5);
 	}];
-	
+
 	// 设置默认选中颜色
 	self.redButton.isUse = YES;
 	self.currentColor = self.redButton.color;

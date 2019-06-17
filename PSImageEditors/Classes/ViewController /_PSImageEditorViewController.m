@@ -392,7 +392,6 @@ PSBottomToolBarDelegate> {
 		_currentTool = currentTool;
 		[_currentTool setup];
 		if (!currentTool) { self.editorMode = PSImageEditorModeNone; }
-        NSLog(@"_currentTool:%@",_currentTool);
 	}
 }
 
