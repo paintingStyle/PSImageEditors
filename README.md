@@ -7,16 +7,16 @@
 - 支持图片编辑，包括涂鸦，添加文字，添加马赛克，裁剪等功能
 
 ## 画笔
-![image](https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/1.png)
+![image](https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/1.jpg)
 
 ## 文字（支持更换文字背景颜色）
-![image](https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/2.png)
+![image](https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/2.jpg)
 
 ## 马赛克（两种马赛克样式）
-![image](https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/3.png)
+![image](https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/3.jpg)
 
 ## 裁剪
-![image](https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/4.png)
+![image](https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/4.jpg)
 
 ## Requirements 要求
 * iOS 8+
