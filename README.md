@@ -8,7 +8,7 @@
 - 支持图片编辑，包括涂鸦，添加文字，添加马赛克，裁剪等功能
 
 ## 画笔
-![image](http://github.com/paintingStyle/PSImageEditors/raw/master/Screenshot/1.png)
+![image](https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/1.jpg)
 
 ## 文字（支持更换文字背景颜色）
 ![image](http://github.com/paintingStyle/PSImageEditors/raw/master/Screenshot/2.png)
