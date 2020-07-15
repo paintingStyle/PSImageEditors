@@ -1,6 +1,6 @@
 PODS:
   - Masonry (1.1.0)
-  - PSImageEditors (0.1.7):
+  - PSImageEditors (0.1.13):
     - Masonry (~> 1.1.0)
     - TOCropViewController
   - TOCropViewController (2.3.8)
@@ -19,9 +19,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  PSImageEditors: 85d5d777acf9f9c203a460a0883b6e573279705d
+  PSImageEditors: 627bf58ebbc7d9982c6621190dd2faf027e9de6b
   TOCropViewController: 0a075f02c253e88095143bbac7b013fc6fba5090
 
 PODFILE CHECKSUM: 71a8f1c471cf8b44c38fe48e6b101e231a883511
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.7.5

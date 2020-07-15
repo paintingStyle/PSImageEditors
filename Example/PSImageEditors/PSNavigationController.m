@@ -25,11 +25,12 @@ alpha:alphaValue]
     
     UINavigationBar *navigationBarAppearance = [UINavigationBar appearance];
     [navigationBarAppearance setTitleTextAttributes:@{
-                                                      NSForegroundColorAttributeName:UIColorFromRGBA(0x393939, 1.0f),
+                                                      NSForegroundColorAttributeName:[UIColor whiteColor],
                                                       NSFontAttributeName:[UIFont systemFontOfSize:17.0f]
                                                       }];
     navigationBarAppearance.tintColor = UIColorFromRGBA(0x000000, 1.0f);
     navigationBarAppearance.barTintColor =  UIColorFromRGBA(0x000000, 1.0f);
+	
 }
 
 #pragma mark - 拦截控制器跳转

@@ -13,6 +13,7 @@
 
 @property (nonatomic, copy) NSArray *images;
 @property (nonatomic, copy) NSArray *urls;
+@property (weak, nonatomic) IBOutlet UIImageView *imageView;
 
 @end
 
@@ -28,8 +29,8 @@
 }
 
 - (IBAction)imageEditorsDidClicked {
-	
-	UIImage *image = [UIImage imageNamed:@"localImage_03@2x.PNG"];
+
+	UIImage *image = [UIImage imageNamed:@"localImage_06@2x.jpg"];
 	PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
 															 delegate:self
 														   dataSource:self];
@@ -39,6 +40,9 @@
 #pragma mark - PSImageEditorDelegate
 
 - (void)imageEditor:(PSImageEditor *)editor didFinishEdittingWithImage:(UIImage *)image {
+	
+	self.imageView.image = image;
+	[editor dismiss];
 	
 	NSLog(@"%s",__func__);
 }

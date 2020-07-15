@@ -12,7 +12,8 @@
 		167AF4DD21313AB80023B586 /* localImage_01@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 167AF4D121313AB70023B586 /* localImage_01@2x.jpg */; };
 		167AF4DF21313AB80023B586 /* localImage_04@2x.gif in Resources */ = {isa = PBXBuildFile; fileRef = 167AF4D321313AB70023B586 /* localImage_04@2x.gif */; };
 		167AF4E2213147450023B586 /* PSNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 167AF4E1213147450023B586 /* PSNavigationController.m */; };
-		475B720B21D2479200E8A482 /* localImage_03@2x.PNG in Resources */ = {isa = PBXBuildFile; fileRef = 475B720A21D2479200E8A482 /* localImage_03@2x.PNG */; };
+		47C160CA24BEA5A5002D56B7 /* localImage_03@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 47C160C924BEA5A5002D56B7 /* localImage_03@2x.jpg */; };
+		47C160D024BEAAAB002D56B7 /* localImage_06@2x.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 47C160CF24BEAAAB002D56B7 /* localImage_06@2x.jpg */; };
 		47F833B0212FB27F00AE3937 /* PSAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 47F833AF212FB27F00AE3937 /* PSAppDelegate.m */; };
 		47F833B3212FB27F00AE3937 /* PSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 47F833B2212FB27F00AE3937 /* PSViewController.m */; };
 		47F833B6212FB27F00AE3937 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 47F833B4212FB27F00AE3937 /* Main.storyboard */; };
@@ -43,7 +44,8 @@
 		167AF4D321313AB70023B586 /* localImage_04@2x.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "localImage_04@2x.gif"; sourceTree = "<group>"; };
 		167AF4E0213147450023B586 /* PSNavigationController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PSNavigationController.h; sourceTree = "<group>"; };
 		167AF4E1213147450023B586 /* PSNavigationController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PSNavigationController.m; sourceTree = "<group>"; };
-		475B720A21D2479200E8A482 /* localImage_03@2x.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "localImage_03@2x.PNG"; sourceTree = "<group>"; };
+		47C160C924BEA5A5002D56B7 /* localImage_03@2x.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "localImage_03@2x.jpg"; sourceTree = "<group>"; };
+		47C160CF24BEAAAB002D56B7 /* localImage_06@2x.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "localImage_06@2x.jpg"; sourceTree = "<group>"; };
 		47F833AB212FB27F00AE3937 /* PSImageEditors.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PSImageEditors.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		47F833AE212FB27F00AE3937 /* PSAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PSAppDelegate.h; sourceTree = "<group>"; };
 		47F833AF212FB27F00AE3937 /* PSAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PSAppDelegate.m; sourceTree = "<group>"; };
@@ -95,11 +97,12 @@
 		167AF4C721313AB70023B586 /* localImages */ = {
 			isa = PBXGroup;
 			children = (
+				47C160C924BEA5A5002D56B7 /* localImage_03@2x.jpg */,
 				167AF4C921313AB70023B586 /* localImage_05@2x.jpg */,
 				167AF4CB21313AB70023B586 /* localImage_02@2x.gif */,
-				475B720A21D2479200E8A482 /* localImage_03@2x.PNG */,
 				167AF4D121313AB70023B586 /* localImage_01@2x.jpg */,
 				167AF4D321313AB70023B586 /* localImage_04@2x.gif */,
+				47C160CF24BEAAAB002D56B7 /* localImage_06@2x.jpg */,
 			);
 			path = localImages;
 			sourceTree = "<group>";
@@ -248,9 +251,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				47F833DA212FEA2500AE3937 /* LaunchScreen.storyboard in Resources */,
+				47C160D024BEAAAB002D56B7 /* localImage_06@2x.jpg in Resources */,
 				167AF4D721313AB80023B586 /* localImage_02@2x.gif in Resources */,
+				47C160CA24BEA5A5002D56B7 /* localImage_03@2x.jpg in Resources */,
 				47F833B8212FB28000AE3937 /* Assets.xcassets in Resources */,
-				475B720B21D2479200E8A482 /* localImage_03@2x.PNG in Resources */,
 				47F833B6212FB27F00AE3937 /* Main.storyboard in Resources */,
 				167AF4DD21313AB80023B586 /* localImage_01@2x.jpg in Resources */,
 				167AF4DF21313AB80023B586 /* localImage_04@2x.gif in Resources */,
@@ -309,19 +313,16 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-PSImageEditors/Pods-PSImageEditors-resources.sh",
-				"${PODS_CONFIGURATION_BUILD_DIR}/PSImageEditors/PSImageEditors.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/TOCropViewController/TOCropViewControllerBundle.bundle",
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PSImageEditors/Pods-PSImageEditors-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/PSImageEditors.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/TOCropViewControllerBundle.bundle",
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PSImageEditors/Pods-PSImageEditors-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-PSImageEditors/Pods-PSImageEditors-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PSImageEditors/Pods-PSImageEditors-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

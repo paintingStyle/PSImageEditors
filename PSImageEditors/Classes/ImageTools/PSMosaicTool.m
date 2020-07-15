@@ -39,8 +39,10 @@ static const CGFloat kDrawLineWidth = 30.0f;
     _drawingView.frame = self.editor.imageView.bounds;
     self.mosaicView.frame = _drawingView.bounds;
 	[self.mosaicView reset];
-	self.mosaicToolBar.canUndo = [self canUndo];
 	self.produceChanges = [self canUndo];
+	if (self.canUndoBlock) {
+		self.canUndoBlock([self canUndo]);
+	}
     
     self.mosaicView.originalImage = self.editor.imageView.image;
     if (self.rectangularMosaic) {
@@ -85,15 +87,19 @@ static const CGFloat kDrawLineWidth = 30.0f;
 	};
     self.mosaicView.drawEndBlock = ^(BOOL canUndo) {
         @strongify(self);
-        self.mosaicToolBar.canUndo = canUndo;
 		self.produceChanges = canUndo;
 		[self.editor hiddenToolBar:NO animation:YES];
+		if (self.canUndoBlock) {
+			self.canUndoBlock([self canUndo]);
+		}
     };
     
     self.mosaicView.userInteractionEnabled = YES;
-    self.mosaicToolBar.canUndo = [self canUndo];
     self.produceChanges = [self canUndo];
     [self.mosaicToolBar setToolBarShow:YES animation:YES];
+	if (self.canUndoBlock) {
+		self.canUndoBlock([self canUndo]);
+	}
 }
 
 - (void)cleanup {
@@ -150,10 +156,6 @@ static const CGFloat kDrawLineWidth = 30.0f;
             break;
         case PSMosaicToolBarEventGrindArenaceous:
             [self changeGrindArenaceousMosaic];
-            break;
-        case PSMosaicToolBarEventUndo:
-            [self undo];
-            self.mosaicToolBar.canUndo = [self canUndo];
             break;
         default:
             break;

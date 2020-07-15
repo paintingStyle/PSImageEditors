@@ -27,6 +27,8 @@ typedef NS_ENUM(NSInteger, PSBottomToolBarEvent) {
 	PSBottomToolBarEventText,
 	PSBottomToolBarEventMosaic,
 	PSBottomToolBarEventClipping,
+	PSBottomToolBarEventUndo,
+	PSBottomToolBarEventDone,
 };
 
 @protocol PSBottomToolBarDelegate<NSObject>
@@ -40,13 +42,14 @@ typedef NS_ENUM(NSInteger, PSBottomToolBarEvent) {
 
 @property (nonatomic, assign, getter=isEditor) BOOL editor;
 
-@property (nonatomic, assign, getter=isWilShow) BOOL wilShow;
-
 /// 用于参照布局
 @property (nonatomic, strong) UIView *tempEditorItem;
 
 /// PSBottomToolTypeDelete模式下删除的样式
 @property (nonatomic, assign) PSBottomToolDeleteState deleteState;
+
+/// 是否可以撤销
+@property (nonatomic, assign) BOOL canUndo;
 
 @property (nonatomic, weak) id<PSBottomToolBarDelegate> delegate;
 

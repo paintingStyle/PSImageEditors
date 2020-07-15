@@ -17,7 +17,6 @@ typedef NS_ENUM(NSInteger, PSColorToolBarType) {
 typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 	
 	PSColorToolBarEventSelectColor = 0,
-	PSColorToolBarEventUndo,
 	PSColorToolBarEventChangeBgColor
 };
 
@@ -35,9 +34,6 @@ typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 
 // 当前颜色
 @property (nonatomic, strong) UIColor *currentColor;
-
-/// 是否可以撤销
-@property (nonatomic, assign) BOOL canUndo;
 
 /// 是否可以改变文字颜色
 @property (nonatomic, assign, getter=isChangeBgColor) BOOL changeBgColor;

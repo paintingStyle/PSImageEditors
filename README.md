@@ -1,6 +1,23 @@
+<p align="center" >
+  <img src="http://github.com/paintingStyle/PSImageEditors/raw/master/Screenshot/logo.png" alt="PSImageEditors" title="PSImageEditors">
+</p>
+
+
 # PSImageEditors
 简而至美的一个图片编辑器
 - 支持图片编辑，包括涂鸦，添加文字，添加马赛克，裁剪等功能
+
+## 画笔
+![image](http://github.com/paintingStyle/PSImageEditors/raw/master/Screenshot/1.png)
+
+## 文字（支持更换文字背景颜色）
+![image](http://github.com/paintingStyle/PSImageEditors/raw/master/Screenshot/2.png)
+
+## 马赛克（两种马赛克样式）
+![image](http://github.com/paintingStyle/PSImageEditors/raw/master/Screenshot/3.png)
+
+## 裁剪
+![image](http://github.com/paintingStyle/PSImageEditors/raw/master/Screenshot/4.png)
 
 ## Requirements 要求
 * iOS 8+

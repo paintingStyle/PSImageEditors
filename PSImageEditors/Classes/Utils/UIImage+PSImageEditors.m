@@ -237,12 +237,15 @@
 	
 	CGRect newRect = CGRectMake(0, 0, imageWidth, imageHeight);
 	UIImage *newImage;
-	UIGraphicsBeginImageContext(newRect.size);
-	newImage = [UIImage imageWithCGImage:image.CGImage scale:1 orientation:image.imageOrientation];
+	UIGraphicsBeginImageContextWithOptions(self.size, NO, self.scale);
+	newImage = [UIImage imageWithCGImage:image.CGImage scale:image.scale orientation:image.imageOrientation];
 	[newImage drawInRect:newRect];
 	newImage = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
 	return newImage;
 }
+
+
+
 
 @end

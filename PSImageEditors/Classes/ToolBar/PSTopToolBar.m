@@ -27,27 +27,13 @@
     }
 }
 
-- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation {
-
-    [UIView animateWithDuration:(animation ? kEditorToolBarAnimationDuration:0)
-                     animations:^{
-        if (show) {
-            self.transform = CGAffineTransformIdentity;
-        }else{
-            self.transform = CGAffineTransformMakeTranslation(0, -PSTopToolBarHeight);
-        }
-	 } completion:^(BOOL finished) {
-		 self.show = show;
-	 }];
-}
-
 - (instancetype)initWithType:(PSTopToolBarType)type {
     
     if (self = [super init]) {
         _type = type;
         switch (type) {
-            case PSTopToolBarTypeCancelAndDoneText:
-                [self configCancelAndDoneTextUI];
+            case PSTopToolBarTypeClose:
+                [self configCloseUI];
                 break;
             case PSTopToolBarTypeCancelAndDoneIcon:
                 [self configCancelAndDoneIconUI];
@@ -59,34 +45,15 @@
     return self;
 }
 
-- (void)configCancelAndDoneTextUI {
+- (void)configCloseUI {
 	
-    [self addSubview:self.maskImageView];
-    [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(self);
-    }];
-    
-    [self.backButton setTitle:@"取消" forState:UIControlStateNormal];
-    [self.backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [self addSubview:self.backButton];
-    
-    [self.doneButton setTitle:@"完成" forState:UIControlStateNormal];
-    [self.doneButton setTitleColor:PSColorFromRGB(0x4393f9) forState:UIControlStateNormal];
-    [self addSubview:self.doneButton];
+	[self.backButton setBackgroundImage:[UIImage ps_imageNamed:@"btn_close"]  forState:UIControlStateNormal];
+	[self addSubview:self.backButton];
     
     [self.backButton mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.size.equalTo(@44);
+        make.size.equalTo(@40);
         make.left.equalTo(@18);
-		if (@available(iOS 11.0, *)) {
-			make.top.equalTo(self.mas_safeAreaLayoutGuideTop).offset(20);
-		} else {
-			make.top.equalTo(@20);
-		}
-    }];
-    [self.doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.size.equalTo(@44);
-        make.right.equalTo(@(-18));
-        make.centerY.equalTo(self.backButton);
+		make.top.equalTo(@(18+PS_SAFEAREA_TOP_DISTANCE));
     }];
 }
 

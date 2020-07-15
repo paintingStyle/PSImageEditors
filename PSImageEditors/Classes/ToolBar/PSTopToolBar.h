@@ -10,7 +10,7 @@
 
 typedef NS_ENUM(NSUInteger, PSTopToolBarType) {
     
-    PSTopToolBarTypeCancelAndDoneText = 0,
+    PSTopToolBarTypeClose = 0,
     PSTopToolBarTypeCancelAndDoneIcon,
 };
 
@@ -28,8 +28,6 @@ typedef NS_ENUM(NSUInteger, PSTopToolBarEvent) {
 @end
 
 @interface PSTopToolBar : PSEditorToolBar
-
-@property (nonatomic, assign, getter=isShow) BOOL show;
 
 @property (nonatomic, weak) id<PSTopToolBarDelegate> delegate;
 

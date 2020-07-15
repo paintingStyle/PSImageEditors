@@ -7,9 +7,12 @@
 
 #import <UIKit/UIKit.h>
 
-static const CGFloat kEditorToolBarAnimationDuration = 0.2;
+static const CGFloat kEditorToolBarAnimationDuration = 0.25;
 
 @interface PSEditorToolBar : UIView
+
+@property (nonatomic, assign, getter=isWilShow) BOOL wilShow;
+@property (nonatomic, assign, getter=isShow) BOOL show;
 
 - (void)setToolBarShow:(BOOL)show animation:(BOOL)animation;
 

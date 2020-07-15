@@ -132,7 +132,7 @@
 	return tmp;
 }
 
-- (void)undoToLastDraw {
+- (void)undo {
     
     if (!_drawPaths.count) { return; }
     [_drawPaths removeLastObject];
@@ -142,8 +142,14 @@
 
 - (void)refreshCanUndoButtonState {
     
-    self.colorToolBar.canUndo = _drawPaths.count;
+	if (self.canUndoBlock) {
+		self.canUndoBlock(_drawPaths.count);
+	}
 	self.produceChanges = _drawPaths.count;
+}
+
+- (BOOL)canUndo {
+	return _drawPaths.count;
 }
 
 #pragma mark - PSColorToolBarDelegate
@@ -153,9 +159,6 @@
     switch (event) {
         case PSColorToolBarEventSelectColor:
             _drawLineColor = toolBar.currentColor;
-            break;
-        case PSColorToolBarEventUndo:
-            [self undoToLastDraw];
             break;
         default:
             break;

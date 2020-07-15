@@ -454,7 +454,6 @@ translationGesture:(UIPanGestureRecognizer *)gesture
     }
     // 文本内容
     NSString *textContentStr = textView.text;
-    NSLog(@"text = %@",textView.text);
     NSInteger existTextNumber = textContentStr.length;
     
     if (existTextNumber > kTextMaxLimitNumber) {
@@ -470,7 +469,6 @@ translationGesture:(UIPanGestureRecognizer *)gesture
 shouldChangeTextInRange:(NSRange)range
  replacementText:(NSString *)text {
     
-    NSLog(@"%@", text);
     if ([text isEqualToString:@"\n"]) {
         [self dismissTextEditing:YES];
         return NO;

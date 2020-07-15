@@ -14,8 +14,6 @@
 @property (nonatomic, strong) PSExpandClickAreaButton *rectangularMosaicStyleButton;
 /// 磨砂马赛克
 @property (nonatomic, strong) PSExpandClickAreaButton *grindArenaceousMosaicStyleButton;
-/// 撤销
-@property (nonatomic, strong) PSExpandClickAreaButton *undoButton;
 
 @property (nonatomic, strong) UIView *bottomLineView;
 
@@ -23,11 +21,6 @@
 
 @implementation PSMosaicToolBar
 
-- (void)setCanUndo:(BOOL)canUndo {
-    
-    _canUndo = canUndo;
-    self.undoButton.enabled = canUndo;
-}
 
 - (instancetype)init {
     
@@ -51,19 +44,9 @@
                                     forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_grindArenaceousMosaicStyleButton];
         
-        _undoButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
-        [_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_normal"]
-                     forState:UIControlStateNormal];
-        [_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_disabled"]
-                     forState:UIControlStateDisabled];
-        [_undoButton addTarget:self action:@selector(buttonDidClick:)
-              forControlEvents:UIControlEventTouchUpInside];
-        _undoButton.enabled = NO;
-        [self addSubview:_undoButton];
         
         NSArray *views = @[_rectangularMosaicStyleButton,
-                           _grindArenaceousMosaicStyleButton,
-                           _undoButton];
+                           _grindArenaceousMosaicStyleButton];
         
         [views mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
                            withFixedSpacing:28
@@ -106,21 +89,12 @@
         self.mosaicType = PSMosaicTypeGrindArenaceous;
         self.grindArenaceousMosaicStyleButton.selected = YES;
         self.rectangularMosaicStyleButton.selected = NO;
-    }else {
-        event = PSMosaicToolBarEventUndo;
     }
     
     if (self.delegate &&
         [self.delegate respondsToSelector:@selector(mosaicToolBarType:event:)]) {
         [self.delegate mosaicToolBarType:self.mosaicType event:event];
     }
-}
-
-- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation {
-    
-    [UIView animateWithDuration:(animation ? kEditorToolBarAnimationDuration:0.0f) animations:^{
-        self.alpha = (show ? 1.0f:0.0f);
-    }];
 }
 
 @end

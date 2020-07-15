@@ -11,6 +11,7 @@
 #import "PSTexTool.h"
 #import "PSTexItem.h"
 #import "PSClippingTool.h"
+#import "PSExpandClickAreaButton.h"
 
 @interface _PSImageEditorViewController ()
 <UIScrollViewDelegate,
@@ -30,6 +31,8 @@ PSBottomToolBarDelegate> {
 @property (nonatomic, strong) PSTexTool *texTool;
 @property (nonatomic, strong) PSClippingTool *clippingTool;
 
+
+@property (nonatomic, strong) UIButton *closeButton;
 @property (nonatomic, strong, readwrite) PSTopToolBar *topToolBar;
 @property (nonatomic, strong, readwrite) PSBottomToolBar *bootomToolBar;
 @property (nonatomic, assign) BOOL wilDismiss;
@@ -127,6 +130,11 @@ PSBottomToolBarDelegate> {
 }
 
 #pragma mark - Method
+
+- (void)closeButtonDidClick {
+	
+	
+}
 
 - (void)buildClipImageCallback:(void(^)(UIImage *clipedImage))callback {
 	
@@ -318,6 +326,26 @@ PSBottomToolBarDelegate> {
 			self.editorMode = PSImageEditorModeClipping;
 			self.currentTool = self.clippingTool;
 			break;
+		case PSBottomToolBarEventUndo:
+		{
+			if (self.currentTool == self.drawTool) {
+				[self.drawTool undo];
+				self.bootomToolBar.canUndo = [self.drawTool canUndo];
+			}else if (self.currentTool == self.mosaicTool) {
+				[self.mosaicTool undo];
+				self.bootomToolBar.canUndo = [self.mosaicTool canUndo];
+			}
+		}
+			break;
+		case PSBottomToolBarEventDone:
+		{
+			[self buildClipImageCallback:^(UIImage *clipedImage) {
+				if (self.delegate && [self.delegate respondsToSelector:@selector(imageEditor:didFinishEdittingWithImage:)]) {
+					[self.delegate imageEditor:self didFinishEdittingWithImage:clipedImage];
+				}
+			}];
+		}
+			break;
 		default:
 			break;
 	}
@@ -413,11 +441,33 @@ PSBottomToolBarDelegate> {
     }));
 }
 
+- (PSDrawTool *)drawTool {
+    
+    return LAZY_LOAD(_drawTool, ({
+        
+		@weakify(self);
+        _drawTool = [[PSDrawTool alloc] initWithImageEditor:self withOption:[self drawToolOption]];
+		_drawTool.canUndoBlock = ^(BOOL canUndo) {
+			@strongify(self);
+			if (self.currentTool == _drawTool) {
+				self.bootomToolBar.canUndo = canUndo;
+			}
+		};
+        _drawTool;
+    }));
+}
+
 - (PSMosaicTool *)mosaicTool {
     
     return LAZY_LOAD(_mosaicTool, ({
-        
+        @weakify(self);
         _mosaicTool = [[PSMosaicTool alloc] initWithImageEditor:self withOption:nil];
+		_mosaicTool.canUndoBlock = ^(BOOL canUndo) {
+			@strongify(self);
+			if (self.currentTool == _mosaicTool) {
+				self.bootomToolBar.canUndo = canUndo;
+			}
+		};
         _mosaicTool;
     }));
 }
@@ -438,15 +488,6 @@ PSBottomToolBarDelegate> {
     }));
 }
 
-- (PSDrawTool *)drawTool {
-    
-    return LAZY_LOAD(_drawTool, ({
-        
-        _drawTool = [[PSDrawTool alloc] initWithImageEditor:self withOption:[self drawToolOption]];
-        _drawTool;
-    }));
-}
-
 - (PSBottomToolBar *)bottomToolBar {
 	
 	return LAZY_LOAD(_bootomToolBar, ({
@@ -461,7 +502,7 @@ PSBottomToolBarDelegate> {
     
     return LAZY_LOAD(_topToolBar, ({
         
-        _topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolBarTypeCancelAndDoneText];
+        _topToolBar = [[PSTopToolBar alloc] initWithType:PSTopToolBarTypeClose];
 		_topToolBar.delegate = self;
         _topToolBar;
     }));

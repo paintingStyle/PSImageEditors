@@ -7,8 +7,10 @@
 
 #import "PSColorToolBar.h"
 #import "PSColorFullButton.h"
+#import "PSExpandClickAreaButton.h"
 
-#define kColorFullButtonSize CGSizeMake(30, 30)
+static const CGFloat kItemLength = 44;
+static const CGFloat kItemRadius= 9;
 
 @interface PSColorToolBar ()
 
@@ -30,12 +32,6 @@
 
 @implementation PSColorToolBar
 
-- (void)setCanUndo:(BOOL)canUndo {
-	
-	_canUndo = canUndo;
-	self.undoButton.enabled = canUndo;
-}
-
 - (instancetype)initWithType:(PSColorToolBarType)type {
 	
     if (self = [super init]) {
@@ -49,6 +45,56 @@
         }
     }
     return self;
+}
+
+- (void)configDrawUI {
+	
+	_colorFullButtonViews = [[UIView alloc] init];
+	[self addSubview:_colorFullButtonViews];
+	
+	[_colorFullButtonViews addSubview:self.redButton];
+	[_colorFullButtonViews addSubview:self.blackButton];
+	[_colorFullButtonViews addSubview:self.whiteButton];
+	[_colorFullButtonViews addSubview:self.yellowButton];
+	[_colorFullButtonViews addSubview:self.greenButton];
+	[_colorFullButtonViews addSubview:self.lightBlueButton];
+	[_colorFullButtonViews addSubview:self.blueButton];
+	// 使用手势识别，关闭自带交互
+	for (PSColorFullButton *button in _colorFullButtonViews.subviews) {
+		button.userInteractionEnabled = NO;
+	}
+	
+	_bottomLineView = [[UIView alloc] init];
+	_bottomLineView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
+	[self addSubview:_bottomLineView];
+
+	[_colorFullButtonViews.subviews mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
+											 withFixedItemLength:kItemLength
+													 leadSpacing:0
+													 tailSpacing:0];
+	[_colorFullButtonViews mas_makeConstraints:^(MASConstraintMaker *make) {
+		CGFloat s = 20 * [UIScreen mainScreen].scale;
+		make.left.equalTo(@(s));
+		make.right.equalTo(@(-s));
+		make.bottom.equalTo(@(-30));
+	}];
+	
+	[_colorFullButtonViews.subviews mas_makeConstraints:^(MASConstraintMaker *make) {
+		make.centerY.equalTo(_colorFullButtonViews);
+		make.height.equalTo(@(kItemLength));
+	}];
+	
+	[_bottomLineView mas_makeConstraints:^(MASConstraintMaker *make) {
+		
+		make.left.equalTo(@15);
+		make.right.equalTo(@(-15));
+		make.bottom.equalTo(self);
+		make.height.equalTo(@0.5);
+	}];
+
+	// 设置默认选中颜色
+	self.redButton.isUse = YES;
+	self.currentColor = self.redButton.color;
 }
 
 - (void)configTextUI {
@@ -78,108 +124,33 @@
 	
 	[_changeBgColorButton mas_makeConstraints:^(MASConstraintMaker *make) {
 		
-		make.top.equalTo(self);
+		make.centerY.equalTo(self);
 		make.left.equalTo(@17);
-		make.width.equalTo(@(kColorFullButtonSize.width));
-		make.height.equalTo(@(kColorFullButtonSize.height));
+		make.width.equalTo(@(kItemLength+12)); // 与选中按钮大小一致
+		make.height.equalTo(@(kItemLength+12));
 	}];
 	
 	[_colorFullButtonViews mas_makeConstraints:^(MASConstraintMaker *make) {
 		
-		make.top.equalTo(_changeBgColorButton);
+		make.centerY.equalTo(self);
 		make.left.equalTo(_changeBgColorButton.mas_right).offset(25);
-		make.height.equalTo(@(kColorFullButtonSize.height));
+		make.height.equalTo(@(kItemLength));
 		make.right.equalTo(@(-17));
 	}];
 	
 	[_colorFullButtonViews.subviews mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
-											 withFixedItemLength:kColorFullButtonSize.width
+											 withFixedItemLength:kItemLength
 													 leadSpacing:0
 													 tailSpacing:0];
 	
 	[_colorFullButtonViews.subviews mas_makeConstraints:^(MASConstraintMaker *make) {
 		make.centerY.equalTo(_colorFullButtonViews);
-		make.height.equalTo(@(kColorFullButtonSize.height));
+		make.height.equalTo(@(kItemLength));
 	}];
 	
 	// 设置默认选中颜色
 	self.whiteButton.isUse = YES;
 	self.currentColor = self.whiteButton.color;
-}
-
-- (void)configDrawUI {
-	
-	_colorFullButtonViews = [[UIView alloc] init];
-	[self addSubview:_colorFullButtonViews];
-	
-	[_colorFullButtonViews addSubview:self.redButton];
-	[_colorFullButtonViews addSubview:self.blackButton];
-	[_colorFullButtonViews addSubview:self.whiteButton];
-	[_colorFullButtonViews addSubview:self.yellowButton];
-	[_colorFullButtonViews addSubview:self.greenButton];
-	[_colorFullButtonViews addSubview:self.lightBlueButton];
-	[_colorFullButtonViews addSubview:self.blueButton];
-	// 使用手势识别，关闭自带交互
-	for (PSColorFullButton *button in _colorFullButtonViews.subviews) {
-		button.userInteractionEnabled = NO;
-	}
-	
-	_undoButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
-	[_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_normal"]
-				 forState:UIControlStateNormal];
-	[_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_disabled"]
-				 forState:UIControlStateDisabled];
-	_undoButton.enabled = NO;
-	[_undoButton addTarget:self action:@selector(undoButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
-	[self addSubview:_undoButton];
-	
-	_bottomLineView = [[UIView alloc] init];
-	_bottomLineView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
-	[self addSubview:_bottomLineView];
-	
-	[_undoButton mas_makeConstraints:^(MASConstraintMaker *make) {
-		
-		make.right.equalTo(@(-15));
-		make.bottom.equalTo(@(-30));
-		make.size.equalTo(@23);
-	}];
-	
-	[_colorFullButtonViews mas_makeConstraints:^(MASConstraintMaker *make) {
-		
-		make.left.equalTo(@15);
-		make.height.equalTo(@(kColorFullButtonSize.height));
-		make.right.equalTo(_undoButton.mas_left).offset(-5);
-		make.centerY.equalTo(_undoButton);
-	}];
-	
-	[_colorFullButtonViews.subviews mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
-											 withFixedItemLength:kColorFullButtonSize.width
-													 leadSpacing:15
-													 tailSpacing:15];
-	
-	[_colorFullButtonViews.subviews mas_makeConstraints:^(MASConstraintMaker *make) {
-		make.centerY.equalTo(_colorFullButtonViews);
-		make.height.equalTo(@(kColorFullButtonSize.height));
-	}];
-	
-	[_bottomLineView mas_makeConstraints:^(MASConstraintMaker *make) {
-		
-		make.left.equalTo(@15);
-		make.right.equalTo(@(-15));
-		make.bottom.equalTo(self);
-		make.height.equalTo(@0.5);
-	}];
-
-	// 设置默认选中颜色
-	self.redButton.isUse = YES;
-	self.currentColor = self.redButton.color;
-}
-
-- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation {
-	
-	[UIView animateWithDuration:(animation ? 0.15:0) animations:^{
-		self.alpha = (show ? 1.0f:0.0f);
-	}];
 }
 
 - (BOOL)isWhiteColor {
@@ -193,14 +164,6 @@
 	_currentColor = currentColor;
 	for (PSColorFullButton *button in self.colorFullButtonViews.subviews) {
 		button.isUse = CGColorEqualToColor(button.color.CGColor, currentColor.CGColor);
-	}
-}
-
-- (void)undoButtonDidClick {
-	
-	if (self.delegate && [self.delegate respondsToSelector:
-						  @selector(colorToolBar:event:)]) {
-		[self.delegate colorToolBar:self event:PSColorToolBarEventUndo];
 	}
 }
 
@@ -264,10 +227,7 @@
 	
 	return LAZY_LOAD(_blueButton, ({
 		
-		_blueButton = [[PSColorFullButton alloc] initWithFrame:
-					   CGRectMake(0, 0, kColorFullButtonSize.width, kColorFullButtonSize.height)];
-		_blueButton.radius = 9;
-		_blueButton.color = PSColorFromRGB(0x8c06ff);
+		_blueButton = [[PSColorFullButton alloc] initWithFrame:CGRectMake(0, 0, kItemLength, kItemLength) radius:kItemRadius color:PSColorFromRGB(0x8c06ff)];
 		_blueButton;
 	}));
 }
@@ -276,10 +236,7 @@
 	
 	return LAZY_LOAD(_lightBlueButton, ({
 		
-		_lightBlueButton = [[PSColorFullButton alloc] initWithFrame:
-							CGRectMake(0, 0, kColorFullButtonSize.width, kColorFullButtonSize.height)];
-		_lightBlueButton.radius = 9;
-		_lightBlueButton.color = PSColorFromRGB(0x199bff);
+		_lightBlueButton = [[PSColorFullButton alloc] initWithFrame:CGRectMake(0, 0, kItemLength, kItemLength) radius:kItemRadius color:PSColorFromRGB(0x199bff)];
 		_lightBlueButton;
 	}));
 }
@@ -288,10 +245,7 @@
 	
 	return LAZY_LOAD(_greenButton, ({
 		
-		_greenButton = [[PSColorFullButton alloc] initWithFrame:
-						CGRectMake(0, 0, kColorFullButtonSize.width, kColorFullButtonSize.height)];
-		_greenButton.radius = 9;
-		_greenButton.color = PSColorFromRGB(0x14e213);
+		_greenButton = [[PSColorFullButton alloc] initWithFrame:CGRectMake(0, 0, kItemLength, kItemLength) radius:kItemRadius color:PSColorFromRGB(0x14e213)];
 		_greenButton;
 	}));
 }
@@ -300,10 +254,7 @@
 	
 	return LAZY_LOAD(_yellowButton, ({
 		
-		_yellowButton = [[PSColorFullButton alloc] initWithFrame:
-						 CGRectMake(0, 0, kColorFullButtonSize.width, kColorFullButtonSize.height)];
-		_yellowButton.radius = 9;
-		_yellowButton.color = PSColorFromRGB(0xfbf60f);
+		_yellowButton = [[PSColorFullButton alloc] initWithFrame:CGRectMake(0, 0, kItemLength, kItemLength) radius:kItemRadius color:PSColorFromRGB(0xfbf60f)];
 		_yellowButton;
 	}));
 }
@@ -312,10 +263,7 @@
 	
 	return LAZY_LOAD(_whiteButton, ({
 		
-		_whiteButton = [[PSColorFullButton alloc] initWithFrame:
-						CGRectMake(0, 0, kColorFullButtonSize.width, kColorFullButtonSize.height)];
-		_whiteButton.radius = 9;
-		_whiteButton.color = PSColorFromRGB(0xf9f9f9);
+		_whiteButton = [[PSColorFullButton alloc] initWithFrame:CGRectMake(0, 0, kItemLength, kItemLength) radius:kItemRadius color:PSColorFromRGB(0xf9f9f9)];
 		_whiteButton;
 	}));
 }
@@ -324,10 +272,7 @@
 	
 	return LAZY_LOAD(_blackButton, ({
 		
-		_blackButton = [[PSColorFullButton alloc] initWithFrame:
-						CGRectMake(0, 0, kColorFullButtonSize.width, kColorFullButtonSize.height)];
-		_blackButton.radius = 9;
-		_blackButton.color = PSColorFromRGB(0x26252a);
+		_blackButton = [[PSColorFullButton alloc] initWithFrame:CGRectMake(0, 0, kItemLength, kItemLength) radius:kItemRadius color:PSColorFromRGB(0x26252a)];
 		_blackButton;
 	}));
 }
@@ -336,10 +281,7 @@
 	
 	return LAZY_LOAD(_redButton, ({
 		
-		_redButton = [[PSColorFullButton alloc] initWithFrame:
-					  CGRectMake(0, 0, kColorFullButtonSize.width, kColorFullButtonSize.height)];
-		_redButton.radius = 9;
-		_redButton.color = PSColorFromRGB(0xff1d12);
+		_redButton = [[PSColorFullButton alloc] initWithFrame:CGRectMake(0, 0, kItemLength, kItemLength) radius:kItemRadius color:PSColorFromRGB(0xff1d12)];
 		_redButton;
 	}));
 }

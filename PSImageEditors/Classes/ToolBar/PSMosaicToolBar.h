@@ -17,7 +17,6 @@ typedef NS_ENUM(NSInteger, PSMosaicToolBarEvent) {
     
     PSMosaicToolBarEventRectangular = 0,
     PSMosaicToolBarEventGrindArenaceous,
-    PSMosaicToolBarEventUndo
 };
 
 @protocol PSMosaicToolBarDelegate<NSObject>
@@ -29,9 +28,6 @@ typedef NS_ENUM(NSInteger, PSMosaicToolBarEvent) {
 @end
 
 @interface PSMosaicToolBar : PSEditorToolBar
-
-/// 是否可以撤销
-@property (nonatomic, assign) BOOL canUndo;
 
 @property (nonatomic, assign) PSMosaicType mosaicType;
 @property (nonatomic, weak) id<PSMosaicToolBarDelegate> delegate;

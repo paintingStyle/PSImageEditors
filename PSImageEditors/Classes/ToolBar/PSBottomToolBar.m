@@ -11,10 +11,14 @@
 @interface PSBottomToolBar ()
 
 @property (nonatomic, strong) UIImageView *maskImageView;
+
 @property (nonatomic, strong) PSExpandClickAreaButton *drawButton;
 @property (nonatomic, strong) PSExpandClickAreaButton *textButton;
 @property (nonatomic, strong) PSExpandClickAreaButton *mosaicButton;
 @property (nonatomic, strong) PSExpandClickAreaButton *clippingButton;
+
+@property (nonatomic, strong) PSExpandClickAreaButton *undoButton;
+@property (nonatomic, strong) PSExpandClickAreaButton *doneButton;
 
 @property (nonatomic, strong) UIView *deleteContainerView;
 @property (nonatomic, strong) UIButton *deleteButton;
@@ -53,6 +57,22 @@
     }
 }
 
+- (void)undoButtonDidClick {
+	
+	if (self.delegate && [self.delegate respondsToSelector:
+                          @selector(bottomToolBar:didClickEvent:)]) {
+        [self.delegate bottomToolBar:self didClickEvent:PSBottomToolBarEventUndo];
+    }
+}
+
+- (void)doneButtonDidClick {
+	
+	if (self.delegate && [self.delegate respondsToSelector:
+                          @selector(bottomToolBar:didClickEvent:)]) {
+        [self.delegate bottomToolBar:self didClickEvent:PSBottomToolBarEventDone];
+    }
+}
+
 - (void)reset {
     
     self.drawButton.selected = NO;
@@ -61,22 +81,6 @@
     self.clippingButton.selected = NO;
 }
 
-- (void)setToolBarShow:(BOOL)show animation:(BOOL)animation {
-    
-    self.wilShow = show;
-    [UIView animateWithDuration:(animation ? kEditorToolBarAnimationDuration:0)
-                     animations:^{
-                         if (show) {
-                             self.transform = CGAffineTransformIdentity;
-                         }else{
-                             if (self.type == PSBottomToolTypeEditor) {
-                                 self.transform = CGAffineTransformMakeTranslation(0, PSBottomToolBarHeight);
-                             }else {
-                                 self.transform = CGAffineTransformMakeTranslation(0, PSBottomToolDeleteBarHeight);
-                             }
-                         }
-                     }];
-}
 
 - (instancetype)initWithType:(PSBottomToolType)type {
     
@@ -103,27 +107,45 @@
     [self addSubview:self.textButton];
     [self addSubview:self.mosaicButton];
     [self addSubview:self.clippingButton];
+	[self addSubview:self.undoButton];
+	[self addSubview:self.doneButton];
+	
     [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self);
     }];
+	[self.undoButton mas_makeConstraints:^(MASConstraintMaker *make) {
+		make.left.equalTo(@24);
+		if (@available(iOS 11.0, *)) {
+			make.bottom.equalTo(self.mas_safeAreaLayoutGuideBottom).offset(-14);
+		} else {
+			make.bottom.equalTo(@(-14));
+		}
+		make.size.equalTo(@34);
+	}];
+	[self.doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
+		make.right.equalTo(@(-24));
+		make.bottom.equalTo(self.undoButton);
+		make.size.equalTo(@34);
+	}];
 	
     NSMutableArray *editorItems = [NSMutableArray array];
     [editorItems addObject:self.drawButton];
     [editorItems addObject:self.textButton];
     [editorItems addObject:self.mosaicButton];
     [editorItems addObject:self.clippingButton];
-    [editorItems mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
-                          withFixedItemLength:28
-                                  leadSpacing:48
-                                  tailSpacing:48];
+	
+	[editorItems mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
+							 withFixedSpacing:34
+								  leadSpacing:100
+								  tailSpacing:100];
     [editorItems mas_makeConstraints:^(MASConstraintMaker *make) {
 		
 		if (@available(iOS 11.0, *)) {
-			make.bottom.equalTo(self.mas_safeAreaLayoutGuideBottom).offset(-20);
+			make.bottom.equalTo(self.mas_safeAreaLayoutGuideBottom).offset(-14);
 		} else {
-			make.bottom.equalTo(@(-20));
+			make.bottom.equalTo(@(-14));
 		}
-        make.height.equalTo(@28);
+        make.height.equalTo(@34);
     }];
 	self.tempEditorItem = editorItems.firstObject;
 }
@@ -185,6 +207,12 @@
 	}
 }
 
+- (void)setCanUndo:(BOOL)canUndo {
+	
+	_canUndo = canUndo;
+	self.undoButton.enabled = canUndo;
+}
+
 - (PSExpandClickAreaButton *)clippingButton {
     
     return LAZY_LOAD(_clippingButton, ({
@@ -237,6 +265,33 @@
         [_drawButton addTarget:self action:@selector(buttonDidClickSender:) forControlEvents:UIControlEventTouchUpInside];
         _drawButton;
     }));
+}
+
+- (PSExpandClickAreaButton *)undoButton {
+	
+	return LAZY_LOAD(_undoButton, ({
+		
+		_undoButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
+		[_undoButton setImage:[UIImage ps_imageNamed:@"btn_revocation_normal"]
+					 forState:UIControlStateNormal];
+		_undoButton.imageView.contentMode = UIViewContentModeScaleAspectFill;
+		_undoButton.enabled = NO;
+		[_undoButton addTarget:self action:@selector(undoButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
+		_undoButton;
+	}));
+}
+
+- (PSExpandClickAreaButton *)doneButton {
+	
+	return LAZY_LOAD(_doneButton, ({
+		
+		_doneButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
+		[_doneButton setImage:[UIImage ps_imageNamed:@"btn_done"]
+					 forState:UIControlStateNormal];
+		_doneButton.imageView.contentMode = UIViewContentModeScaleAspectFill;
+		[_doneButton addTarget:self action:@selector(doneButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
+		_doneButton;
+	}));
 }
 
 - (UIImageView *)maskImageView {
