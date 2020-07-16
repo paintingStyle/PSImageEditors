@@ -2,6 +2,10 @@
   <img src="https://github.com/paintingStyle/PSImageEditors/blob/master/Screenshot/logo.png" alt="PSImageEditors" title="PSImageEditors">
 </p>
 
+
+
+![image](https://raw.github.com/PSImageEditors/PSImageEditors/Screenshot/logo.png)
+
 # PSImageEditors
 简而至美的一个图片编辑器
 - 支持图片编辑，包括涂鸦，添加文字，添加马赛克，裁剪等功能
