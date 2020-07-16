@@ -4,7 +4,10 @@
 
 
 
-![image](https://raw.github.com/PSImageEditors/PSImageEditors/Screenshot/logo.png)
+![image1](https://raw.github.com/PSImageEditors/PSImageEditors/Screenshot/logo.png)
+
+![image2](https://upload.jianshu.io/admin_banners/web_images/4991/f35f847410c2d919aee3f40701e6c2e8d234661e.jpg?imageMogr2/auto-orient/strip|imageView2/1/w/1250/h/540)
+
 
 # PSImageEditors
 简而至美的一个图片编辑器
