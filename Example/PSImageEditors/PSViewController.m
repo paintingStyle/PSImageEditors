@@ -30,11 +30,11 @@
 
 - (IBAction)imageEditorsDidClicked {
 
-	UIImage *image = [UIImage imageNamed:@"localImage_06@2x.jpg"];
-	PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
-															 delegate:self
-														   dataSource:self];
-	[self.navigationController pushViewController:imageEditor animated:YES];
+UIImage *image = [UIImage imageNamed:@"localImage_06@2x.jpg"];
+PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
+													 delegate:self
+												   dataSource:self];
+[self.navigationController pushViewController:imageEditor animated:YES];
 }
 
 #pragma mark - PSImageEditorDelegate

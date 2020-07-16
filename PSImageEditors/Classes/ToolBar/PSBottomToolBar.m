@@ -113,8 +113,11 @@
     [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self);
     }];
+	
+	CGFloat margin = PS_SMALL_IPHONE ? 0:PS_ELASTIC_LAYOUT(24);
+	
 	[self.undoButton mas_makeConstraints:^(MASConstraintMaker *make) {
-		make.left.equalTo(@24);
+		make.left.equalTo(@(margin));
 		if (@available(iOS 11.0, *)) {
 			make.bottom.equalTo(self.mas_safeAreaLayoutGuideBottom).offset(-14);
 		} else {
@@ -123,7 +126,7 @@
 		make.size.equalTo(@34);
 	}];
 	[self.doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
-		make.right.equalTo(@(-24));
+		make.right.equalTo(@(-margin));
 		make.bottom.equalTo(self.undoButton);
 		make.size.equalTo(@34);
 	}];
@@ -134,10 +137,14 @@
     [editorItems addObject:self.mosaicButton];
     [editorItems addObject:self.clippingButton];
 	
+	CGFloat leadSpacing = PS_SMALL_IPHONE ? 60: PS_ELASTIC_LAYOUT(80);
+	CGFloat fixedSpacing = PS_SMALL_IPHONE ? 20: PS_ELASTIC_LAYOUT(30);
+	
 	[editorItems mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
-							 withFixedSpacing:34
-								  leadSpacing:100
-								  tailSpacing:100];
+							 withFixedSpacing:fixedSpacing
+								  leadSpacing:leadSpacing
+								  tailSpacing:leadSpacing];
+
     [editorItems mas_makeConstraints:^(MASConstraintMaker *make) {
 		
 		if (@available(iOS 11.0, *)) {

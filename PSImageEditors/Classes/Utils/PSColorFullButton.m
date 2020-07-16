@@ -62,7 +62,7 @@
 		layer2.allowsEdgeAntialiasing = YES;
 		layer2.backgroundColor = [UIColor clearColor].CGColor;
 		layer2.strokeColor = _color.CGColor;
-		layer2.lineWidth = 4;
+		layer2.lineWidth = 3;
 		layer2.path = path2.CGPath;
 		[path2 stroke];
 		UIGraphicsEndImageContext();

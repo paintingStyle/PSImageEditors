@@ -26,6 +26,8 @@
 #define PS_STATUS_BAR_H [[UIApplication sharedApplication] statusBarFrame].size.height
 #define PS_NAV_BAR_H    (PS_IPHONE_X_FUTURE_MODELS ? 88.0f: 64.0f)
 #define PS_TAB_BAR_H     (PS_IPHONE_X_FUTURE_MODELS ? 83.0f: 49.0f)
+#define PS_ELASTIC_LAYOUT(x) ceil(((x)/375.0f * [UIScreen mainScreen].bounds.size.width))
+#define PS_SMALL_IPHONE ([UIScreen mainScreen].bounds.size.width <= 320.0f)
 #define PS_COMMON_NUM     44.0f
 
 /// iPhoneX顶部安全距离

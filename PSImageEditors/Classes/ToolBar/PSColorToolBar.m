@@ -9,8 +9,8 @@
 #import "PSColorFullButton.h"
 #import "PSExpandClickAreaButton.h"
 
-static const CGFloat kItemLength = 44;
-static const CGFloat kItemRadius= 9;
+#define kItemLength PS_SMALL_IPHONE ? 34:44
+#define kItemRadius 8
 
 @interface PSColorToolBar ()
 
@@ -73,9 +73,9 @@ static const CGFloat kItemRadius= 9;
 													 leadSpacing:0
 													 tailSpacing:0];
 	[_colorFullButtonViews mas_makeConstraints:^(MASConstraintMaker *make) {
-		CGFloat s = 20 * [UIScreen mainScreen].scale;
-		make.left.equalTo(@(s));
-		make.right.equalTo(@(-s));
+		CGFloat offest = PS_SMALL_IPHONE ? 10:PS_ELASTIC_LAYOUT(50);
+		make.left.equalTo(@(offest));
+		make.right.equalTo(@(-offest));
 		make.bottom.equalTo(@(-30));
 	}];
 	
@@ -122,20 +122,23 @@ static const CGFloat kItemRadius= 9;
 		button.userInteractionEnabled = NO;
 	}
 	
+	CGFloat margin = PS_SMALL_IPHONE ? 0:14;
+	
 	[_changeBgColorButton mas_makeConstraints:^(MASConstraintMaker *make) {
 		
 		make.centerY.equalTo(self);
-		make.left.equalTo(@17);
+		make.left.equalTo(@(margin));
 		make.width.equalTo(@(kItemLength+12)); // 与选中按钮大小一致
 		make.height.equalTo(@(kItemLength+12));
 	}];
 	
 	[_colorFullButtonViews mas_makeConstraints:^(MASConstraintMaker *make) {
 		
+		CGFloat offest = PS_SMALL_IPHONE ? 10:16;
 		make.centerY.equalTo(self);
-		make.left.equalTo(_changeBgColorButton.mas_right).offset(25);
+		make.left.equalTo(_changeBgColorButton.mas_right).offset(offest);
 		make.height.equalTo(@(kItemLength));
-		make.right.equalTo(@(-17));
+		make.right.equalTo(@(-(margin)));
 	}];
 	
 	[_colorFullButtonViews.subviews mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
