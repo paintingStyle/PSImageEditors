@@ -1,22 +1,22 @@
 <p align="center" >
-<img src="https://upload-images.jianshu.io/upload_images/4490624-904c1ed2a18ab850.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240.png" alt="PSImageEditors" title="PSImageEditors">
+<img src="https://upload-images.jianshu.io/upload_images/4490624-904c1ed2a18ab850.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="PSImageEditors" title="PSImageEditors">
 </p>
 
 # PSImageEditors（简而至美的一个图片编辑器 ）
 开源一个图片编辑组件，样式参照微信与钉钉的图片编辑效果，支持包括涂鸦，添加文字，添加马赛克，裁剪等功能，内部线上项目已使用此组件。
 
 ## 功能
-- 画笔
+###### 画笔
 ![1.jpg](https://upload-images.jianshu.io/upload_images/4490624-933bcfcb7fa9568d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-- 文字（支持更换文字背景颜色）
+###### 文字（支持更换文字背景颜色）
 ![2.jpg](https://upload-images.jianshu.io/upload_images/4490624-11568807eed88d2c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![3.jpg](https://upload-images.jianshu.io/upload_images/4490624-a81108912887243d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-- 马赛克（两种马赛克样式）
+###### 马赛克（两种马赛克样式）
 ![4.jpg](https://upload-images.jianshu.io/upload_images/4490624-230458e6f237b8e3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-- 裁剪
+###### 裁剪
 ![5.jpg](https://upload-images.jianshu.io/upload_images/4490624-72123212cd454a56.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ## Installation 安装
@@ -56,7 +56,7 @@ PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
 #pragma mark - PSImageEditorDelegate
 
 - (UIColor *)imageEditorDefaultColor {
-    return [UIColor redColor];
+	return [UIColor redColor];
 }
 
 - (PSImageEditorMode)imageEditorDefalutEditorMode {
@@ -64,7 +64,7 @@ PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
 }
 
 - (CGFloat)imageEditorDrawPathWidth {
-    return 5;
+	return 5;
 }
 
 - (UIFont *)imageEditorTextFont {
