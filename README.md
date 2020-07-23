@@ -1,5 +1,5 @@
 <p align="center" >
-  <img src="https://upload-images.jianshu.io/upload_images/4490624-904c1ed2a18ab850.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="PSImageEditors" title="PSImageEditors">
+<img src="https://upload-images.jianshu.io/upload_images/4490624-904c1ed2a18ab850.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240.png" alt="PSImageEditors" title="PSImageEditors">
 </p>
 
 # PSImageEditors（简而至美的一个图片编辑器 ）
@@ -59,6 +59,10 @@ PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
     return [UIColor redColor];
 }
 
+- (PSImageEditorMode)imageEditorDefalutEditorMode {
+	return PSImageEditorModeDraw;
+}
+
 - (CGFloat)imageEditorDrawPathWidth {
     return 5;
 }
@@ -76,6 +80,7 @@ PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
 ## 更新日志
 ```
 - 2018.06.14 (tag:0.1.0)：提交0.1.0版本
-- 2020.07.16 (tag:0.2.0):  修复编辑图片模糊的问题，UI更新
+- 2020.07.16 (tag:0.2.0): 修复编辑图片模糊的问题，UI更新
+- 2020.07.23 (tag:0.2.1): 增加默认选中编辑选项功能
 ```
 

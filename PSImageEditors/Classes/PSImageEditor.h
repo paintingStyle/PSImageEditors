@@ -45,6 +45,7 @@ typedef NS_ENUM(NSInteger, PSImageEditorMode) {
 
 @optional
 - (UIColor *)imageEditorDefaultColor;
+- (PSImageEditorMode)imageEditorDefalutEditorMode;
 - (CGFloat)imageEditorDrawPathWidth;
 - (UIFont *)imageEditorTextFont;
 

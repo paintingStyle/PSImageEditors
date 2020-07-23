@@ -73,6 +73,31 @@
     }
 }
 
+- (void)selectIndex:(NSInteger)index {
+	
+	UIButton *sender = nil;
+	switch (index) {
+		case 0:
+			sender = self.drawButton;
+			break;
+		case 1:
+			sender = self.textButton;
+			break;
+		case 2:
+			sender = self.mosaicButton;
+			break;
+		case 3:
+			sender = self.clippingButton;
+			break;
+		default:
+			break;
+	}
+	
+	if (sender) {
+		[self buttonDidClickSender:sender];
+	}
+}
+
 - (void)reset {
     
     self.drawButton.selected = NO;

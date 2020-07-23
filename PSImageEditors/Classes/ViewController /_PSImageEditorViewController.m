@@ -66,6 +66,9 @@ PSBottomToolBarDelegate> {
     
     [super viewDidLoad];
     [self configUI];
+	[self performSelector:@selector(selectDefaultEditorMode)
+			   withObject:nil
+			   afterDelay:kEditorToolBarAnimationDuration +0.25];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -133,7 +136,12 @@ PSBottomToolBarDelegate> {
 
 - (void)closeButtonDidClick {
 	
+}
+
+- (void)selectDefaultEditorMode {
 	
+	NSInteger editorMode = [self defalutEditorMode];
+	[self.bootomToolBar selectIndex:editorMode];
 }
 
 - (void)buildClipImageCallback:(void(^)(UIImage *clipedImage))callback {
@@ -221,6 +229,15 @@ PSBottomToolBarDelegate> {
 
 	BOOL show = !self.topToolBar.isShow;
 	[self hiddenToolBar:!show animation:YES];
+}
+
+- (PSImageEditorMode)defalutEditorMode {
+	
+	if (self.dataSource && [self.dataSource respondsToSelector:@selector(imageEditorDefalutEditorMode)]) {
+		PSImageEditorMode editorMode = [self.dataSource imageEditorDefalutEditorMode];
+		return editorMode;
+	}
+	return PSImageEditorModeNone;
 }
 
 - (NSDictionary *)drawToolOption {

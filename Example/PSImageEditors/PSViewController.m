@@ -59,6 +59,10 @@ PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
     return [UIColor redColor];
 }
 
+- (PSImageEditorMode)imageEditorDefalutEditorMode {
+	return PSImageEditorModeDraw;
+}
+
 - (CGFloat)imageEditorDrawPathWidth {
 	
     return 5;

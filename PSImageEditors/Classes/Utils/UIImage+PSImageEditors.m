@@ -188,8 +188,8 @@
 - (UIImage *)ps_imageCompress {
 	
 	UIImage *image = self;
-	CGFloat imageWidth = image.size.width;
-	CGFloat imageHeight = image.size.height;
+	CGFloat imageWidth = image.size.width; // 2268
+	CGFloat imageHeight = image.size.height; // 4032
 	CGFloat boundary = 1280;
 	
 	// width, height <= 1280, Size remains the same
@@ -237,15 +237,12 @@
 	
 	CGRect newRect = CGRectMake(0, 0, imageWidth, imageHeight);
 	UIImage *newImage;
-	UIGraphicsBeginImageContextWithOptions(self.size, NO, self.scale);
+	UIGraphicsBeginImageContextWithOptions(CGSizeMake(imageWidth, imageHeight), NO, image.scale);
 	newImage = [UIImage imageWithCGImage:image.CGImage scale:image.scale orientation:image.imageOrientation];
 	[newImage drawInRect:newRect];
 	newImage = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
 	return newImage;
 }
-
-
-
 
 @end

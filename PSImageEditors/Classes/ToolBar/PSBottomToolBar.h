@@ -54,6 +54,8 @@ typedef NS_ENUM(NSInteger, PSBottomToolBarEvent) {
 @property (nonatomic, weak) id<PSBottomToolBarDelegate> delegate;
 
 - (instancetype)initWithType:(PSBottomToolType)type;
+
+- (void)selectIndex:(NSInteger)index;
 - (void)reset;
 
 @end
