@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="Z1m-Tf-CiT">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Z1m-Tf-CiT">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15510"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -11,16 +12,12 @@
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="PSViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="yjR-xR-KrU"/>
-                        <viewControllerLayoutGuide type="bottom" id="Sz5-Ti-MMy"/>
-                    </layoutGuides>
                     <view key="view" alpha="0.90000000000000002" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="localImage_06.jpg" translatesAutoresizingMaskIntoConstraints="NO" id="xFh-bJ-Q6y">
-                                <rect key="frame" x="-433.5" y="-1010.5" width="1242" height="2688"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="localImage_06.jpg" translatesAutoresizingMaskIntoConstraints="NO" id="xFh-bJ-Q6y">
+                                <rect key="frame" x="0.0" y="44" width="375" height="623"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LaV-wc-P6x">
                                 <rect key="frame" x="95.5" y="316" width="184" height="35"/>
@@ -36,11 +33,14 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="xFh-bJ-Q6y" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="ZDs-PJ-9Pa"/>
-                            <constraint firstItem="LaV-wc-P6x" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="llw-ny-klv"/>
+                            <constraint firstItem="aV8-bx-zp4" firstAttribute="trailing" secondItem="xFh-bJ-Q6y" secondAttribute="trailing" id="99v-sa-8mE"/>
+                            <constraint firstItem="xFh-bJ-Q6y" firstAttribute="top" secondItem="aV8-bx-zp4" secondAttribute="top" id="J2n-mX-q1w"/>
+                            <constraint firstItem="aV8-bx-zp4" firstAttribute="bottom" secondItem="xFh-bJ-Q6y" secondAttribute="bottom" id="aQn-Eb-N2O"/>
+                            <constraint firstItem="LaV-wc-P6x" firstAttribute="centerX" secondItem="aV8-bx-zp4" secondAttribute="centerX" id="llw-ny-klv"/>
+                            <constraint firstItem="xFh-bJ-Q6y" firstAttribute="leading" secondItem="aV8-bx-zp4" secondAttribute="leading" id="pkO-Ce-oM5"/>
                             <constraint firstItem="LaV-wc-P6x" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="qOT-tL-9oR"/>
-                            <constraint firstItem="xFh-bJ-Q6y" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="uuY-1v-lo6"/>
                         </constraints>
+                        <viewLayoutGuide key="safeArea" id="aV8-bx-zp4"/>
                     </view>
                     <navigationItem key="navigationItem" title="PSImageEditors" id="csA-eg-0od"/>
                     <connections>

@@ -20,10 +20,6 @@
 @property (nonatomic, strong) PSExpandClickAreaButton *undoButton;
 @property (nonatomic, strong) PSExpandClickAreaButton *doneButton;
 
-@property (nonatomic, strong) UIView *deleteContainerView;
-@property (nonatomic, strong) UIButton *deleteButton;
-@property (nonatomic, strong) UIButton *deleteDescButton;
-
 @property (nonatomic, assign) PSBottomToolType type;
 
 @end
@@ -33,7 +29,7 @@
 
 - (void)buttonDidClickSender:(UIButton *)btn {
     
-    for (UIButton *button in self.subviews) {
+    for (UIButton *button in self.editorItemsView.subviews) {
         if ([button isKindOfClass:[UIButton class]] && (button !=btn))
         { button.selected = NO; }
     }
@@ -115,9 +111,6 @@
             case PSBottomToolTypeEditor:
                 [self configEditorUI];
                 break;
-            case PSBottomToolTypeDelete:
-                [self configDeleteUI];
-                break;
             default:
                 break;
         }
@@ -127,33 +120,35 @@
 
 - (void)configEditorUI {
     
-    [self addSubview:self.maskImageView];
-    [self addSubview:self.drawButton];
-    [self addSubview:self.textButton];
-    [self addSubview:self.mosaicButton];
-    [self addSubview:self.clippingButton];
-	[self addSubview:self.undoButton];
-	[self addSubview:self.doneButton];
+	[self addSubview:self.editorItemsView];
+    [self.editorItemsView addSubview:self.drawButton];
+    [self.editorItemsView addSubview:self.textButton];
+    [self.editorItemsView addSubview:self.mosaicButton];
+    [self.editorItemsView addSubview:self.clippingButton];
+	[self.editorItemsView addSubview:self.undoButton];
+	[self.editorItemsView addSubview:self.doneButton];
 	
-    [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(self);
+    [self.editorItemsView mas_makeConstraints:^(MASConstraintMaker *make) {
+		make.left.right.bottom.equalTo(self);
+		make.height.equalTo(@(44+PS_SAFEAREA_BOTTOM_DISTANCE));
     }];
 	
-	CGFloat margin = PS_SMALL_IPHONE ? 0:PS_ELASTIC_LAYOUT(24);
+	CGFloat leadItemMargin = PS_ELASTIC_LAYOUT(24);
+	CGFloat leadItemWH = PS_ELASTIC_LAYOUT(16);
+	CGFloat editorItemWH = leadItemWH;
+	CGFloat editorItemMargin = PS_ELASTIC_LAYOUT(34);
+	CGFloat editorItemLeadMargin = floor((PS_SCREEN_W  - (4 *editorItemWH) -(3 *editorItemMargin)) *0.5);
 	
 	[self.undoButton mas_makeConstraints:^(MASConstraintMaker *make) {
-		make.left.equalTo(@(margin));
-		if (@available(iOS 11.0, *)) {
-			make.bottom.equalTo(self.mas_safeAreaLayoutGuideBottom).offset(-14);
-		} else {
-			make.bottom.equalTo(@(-14));
-		}
-		make.size.equalTo(@34);
+		make.left.equalTo(@(leadItemMargin));
+		make.size.equalTo(@(leadItemWH));
+		make.top.equalTo(@14);
 	}];
+	
 	[self.doneButton mas_makeConstraints:^(MASConstraintMaker *make) {
-		make.right.equalTo(@(-margin));
-		make.bottom.equalTo(self.undoButton);
-		make.size.equalTo(@34);
+		make.right.equalTo(@(-leadItemMargin));
+		make.size.equalTo(@(leadItemWH));
+		make.top.equalTo(@14);
 	}];
 	
     NSMutableArray *editorItems = [NSMutableArray array];
@@ -162,81 +157,15 @@
     [editorItems addObject:self.mosaicButton];
     [editorItems addObject:self.clippingButton];
 	
-	CGFloat leadSpacing = PS_SMALL_IPHONE ? 60: PS_ELASTIC_LAYOUT(80);
-	CGFloat fixedSpacing = PS_SMALL_IPHONE ? 20: PS_ELASTIC_LAYOUT(30);
-	
 	[editorItems mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
-							 withFixedSpacing:fixedSpacing
-								  leadSpacing:leadSpacing
-								  tailSpacing:leadSpacing];
+						  withFixedItemLength:editorItemWH
+								  leadSpacing:editorItemLeadMargin
+								  tailSpacing:editorItemLeadMargin];
 
     [editorItems mas_makeConstraints:^(MASConstraintMaker *make) {
-		
-		if (@available(iOS 11.0, *)) {
-			make.bottom.equalTo(self.mas_safeAreaLayoutGuideBottom).offset(-14);
-		} else {
-			make.bottom.equalTo(@(-14));
-		}
-        make.height.equalTo(@34);
+		make.centerY.equalTo(self.undoButton);
+		make.height.equalTo(@(editorItemWH));
     }];
-	self.tempEditorItem = editorItems.firstObject;
-}
-
-- (void)configDeleteUI {
-    
-    [self addSubview:self.maskImageView];
-    [self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(self);
-    }];
-    
-    self.deleteContainerView = [[UIView alloc] init];
-    [self addSubview:self.deleteContainerView];
-    
-    self.deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.deleteButton setImage:[UIImage ps_imageNamed:@"btn_delete_normal"] forState:UIControlStateNormal];
-    [self.deleteButton setImage:[UIImage ps_imageNamed:@"btn_delete_selected"] forState:UIControlStateSelected];
-    [self.deleteContainerView addSubview:self.deleteButton];
-    
-    self.deleteDescButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.deleteDescButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    self.deleteDescButton.titleLabel.font = [UIFont systemFontOfSize:16];
-    [self.deleteDescButton setTitle:@"拖动到此处删除" forState:UIControlStateNormal];
-    [self.deleteDescButton setTitle:@"松手即可删除" forState:UIControlStateSelected];
-    [self.deleteContainerView addSubview:self.deleteDescButton];
-    
-    
-    [self.deleteContainerView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.equalTo(self);
-    }];
-    
-    [self.deleteButton mas_makeConstraints:^(MASConstraintMaker *make) {
-		
-        make.centerX.equalTo(self.deleteContainerView);
-		make.bottom.equalTo(self.deleteDescButton.mas_top).offset(-12);
-    }];
-    
-    [self.deleteDescButton mas_makeConstraints:^(MASConstraintMaker *make) {
-		
-        make.centerX.equalTo(self.deleteButton);
-		if (@available(iOS 11.0, *)) {
-			make.bottom.equalTo(self.mas_safeAreaLayoutGuideBottom).offset(-20);
-		} else {
-			make.bottom.equalTo(@(-20));
-		}
-    }];
-}
-
-- (void)setDeleteState:(PSBottomToolDeleteState)deleteState {
-    
-    _deleteState = deleteState;
-
-	if (deleteState == PSBottomToolDeleteStateDid) {
-		self.deleteButton.selected = YES;
-		self.deleteDescButton.selected = YES;
-	}else {
-		self.deleteButton.selected = NO;
-		self.deleteDescButton.selected = NO;
-	}
 }
 
 - (void)setCanUndo:(BOOL)canUndo {
@@ -324,6 +253,16 @@
 		[_doneButton addTarget:self action:@selector(doneButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
 		_doneButton;
 	}));
+}
+
+- (UIView *)editorItemsView {
+	
+	return LAZY_LOAD(_editorItemsView, ({
+		   
+		   _editorItemsView = [[UIView alloc] init];
+		   _editorItemsView.backgroundColor = [UIColor blackColor];
+		   _editorItemsView;
+	   }));
 }
 
 - (UIImageView *)maskImageView {

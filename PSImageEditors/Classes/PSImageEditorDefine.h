@@ -9,13 +9,14 @@
 #define PSImageEditorDefine_h
 
 #define PSTopToolBarHeight PS_NAV_BAR_H
-#define PSBottomToolBarHeight 110+PS_SAFEAREA_BOTTOM_DISTANCE
+#define PSBottomToolBarHeight PS_SAFEAREA_BOTTOM_DISTANCE +44
 #define PSBottomToolDeleteBarHeight 120
 
 #define PSTextTopToolBarHeight PS_NAV_BAR_H
-#define PSDrawColorToolBarHeight 50
+#define PSDrawColorToolBarHeight 42
 #define PSTextColorToolBarHeight 48
-#define PSMosaicToolBarHeight 50
+#define PSMosaicToolBarHeight 40
+
 
 #define PS_SCREEN_W [UIScreen mainScreen].bounds.size.width
 #define PS_SCREEN_H [UIScreen mainScreen].bounds.size.height

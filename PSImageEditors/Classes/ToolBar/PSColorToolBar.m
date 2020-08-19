@@ -9,10 +9,12 @@
 #import "PSColorFullButton.h"
 #import "PSExpandClickAreaButton.h"
 
-#define kItemLength PS_SMALL_IPHONE ? 34:44
-#define kItemRadius 8
+#define kItemLength 24//PS_SMALL_IPHONE ? 34:44
+#define kItemRadius 4.5
 
 @interface PSColorToolBar ()
+
+@property (nonatomic, strong) UIImageView *maskImageView;
 
 @property (nonatomic, strong) PSColorFullButton *redButton;
 @property (nonatomic, strong) PSColorFullButton *blackButton;
@@ -49,9 +51,11 @@
 
 - (void)configDrawUI {
 	
+	[self addSubview:self.maskImageView];
+	
 	_colorFullButtonViews = [[UIView alloc] init];
 	[self addSubview:_colorFullButtonViews];
-	
+
 	[_colorFullButtonViews addSubview:self.redButton];
 	[_colorFullButtonViews addSubview:self.blackButton];
 	[_colorFullButtonViews addSubview:self.whiteButton];
@@ -59,45 +63,44 @@
 	[_colorFullButtonViews addSubview:self.greenButton];
 	[_colorFullButtonViews addSubview:self.lightBlueButton];
 	[_colorFullButtonViews addSubview:self.blueButton];
+	
 	// 使用手势识别，关闭自带交互
 	for (PSColorFullButton *button in _colorFullButtonViews.subviews) {
 		button.userInteractionEnabled = NO;
 	}
 	
-	_bottomLineView = [[UIView alloc] init];
-	_bottomLineView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
-	[self addSubview:_bottomLineView];
+	[self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+	   make.edges.equalTo(self);
+	}];
 
+	[_colorFullButtonViews mas_makeConstraints:^(MASConstraintMaker *make) {
+		CGFloat offest = PS_ELASTIC_LAYOUT(70);
+		make.left.equalTo(@(offest));
+		make.right.equalTo(@(-offest));
+		make.top.equalTo(self);
+		make.height.equalTo(@24);
+	}];
+	
 	[_colorFullButtonViews.subviews mas_distributeViewsAlongAxis:MASAxisTypeHorizontal
 											 withFixedItemLength:kItemLength
 													 leadSpacing:0
 													 tailSpacing:0];
-	[_colorFullButtonViews mas_makeConstraints:^(MASConstraintMaker *make) {
-		CGFloat offest = PS_SMALL_IPHONE ? 10:PS_ELASTIC_LAYOUT(50);
-		make.left.equalTo(@(offest));
-		make.right.equalTo(@(-offest));
-		make.bottom.equalTo(@(-30));
-	}];
 	
 	[_colorFullButtonViews.subviews mas_makeConstraints:^(MASConstraintMaker *make) {
 		make.centerY.equalTo(_colorFullButtonViews);
 		make.height.equalTo(@(kItemLength));
 	}];
-	
-	[_bottomLineView mas_makeConstraints:^(MASConstraintMaker *make) {
-		
-		make.left.equalTo(@15);
-		make.right.equalTo(@(-15));
-		make.bottom.equalTo(self);
-		make.height.equalTo(@0.5);
-	}];
 
 	// 设置默认选中颜色
 	self.redButton.isUse = YES;
 	self.currentColor = self.redButton.color;
+	
+	[self colorFullButtonDidClick:self.redButton];
 }
 
 - (void)configTextUI {
+	
+	[self addSubview:self.maskImageView];
 	
 	_changeBgColorButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
 	[_changeBgColorButton setImage:[UIImage ps_imageNamed:@"btn_changeTextBgColor_normal"]
@@ -122,8 +125,11 @@
 		button.userInteractionEnabled = NO;
 	}
 	
-	CGFloat margin = PS_SMALL_IPHONE ? 0:14;
+	[self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+	   make.edges.equalTo(self);
+	}];
 	
+	CGFloat margin = PS_SMALL_IPHONE ? 0:14;
 	[_changeBgColorButton mas_makeConstraints:^(MASConstraintMaker *make) {
 		
 		make.centerY.equalTo(self);
@@ -160,6 +166,11 @@
 	
 	return CGColorEqualToColor(self.currentColor.CGColor,
 							   self.whiteButton.color.CGColor);
+}
+
+- (void)setChangeBgColorButtonSelected:(BOOL)selected {
+	
+	_changeBgColorButton.selected = selected;
 }
 
 - (void)setCurrentColor:(UIColor *)currentColor {
@@ -287,6 +298,15 @@
 		_redButton = [[PSColorFullButton alloc] initWithFrame:CGRectMake(0, 0, kItemLength, kItemLength) radius:kItemRadius color:PSColorFromRGB(0xff1d12)];
 		_redButton;
 	}));
+}
+
+- (UIImageView *)maskImageView {
+    
+    return LAZY_LOAD(_maskImageView, ({
+        
+        _maskImageView = [[UIImageView alloc] initWithImage:[UIImage ps_imageNamed:@"icon_mask_bottom"]];
+        _maskImageView;
+    }));
 }
 
 @end

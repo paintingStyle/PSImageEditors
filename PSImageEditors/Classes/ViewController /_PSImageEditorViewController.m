@@ -9,7 +9,7 @@
 #import "PSDrawTool.h"
 #import "PSMosaicTool.h"
 #import "PSTexTool.h"
-#import "PSTexItem.h"
+#import "PSMovingView.h"
 #import "PSClippingTool.h"
 #import "PSExpandClickAreaButton.h"
 
@@ -66,15 +66,13 @@ PSBottomToolBarDelegate> {
     
     [super viewDidLoad];
     [self configUI];
-	[self performSelector:@selector(selectDefaultEditorMode)
-			   withObject:nil
-			   afterDelay:kEditorToolBarAnimationDuration +0.25];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     
     [super viewWillAppear:animated];
 	[UIApplication sharedApplication].statusBarHidden = YES;
+	
     [self.navigationController setNavigationBarHidden:YES animated:NO];
 	if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]){
 		self.navigationController.interactivePopGestureRecognizer.enabled = NO;
@@ -93,13 +91,6 @@ PSBottomToolBarDelegate> {
 	}
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-    
-    [super viewDidAppear:animated];
-    [self.topToolBar setToolBarShow:YES animation:YES];
-    [self.bottomToolBar setToolBarShow:YES animation:YES];
-}
-
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
 	
@@ -109,6 +100,8 @@ PSBottomToolBarDelegate> {
 		[self.mosaicTool initialize];
 		[self.drawTool initialize];
 		[self.texTool initialize];
+		// 设置默认编辑模式
+		[self selectDefaultEditorMode];
 	}
 	self.initializeTools = YES;
 }
@@ -134,10 +127,6 @@ PSBottomToolBarDelegate> {
 
 #pragma mark - Method
 
-- (void)closeButtonDidClick {
-	
-}
-
 - (void)selectDefaultEditorMode {
 	
 	NSInteger editorMode = [self defalutEditorMode];
@@ -155,19 +144,18 @@ PSBottomToolBarDelegate> {
     UIImageView *drawingView =  self.drawTool->_drawingView;
     UIImage *mosaicImage = [self.mosaicTool mosaicImage];
     
-    UIGraphicsBeginImageContextWithOptions(imageView.image.size, NO, [UIScreen mainScreen].scale);
-    // 画笔
+    UIGraphicsBeginImageContextWithOptions(imageView.image.size, NO, imageView.image.scale);
+    // 图片
     [imageView.image drawAtPoint:CGPointZero];
 	// 马赛克
     [mosaicImage drawAtPoint:CGPointZero];
+	// 画笔
     [drawingView.image drawInRect:CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height)];
     // 文字
     for (UIView *view in self.view.subviews) {
-        if (![view isKindOfClass:[PSTexItem class]]) { continue; }
+        if (![view isKindOfClass:[PSMovingView class]]) { continue; }
         
-        PSTexItem *texItem = (PSTexItem *)view;
-        [PSTexItem setInactiveTextView:texItem];
-        
+        PSMovingView *texItem = (PSMovingView *)view;
         CGFloat rotation = [[texItem.layer valueForKeyPath:@"transform.rotation.z"] doubleValue];
         CGFloat selfRw = imageView.bounds.size.width / imageView.image.size.width;
         CGFloat selfRh = imageView.bounds.size.height / imageView.image.size.height;
@@ -192,12 +180,17 @@ PSBottomToolBarDelegate> {
 }
 
 - (void)resetImageViewFrame {
-    
-    CGSize size = (_imageView.image) ? _imageView.image.size : _imageView.frame.size;
-    CGFloat ratio = MIN(_scrollView.frame.size.width / size.width, _scrollView.frame.size.height / size.height);
-    CGFloat W = ratio * size.width;
-    CGFloat H = ratio * size.height;
-    _imageView.frame = CGRectMake(0, 0, W, H);
+	
+	CGSize size = (_imageView.image) ? _imageView.image.size : _imageView.frame.size;
+	if (size.width <= 2048 && size.height <=2048) {
+		_imageView.frame = self.view.bounds;
+	}else {
+		CGFloat ratio = MIN(_scrollView.frame.size.width / size.width, _scrollView.frame.size.height / size.height);
+		CGFloat W = ratio * size.width;
+		CGFloat H = ratio * size.height;
+		_imageView.frame = CGRectMake(0, 0, W, H);
+	}
+	
     _imageView.superview.bounds = _imageView.bounds;
 }
 
@@ -223,12 +216,6 @@ PSBottomToolBarDelegate> {
 	if (!_originalImage) { return; }
     [self resetImageViewFrame];
     [self resetZoomScaleWithAnimate:NO];
-}
-
-- (void)singleGestureClicked {
-
-	BOOL show = !self.topToolBar.isShow;
-	[self hiddenToolBar:!show animation:YES];
 }
 
 - (PSImageEditorMode)defalutEditorMode {
@@ -282,8 +269,13 @@ PSBottomToolBarDelegate> {
 	}
 	
 	[self.topToolBar setToolBarShow:!hidden animation:animation];
+}
+
+- (void)hiddenBottomToolBar:(BOOL)hidden animation:(BOOL)animation {
+	
 	[self.bottomToolBar setToolBarShow:!hidden animation:animation];
 }
+
 
 - (void)dismiss {
 	
@@ -413,11 +405,9 @@ PSBottomToolBarDelegate> {
 		make.height.equalTo(@(PSBottomToolBarHeight));
 	}];
     [self.scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
-		make.edges.equalTo(self.view);
+		make.top.left.right.equalTo(self.view);
+		make.bottom.equalTo(self.view).offset(-(44+PS_SAFEAREA_BOTTOM_DISTANCE));
     }];
-    
-    [self.topToolBar setToolBarShow:NO animation:NO];
-    [self.bottomToolBar setToolBarShow:NO animation:NO];
 }
 
 #pragma mark - Getter/Setter
@@ -494,13 +484,6 @@ PSBottomToolBarDelegate> {
     return LAZY_LOAD(_texTool, ({
         
         _texTool = [[PSTexTool alloc] initWithImageEditor:self withOption:[self textToolOption]];
-        @weakify(self);
-        _texTool.dissmissCallback = ^(NSString *currentText) {
-            @strongify(self);
-            [self.texTool cleanup];
-			self.currentTool = nil;
-            [self.bottomToolBar reset];
-        };
         _texTool;
     }));
 }
@@ -511,6 +494,7 @@ PSBottomToolBarDelegate> {
 		
 		_bootomToolBar = [[PSBottomToolBar alloc] initWithType:PSBottomToolTypeEditor];
 		_bootomToolBar.delegate = self;
+		_bootomToolBar.backgroundColor = [UIColor blackColor];
 		_bootomToolBar;
 	}));
 }
@@ -561,8 +545,6 @@ PSBottomToolBarDelegate> {
             _scrollView.contentInsetAdjustmentBehavior =
             UIScrollViewContentInsetAdjustmentNever;
         }
-		UITapGestureRecognizer *singleGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleGestureClicked)];
-		[_scrollView addGestureRecognizer:singleGesture];
         _scrollView;
     }));
 }

@@ -31,7 +31,7 @@
 		UIGraphicsBeginImageContext(self.bounds.size);
 		CAShapeLayer *layer = [CAShapeLayer layer];
 		layer.frame = self.bounds;
-		UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(self.bounds.size.width/2.f, self.bounds.size.height/2.f) radius:9 startAngle:0 endAngle:2*M_PI clockwise:YES];
+		UIBezierPath *path = [UIBezierPath bezierPathWithArcCenter:CGPointMake(self.bounds.size.width/2.f, self.bounds.size.height/2.f) radius:radius startAngle:0 endAngle:2*M_PI clockwise:YES];
 		layer.fillColor = _color.CGColor;
 		layer.allowsEdgeAntialiasing = YES;
 		layer.backgroundColor = [UIColor clearColor].CGColor;

@@ -41,5 +41,6 @@ typedef NS_ENUM(NSUInteger, PSColorToolBarEvent) {
 @property (nonatomic, weak) id<PSColorToolBarDelegate> delegate;
 
 - (BOOL)isWhiteColor;
+- (void)setChangeBgColorButtonSelected:(BOOL)selected;
 
 @end

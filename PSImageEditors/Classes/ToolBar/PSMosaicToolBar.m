@@ -10,12 +10,12 @@
 
 @interface PSMosaicToolBar ()
 
+@property (nonatomic, strong) UIImageView *maskImageView;
+
 /// 矩形马赛克
 @property (nonatomic, strong) PSExpandClickAreaButton *rectangularMosaicStyleButton;
 /// 磨砂马赛克
 @property (nonatomic, strong) PSExpandClickAreaButton *grindArenaceousMosaicStyleButton;
-
-@property (nonatomic, strong) UIView *bottomLineView;
 
 @end
 
@@ -26,6 +26,11 @@
     
     if (self = [super init]) {
         
+		[self addSubview:self.maskImageView];
+		[self.maskImageView mas_makeConstraints:^(MASConstraintMaker *make) {
+		   make.edges.equalTo(self);
+		}];
+		
         _rectangularMosaicStyleButton = [PSExpandClickAreaButton buttonWithType:UIButtonTypeCustom];
         [_rectangularMosaicStyleButton setImage:[UIImage ps_imageNamed:@"btn_mosaic_rectangular_normal"]
                                        forState:UIControlStateNormal];
@@ -53,21 +58,10 @@
                                 leadSpacing:48
                                 tailSpacing:48];
         [views mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.top.equalTo(self);
-            make.height.equalTo(@28);
+            make.bottom.equalTo(@(-10));
+            make.height.equalTo(@30);
         }];
 		
-		_bottomLineView = [[UIView alloc] init];
-		_bottomLineView.backgroundColor = [UIColor colorWithWhite:1 alpha:0.2];
-		[self addSubview:_bottomLineView];
-		
-		[_bottomLineView mas_makeConstraints:^(MASConstraintMaker *make) {
-			
-			make.left.equalTo(@15);
-			make.right.equalTo(@(-15));
-			make.bottom.equalTo(self);
-			make.height.equalTo(@0.5);
-		}];
 		
         // 默认选中
         _rectangularMosaicStyleButton.selected = YES;
@@ -95,6 +89,15 @@
         [self.delegate respondsToSelector:@selector(mosaicToolBarType:event:)]) {
         [self.delegate mosaicToolBarType:self.mosaicType event:event];
     }
+}
+
+- (UIImageView *)maskImageView {
+    
+    return LAZY_LOAD(_maskImageView, ({
+        
+        _maskImageView = [[UIImageView alloc] initWithImage:[UIImage ps_imageNamed:@"icon_mask_bottom"]];
+        _maskImageView;
+    }));
 }
 
 @end

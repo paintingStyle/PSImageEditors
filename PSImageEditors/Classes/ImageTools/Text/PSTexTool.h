@@ -12,13 +12,6 @@
 
 @property (nonatomic, strong) PSTextView *textView;
 
-/// 再次编辑PSTexToolItem
-@property (nonatomic, assign) BOOL isEditAgain;
-/// 关闭页面
-@property (nonatomic, copy) void (^dissmissCallback) (NSString *currentText);
-/// 再次编辑回调
-@property (nonatomic, copy) void (^editAgainCallback) (NSString *text, NSDictionary *attrs);
-
 @end
 
 @interface PSTextView : UIView
@@ -27,6 +20,11 @@
 @property (nonatomic, strong) UITextView *inputView;
 @property (nonatomic, strong) NSDictionary *attrs; /// 预设属性
 
-@property (nonatomic, copy) void (^dissmissBlock) (NSString *text, NSDictionary *attrs, BOOL use);
+
+- (void)addTextItemWithText:(NSString *)text
+				  withAttrs:(NSDictionary *)attrs
+				  withPoint:(CGPoint)point;
+
+@property (nonatomic, copy) void (^dissmissBlock) (NSString *text, NSDictionary *attrs, BOOL done);
 
 @end

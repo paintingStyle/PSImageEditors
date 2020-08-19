@@ -18,5 +18,9 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>如果不允许，你将无法保存照片到系统相册里</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>如果不允许，你将无法发送系统相册里的照片给朋友</string>
 </dict>
 </plist>

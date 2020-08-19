@@ -9,15 +9,16 @@
 #import "PSTopToolBar.h"
 #import "PSBottomToolBar.h"
 #import "PSColorToolBar.h"
-#import "PSTexItem.h"
+#import "PSMovingView.h"
 
 static const NSInteger kTextMaxLimitNumber = 100;
 
-@interface PSTexTool()<PSTexItemDelegate>
+@interface PSTexTool()
 
 @property (nonatomic, strong) UIColor *textColor;
 @property (nonatomic, strong) UIFont *textFont;
-@property (nonatomic, strong) PSBottomToolBar *deleteToolBar;
+@property (nonatomic, strong) PSColorToolBar *colorToolBar;
+@property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
 
 @end
 
@@ -32,7 +33,7 @@ static const NSInteger kTextMaxLimitNumber = 100;
 - (void)resetRect:(CGRect)rect {
 	
 	[self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-		if ([obj isKindOfClass:[PSTexItem class]]) {
+		if ([obj isKindOfClass:[PSMovingView class]]) {
 			[obj removeFromSuperview];
 		}
 	}];
@@ -43,139 +44,171 @@ static const NSInteger kTextMaxLimitNumber = 100;
     
     [super setup];
     
-    [self.editor.topToolBar setToolBarShow:NO animation:NO];
-    [self.editor.bottomToolBar setToolBarShow:NO animation:NO];
-    
-    if (!self.deleteToolBar) {
-        self.deleteToolBar = [[PSBottomToolBar alloc] initWithType:PSBottomToolTypeDelete];
-        [self.deleteToolBar setToolBarShow:NO animation:NO];
-        [self.editor.view addSubview:self.deleteToolBar];
-        [self.deleteToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.left.bottom.right.equalTo(self.editor.view);
-            make.height.equalTo(@(PSBottomToolDeleteBarHeight));
-        }];
-    }
-    
     self.textColor = self.option[kImageToolTextColorKey];
     self.textFont = self.option[kImageToolTextFontKey];
     
-    // 关闭scrollView自带的缩放手势
-    self.editor.scrollView.pinchGestureRecognizer.enabled = NO;
-    
-    __weak typeof(self)weakSelf = self;
+	if (!self.tapGesture) {
+		 self.tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(drawingViewDidTap:)];
+		 [self.editor.view addGestureRecognizer:self.tapGesture];
+	 }
+	self.tapGesture.enabled = YES;
 	
-	self.textView = [[PSTextView alloc] initWithFrame:self.editor.view.bounds];
-    self.textView.inputView.textColor = self.textColor;
-    self.textView.inputView.font = self.textFont;
-    
-    PSTexItem *activeTexItem  = self.activeItem;
-    // 点击了激活的item，再次进入编辑模式
-    if (activeTexItem && self.isEditAgain) {
-        NSMutableDictionary *attrs = [NSMutableDictionary dictionary];
-        if (activeTexItem.fillColor) {
-            [attrs setObject:activeTexItem.fillColor forKey:NSBackgroundColorAttributeName];
-        }
-        if (activeTexItem.strokeColor) {
-            [attrs setObject:activeTexItem.strokeColor forKey:NSForegroundColorAttributeName];
-        }
-        if (activeTexItem.font) {
-            [attrs setObject:activeTexItem.font forKey:NSFontAttributeName];
-        }
-        self.textView.inputView.text = activeTexItem.text;
-        self.textView.attrs = attrs;
-	}
+	if (!self.colorToolBar) {
+	   self.colorToolBar = [[PSColorToolBar alloc] initWithType:PSColorToolBarTypeColor];
+	   self.colorToolBar.delegate = self;
+	   [self.editor.view addSubview:self.colorToolBar];
+	   [self.colorToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
+		   make.bottom.equalTo(self.editor.bottomToolBar.editorItemsView.mas_top);
+		   make.left.right.equalTo(self.editor.view);
+		   make.height.equalTo(@(PSDrawColorToolBarHeight));
+	   }];
+   }
+   [self.colorToolBar setToolBarShow:YES animation:NO];
+}
+
+- (void)cleanup {
+    [super cleanup];
+	self.tapGesture.enabled = NO;
+	[self.colorToolBar setToolBarShow:NO animation:NO];
+}
+
+- (void)addTextItemWithText:(NSString *)text
+				  withAttrs:(NSDictionary *)attrs
+				  withPoint:(CGPoint)point {
+	
+	// 过滤颜色卡的点击范围
+	if (point.y > CGRectGetMinY(self.colorToolBar.frame)) { return; }
+	
+	UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
+	UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
+	UIFont *font = attrs[NSFontAttributeName];
+
+	CGPoint center = point;
+	// 修正超长图文字的显示位置
+	if (CGRectGetHeight(self.editor.imageView.frame) >PS_SCREEN_H)
+	{ center.y = self.editor.scrollView.contentOffset.y + PS_SCREEN_H *0.5; }
+
+	NSAttributedString *attribString = [[NSAttributedString alloc] initWithString:@"点击输入" attributes:@{NSFontAttributeName:font,
+																									   NSForegroundColorAttributeName:strokeColor,
+																									   NSBackgroundColorAttributeName:fillColor}];
+	
+	PSStickerItem *item = [PSStickerItem mainWithAttributedText:attribString];
+	PSMovingView *movingView = [[PSMovingView alloc] initWithItem:item];
+	movingView.center = center;
+
+	[self.editor.view addSubview:movingView];
+	[PSMovingView setActiveEmoticonView:movingView];
+
+	CGFloat screenScale = 1;
+	CGFloat minScale = 0.2;
+	CGFloat maxScale = 3;
+
+
+	//* 屏幕缩放率
+	movingView.screenScale = screenScale;
+	
+	/** 最小缩放率 */
+	CGFloat ratio = minScale;
+	movingView.minScale = MIN( (ratio * [UIScreen mainScreen].bounds.size.width) / movingView.view.frame.size.width, (ratio * [UIScreen mainScreen].bounds.size.height) / movingView.view.frame.size.height)/screenScale;
+	/** 最大缩放率 */
+	ratio = maxScale;
+	movingView.maxScale = MIN( (ratio * [UIScreen mainScreen].bounds.size.width) / movingView.view.frame.size.width, (ratio * [UIScreen mainScreen].bounds.size.height) / movingView.view.frame.size.height)/screenScale;
+	ratio = 0.5f;
+	CGFloat scale = MIN( (ratio * [UIScreen mainScreen].bounds.size.width) / movingView.view.frame.size.width, (ratio * [UIScreen mainScreen].bounds.size.height) / movingView.view.frame.size.height);
+	[movingView setScale:scale/screenScale];
+	
+	__weak typeof(self)weakSelf = self;
+	[movingView setTapEnded:^(PSMovingView * _Nonnull view) {
+		if (view.isActive) {
+			[weakSelf presentTextViewWithView:view];
+		}
+	}];
+	[movingView setMoveCenter:^(UIGestureRecognizerState state) {
+		if (weakSelf.editor.editorMode != PSImageEditorModeText) { return; }
+		
+		if (state == UIGestureRecognizerStateEnded) {
+			[weakSelf.colorToolBar setToolBarShow:YES animation:YES];
+		}else {
+			[weakSelf.colorToolBar setToolBarShow:NO animation:YES];
+		}
+	}];
 	
 	self.editor.scrollViewDidZoomBlock = ^(CGFloat zoomScale) {
-		[self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-			if ([obj isKindOfClass:[PSTexItem class]]) {
+		[weakSelf.editor.view.subviews enumerateObjectsUsingBlock:
+		 ^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			if ([obj isKindOfClass:[PSMovingView class]]) {
 				obj.transform = CGAffineTransformMakeScale(zoomScale, zoomScale);
 			}
 		}];
 	};
-    
-    self.textView.dissmissBlock = ^(NSString *text, NSDictionary *attrs, BOOL use) {
-        
-        if (weakSelf.isEditAgain) { // 点击item
-            if (weakSelf.editAgainCallback && use) {
-                weakSelf.editAgainCallback(text, attrs);
-            }
-            weakSelf.isEditAgain = NO;
-        } else {
-            if (use) {
-                [weakSelf addTextBoardItemWithText:text attrs:attrs];
-            }
-        }
-        // 开启scrollView自带的缩放手势
-        weakSelf.editor.scrollView.pinchGestureRecognizer.enabled = YES;
-        //[weakSelf cleanup];
-        if (weakSelf.dissmissCallback) {
-             weakSelf.dissmissCallback(text);
-        }
-    };
+}
+
+- (void)presentTextViewWithView:(PSMovingView *)view {
+
+	self.tapGesture.enabled = NO;
+	
+	self.textView = [[PSTextView alloc] initWithFrame:self.editor.view.bounds];
+	self.textView.inputView.textColor = self.textColor;
+	self.textView.inputView.font = self.textFont;
+
+	// 点击了激活的item，再次进入编辑模式
+	NSRange range = NSMakeRange(0, view.item.attributedText.string.length);
+	NSMutableDictionary *attrs = [view.item.attributedText attributesAtIndex:0 effectiveRange:&range];
+	self.textView.inputView.text = view.item.attributedText.string;
+	self.textView.attrs = attrs;
+
+	__weak typeof(self)weakSelf = self;
+	self.textView.dissmissBlock = ^(NSString *text, NSDictionary *attrs, BOOL done) {
+		
+		UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
+		UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
+		UIFont *font = [UIFont systemFontOfSize:18];
+
+		NSAttributedString *attribString = [[NSAttributedString alloc] initWithString:@"点击输入" attributes:@{NSFontAttributeName:font,
+																										   NSForegroundColorAttributeName:strokeColor,
+																										   NSBackgroundColorAttributeName:fillColor}];
+		PSStickerItem *item = [PSStickerItem mainWithAttributedText:attribString];
+		view.item = item;
+		[weakSelf.textView removeFromSuperview];
+		weakSelf.tapGesture.enabled = YES;
+	};
 	if (!self.textView.superview) {
 		[self.editor.view addSubview:self.textView];
 	}
 }
 
-- (void)cleanup {
-    [super cleanup];
-    [self.textView removeFromSuperview];
-	[self.deleteToolBar setToolBarShow:NO animation:NO];
-    [self.editor.topToolBar setToolBarShow:YES animation:YES];
-    [self.editor.bottomToolBar setToolBarShow:YES animation:YES];
+- (void)drawingViewDidTap:(UITapGestureRecognizer *)tap {
+	
+	CGPoint point = [tap locationInView:tap.view];
+	
+	NSDictionary *attrs = @{
+			NSBackgroundColorAttributeName:[UIColor clearColor],
+			NSForegroundColorAttributeName:self.colorToolBar.currentColor,
+			NSFontAttributeName:[UIFont systemFontOfSize:18],
+		};
+	[self addTextItemWithText:@"添加文字"
+						withAttrs:attrs
+						withPoint:point];
 }
 
 - (void)executeWithCompletionBlock:(void (^)(UIImage *, NSError *, NSDictionary *))completionBlock {
     
 }
 
-- (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation {
-    
-    [self.deleteToolBar setToolBarShow:!hidden animation:animation];
-}
-
 - (void)changeColor:(NSNotification *)notification {
-    UIColor *panColor = (UIColor *)notification.object;
+    
+	UIColor *panColor = (UIColor *)notification.object;
     if (panColor && self.textView) {
         [self.textView.inputView setTextColor:panColor];
     }
 }
 
-- (void)addTextBoardItemWithText:(NSString *)text
-                           attrs:(NSDictionary *)attrs {
-    
-    if (!text && !text.length) { return; }
-    
-    UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
-    UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
-    UIFont *font = attrs[NSFontAttributeName];
-    
-    PSTexItem *texItem = [[PSTexItem alloc] initWithTool:self text:text font:self.textView.inputView.font];
+- (PSMovingView *)activeItem {
 
-    CGPoint center = self.editor.view.center;
-    // 修正超长图文字的显示位置
-    if (CGRectGetHeight(self.editor.imageView.frame) >PS_SCREEN_H) {
-        center.y = self.editor.scrollView.contentOffset.y + PS_SCREEN_H *0.5;
-    }
-
-    texItem.delegate = self;
-    texItem.borderColor = [UIColor whiteColor];
-    texItem.font = font;
-    texItem.strokeColor = strokeColor;
-    texItem.fillColor = fillColor;
-    texItem.text = text;
-    texItem.center = center;
-    texItem.userInteractionEnabled = YES;
-    [self.editor.view addSubview:texItem];
-    [PSTexItem setActiveTextView:texItem];
-}
-
-- (PSTexItem *)activeItem {
-
-    __block PSTexItem *activeItem;
+    __block PSMovingView *activeItem;
     [self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([obj isKindOfClass:[PSTexItem class]]) {
-			if (((PSTexItem *)obj).isActive) {
+        if ([obj isKindOfClass:[PSMovingView class]]) {
+			if (((PSMovingView *)obj).isActive) {
 				activeItem = obj;
 				*stop = YES;
 			}
@@ -188,7 +221,7 @@ static const NSInteger kTextMaxLimitNumber = 100;
 	
 	__block BOOL containsTexItem = NO;
 	[self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-		if ([obj isKindOfClass:[PSTexItem class]]) {
+		if ([obj isKindOfClass:[PSMovingView class]]) {
 			containsTexItem = YES;
 			*stop = YES;
 		}
@@ -196,46 +229,6 @@ static const NSInteger kTextMaxLimitNumber = 100;
 	
 	return containsTexItem;
 }
-
-#pragma mark - PSTexItemDelegate
-
-- (void)texItemDidClickWithItem:(PSTexItem *)item {
-    
-    [self setup];
-}
-
-- (BOOL)textItemRestrictedPanAreasWithTextItem:(PSTexItem *)item {
-    
-    BOOL hasDeleteCoordinate = CGRectIntersectsRect(self.deleteToolBar.frame, item.frame);
-    CGRect rectCoordinate = [item.superview convertRect:item.frame toView:self.editor.imageView.superview];
-    BOOL beyondBorder = !CGRectIntersectsRect(CGRectInset(self.editor.imageView.frame, 30, 30), rectCoordinate);
-    
-    return beyondBorder && !hasDeleteCoordinate;
-}
-
-- (void)texItem:(PSTexItem *)item
-translationGesture:(UIPanGestureRecognizer *)gesture
-     activation:(BOOL)activation {
-    
-    BOOL hasDeleteCoordinate = CGRectIntersectsRect(self.deleteToolBar.frame, item.frame);
-	
-    if (hasDeleteCoordinate) {
-        self.deleteToolBar.deleteState = PSBottomToolDeleteStateDid;
-        if (!activation) {
-            [item remove];
-        }
-    }else {
-        self.deleteToolBar.deleteState = PSBottomToolDeleteStateWill;
-    }
-	
-    if (!self.deleteToolBar.isWilShow && activation) {
-        [self.deleteToolBar setToolBarShow:YES animation:YES];
-    }else if (self.deleteToolBar.isWilShow && !activation) {
-        [self.deleteToolBar setToolBarShow:NO animation:YES];
-    }
-}
-
-
 
 @end
 
@@ -264,7 +257,8 @@ translationGesture:(UIPanGestureRecognizer *)gesture
     
     self.colorToolBar.changeBgColor = !CGColorEqualToColor(fillColor.CGColor, [UIColor clearColor].CGColor);
     self.colorToolBar.currentColor = self.colorToolBar.changeBgColor ? fillColor:strokeColor;
-    
+	[self.colorToolBar setChangeBgColorButtonSelected:!CGColorEqualToColor(fillColor.CGColor, [UIColor clearColor].CGColor)];
+	
     [self refreshTextViewDisplay];
 }
 

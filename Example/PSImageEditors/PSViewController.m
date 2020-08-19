@@ -8,6 +8,7 @@
 
 #import "PSViewController.h"
 #import <PSImageEditor.h>
+#import "UIImage+PSImageEditors.h"
 
 @interface PSViewController ()<PSImageEditorDelegate,PSImageEditorDataSource>
 
@@ -30,11 +31,11 @@
 
 - (IBAction)imageEditorsDidClicked {
 
-UIImage *image = [UIImage imageNamed:@"localImage_06@2x.jpg"];
-PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
-													 delegate:self
-												   dataSource:self];
-[self.navigationController pushViewController:imageEditor animated:YES];
+	UIImage *image = [UIImage imageNamed:@"localImage_06@2x.jpg"];
+	PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
+														 delegate:self
+													   dataSource:self];
+	[self.navigationController pushViewController:imageEditor animated:YES];
 }
 
 #pragma mark - PSImageEditorDelegate
@@ -43,6 +44,8 @@ PSImageEditor *imageEditor = [[PSImageEditor alloc] initWithImage:image
 	
 	self.imageView.image = image;
 	[editor dismiss];
+	
+	//UIImageWriteToSavedPhotosAlbum(image, self, nil, (__bridge void *)self);
 	
 	NSLog(@"%s",__func__);
 }

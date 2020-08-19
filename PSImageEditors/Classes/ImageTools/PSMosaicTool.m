@@ -74,7 +74,7 @@ static const CGFloat kDrawLineWidth = 30.0f;
         self.mosaicToolBar.mosaicType = PSMosaicToolBarEventGrindArenaceous;
         [self.editor.view addSubview:self.mosaicToolBar];
         [self.mosaicToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
-			make.bottom.equalTo(self.editor.bottomToolBar.tempEditorItem.mas_top).offset(-15);
+			make.bottom.equalTo(self.editor.bottomToolBar.editorItemsView.mas_top);
             make.left.right.equalTo(self.editor.bottomToolBar);
             make.height.equalTo(@(PSMosaicToolBarHeight));
         }];
@@ -96,7 +96,7 @@ static const CGFloat kDrawLineWidth = 30.0f;
     
     self.mosaicView.userInteractionEnabled = YES;
     self.produceChanges = [self canUndo];
-    [self.mosaicToolBar setToolBarShow:YES animation:YES];
+    [self.mosaicToolBar setToolBarShow:YES animation:NO];
 	if (self.canUndoBlock) {
 		self.canUndoBlock([self canUndo]);
 	}

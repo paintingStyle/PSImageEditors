@@ -24,5 +24,6 @@
 
 - (void)buildClipImageCallback:(void(^)(UIImage *clipedImage))callback;
 - (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation;
+- (void)hiddenBottomToolBar:(BOOL)hidden animation:(BOOL)animation;
 
 @end

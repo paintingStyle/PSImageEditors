@@ -36,6 +36,8 @@
 
 - (void)initialize {
     
+	[super initialize];
+	
     if (!_drawingView) {
 		_originalImageSize = self.editor.imageView.image.size;
         _drawingView = [[UIImageView alloc] initWithFrame:self.editor.imageView.bounds];
@@ -84,13 +86,13 @@
         self.colorToolBar.delegate = self;
         [self.editor.view addSubview:self.colorToolBar];
         [self.colorToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
-			make.bottom.equalTo(self.editor.bottomToolBar.tempEditorItem.mas_top).offset(-15);
+			make.bottom.equalTo(self.editor.bottomToolBar.editorItemsView.mas_top);
             make.left.right.equalTo(self.editor.view);
             make.height.equalTo(@(PSDrawColorToolBarHeight));
         }];
     }
 	[self refreshCanUndoButtonState];
-    [self.colorToolBar setToolBarShow:YES animation:YES];
+    [self.colorToolBar setToolBarShow:YES animation:NO];
 }
 
 - (void)cleanup {
@@ -143,7 +145,7 @@
 - (void)refreshCanUndoButtonState {
     
 	if (self.canUndoBlock) {
-		self.canUndoBlock(_drawPaths.count);
+		self.canUndoBlock(_drawPaths.count >=1 ? YES:NO);
 	}
 	self.produceChanges = _drawPaths.count;
 }

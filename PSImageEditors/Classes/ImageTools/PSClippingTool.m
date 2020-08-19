@@ -34,6 +34,18 @@
 	
 	TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:
 											TOCropViewCroppingStyleDefault image:image];
+	
+	
+	TOCropToolbar *toolbar = cropController.toolbar;
+	
+	[toolbar.doneTextButton setImage:[self doneImage] forState:UIControlStateNormal];
+	[toolbar.cancelTextButton setImage:[self cancelImage] forState:UIControlStateNormal];
+	[toolbar.doneTextButton setTitle:nil forState:UIControlStateNormal];
+	[toolbar.cancelTextButton setTitle:nil forState:UIControlStateNormal];
+	[toolbar.doneTextButton setTintColor:[UIColor whiteColor]];
+	[toolbar.cancelTextButton setTintColor:[UIColor whiteColor]];
+	
+	
 	cropController.aspectRatioPickerButtonHidden = YES;
 	cropController.delegate = self;
 	CGRect viewFrame = [self.editor.view convertRect:self.editor.imageView.frame
@@ -48,6 +60,59 @@
 												 [UIApplication sharedApplication].statusBarHidden = YES;
 													  } completion:nil];
 }
+
+- (UIImage *)doneImage
+{
+    UIImage *doneImage = nil;
+    
+    UIGraphicsBeginImageContextWithOptions((CGSize){17,14}, NO, 0.0f);
+    {
+        //// Rectangle Drawing
+        UIBezierPath* rectanglePath = UIBezierPath.bezierPath;
+        [rectanglePath moveToPoint: CGPointMake(1, 7)];
+        [rectanglePath addLineToPoint: CGPointMake(6, 12)];
+        [rectanglePath addLineToPoint: CGPointMake(16, 1)];
+        [UIColor.whiteColor setStroke];
+        rectanglePath.lineWidth = 2;
+        [rectanglePath stroke];
+        
+        
+        doneImage = UIGraphicsGetImageFromCurrentImageContext();
+    }
+    UIGraphicsEndImageContext();
+    
+    return doneImage;
+}
+
+- (UIImage *)cancelImage
+{
+    UIImage *cancelImage = nil;
+    
+    UIGraphicsBeginImageContextWithOptions((CGSize){16,16}, NO, 0.0f);
+    {
+        UIBezierPath* bezierPath = UIBezierPath.bezierPath;
+        [bezierPath moveToPoint: CGPointMake(15, 15)];
+        [bezierPath addLineToPoint: CGPointMake(1, 1)];
+        [UIColor.whiteColor setStroke];
+        bezierPath.lineWidth = 2;
+        [bezierPath stroke];
+        
+        
+        //// Bezier 2 Drawing
+        UIBezierPath* bezier2Path = UIBezierPath.bezierPath;
+        [bezier2Path moveToPoint: CGPointMake(1, 15)];
+        [bezier2Path addLineToPoint: CGPointMake(15, 1)];
+        [UIColor.whiteColor setStroke];
+        bezier2Path.lineWidth = 2;
+        [bezier2Path stroke];
+        
+        cancelImage = UIGraphicsGetImageFromCurrentImageContext();
+    }
+    UIGraphicsEndImageContext();
+    
+    return cancelImage;
+}
+
 
 #pragma mark - TOCropViewControllerDelegate
 
