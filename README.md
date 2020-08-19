@@ -7,17 +7,17 @@
 
 ## 功能
 ##### 画笔
-![1.jpg](https://upload-images.jianshu.io/upload_images/4490624-933bcfcb7fa9568d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![1.jpg](https://upload-images.jianshu.io/upload_images/4490624-254d46f57a0d76e2.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ##### 文字（支持更换文字背景颜色）
-![2.jpg](https://upload-images.jianshu.io/upload_images/4490624-11568807eed88d2c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-![3.jpg](https://upload-images.jianshu.io/upload_images/4490624-a81108912887243d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![2.jpg](https://upload-images.jianshu.io/upload_images/4490624-8dff29894b7c64df.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![3.jpg](https://upload-images.jianshu.io/upload_images/4490624-8ab1bcab20b55068.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ##### 马赛克（两种马赛克样式）
-![4.jpg](https://upload-images.jianshu.io/upload_images/4490624-230458e6f237b8e3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![4.jpg](https://upload-images.jianshu.io/upload_images/4490624-146ac352571cf626.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ##### 裁剪
-![5.jpg](https://upload-images.jianshu.io/upload_images/4490624-72123212cd454a56.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![5.jpg](https://upload-images.jianshu.io/upload_images/4490624-c377e3568a7f7b0f.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ## Installation 安装
 ### 1，手动安装
