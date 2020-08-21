@@ -182,15 +182,10 @@ PSBottomToolBarDelegate> {
 - (void)resetImageViewFrame {
 	
 	CGSize size = (_imageView.image) ? _imageView.image.size : _imageView.frame.size;
-	if (size.width <= 2048 && size.height <=2048) {
-		_imageView.frame = self.view.bounds;
-	}else {
-		CGFloat ratio = MIN(_scrollView.frame.size.width / size.width, _scrollView.frame.size.height / size.height);
-		CGFloat W = ratio * size.width;
-		CGFloat H = ratio * size.height;
-		_imageView.frame = CGRectMake(0, 0, W, H);
-	}
-	
+	CGFloat ratio = MIN(_scrollView.frame.size.width / size.width, _scrollView.frame.size.height / size.height);
+	CGFloat W = ratio * size.width;
+	CGFloat H = ratio * size.height;
+	_imageView.frame = CGRectMake(0, 0, W, H);
     _imageView.superview.bounds = _imageView.bounds;
 }
 
