@@ -48,10 +48,10 @@ static const CGFloat kDrawLineWidth = 30.0f;
 	
 	[self.splashView removeAllObjects];
 	
-	self.produceChanges = [self canUndo];
-	if (self.canUndoBlock) {
-		self.canUndoBlock([self canUndo]);
-	}
+	//self.produceChanges = [self canUndo];
+//	if (self.canUndoBlock) {
+//		self.canUndoBlock([self canUndo]);
+//	}
 
     if (self.rectangularMosaic) {
         [self changeRectangularMosaic];
@@ -108,18 +108,30 @@ static const CGFloat kDrawLineWidth = 30.0f;
 	};
 	self.splashView.drawEnded = ^{
 		@strongify(self);
-		self.produceChanges = [self canUndo];
+		//self.produceChanges = [self canUndo];
 		[self.editor hiddenToolBar:NO animation:YES];
-		if (self.canUndoBlock) {
-			self.canUndoBlock([self canUndo]);
-		}
+		[self refresUndoState];
+//		if (self.canUndoBlock) {
+//			self.canUndoBlock([self canUndo]);
+//		}
 	};
 
 	self.splashView.userInteractionEnabled = YES;
-	self.produceChanges = [self canUndo];
+//	self.produceChanges = [self canUndo];
     [self.mosaicToolBar setToolBarShow:YES animation:NO];
-	if (self.canUndoBlock) {
-		self.canUndoBlock([self canUndo]);
+//	if (self.canUndoBlock) {
+//		self.canUndoBlock([self canUndo]);
+//	}
+}
+
+- (BOOL)produceChanges {
+	return [self canUndo];
+}
+
+- (void)refresUndoState {
+    
+	if ([self canUndo]) {
+		[self.editor addTrajectoryName:NSStringFromClass([self class])];
 	}
 }
 

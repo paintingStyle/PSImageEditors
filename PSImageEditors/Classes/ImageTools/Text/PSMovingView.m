@@ -301,18 +301,6 @@
     }
 }
 
-- (CGSize)sizeWithFont:(UIFont *)font
-			   maxSize:(CGSize)maxSize
-				  text:(NSString *)text {
-	
-	CGSize size = CGSizeZero;
-	if (text.length > 0) {
-		CGRect frame = [text boundingRectWithSize:maxSize options:NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:@{ NSFontAttributeName: font } context:nil];
-		size = CGSizeMake(frame.size.width, frame.size.height + 1);
-	}
-	return size;
-}
-
 - (void)setScreenScale:(CGFloat)screenScale
 {
     _screenScale = screenScale;
@@ -384,8 +372,8 @@
 			CGFloat distacn = CGRectGetWidth(_circleView.frame) +(7 *_scale);
 			r.origin.y = PS_IPHONE_X_FUTURE_MODELS ? PS_SAFEAREA_TOP_DISTANCE -(7 *_scale) :distacn;
 		}
-		if (rect.origin.y > CGRectGetHeight(self.superview.frame) -rect.size.height -self.bottomSafeDistance) {
-			r.origin.y = CGRectGetHeight(self.superview.frame)-self.bottomSafeDistance- (7 *_scale);
+		if (rect.origin.y > CGRectGetHeight(self.superview.frame)-self.bottomSafeDistance- rect.size.height -(7 *_scale)) {
+			r.origin.y = CGRectGetHeight(self.superview.frame) -self.bottomSafeDistance -rect.size.height -(7 *_scale);
 		}
 		
 		if (!CGRectEqualToRect(self.frame, r)) {

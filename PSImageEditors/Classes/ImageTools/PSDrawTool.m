@@ -53,7 +53,8 @@
     _originalImageSize = self.editor.imageView.image.size;
     _drawingView.frame = self.editor.imageView.bounds;
 	[_drawPaths removeAllObjects];
-	[self refreshCanUndoButtonState];
+	//self.produceChanges = NO;
+	//[self refresUndoState];
 }
 
 - (void)setup {
@@ -91,7 +92,7 @@
             make.height.equalTo(@(PSDrawColorToolBarHeight));
         }];
     }
-	[self refreshCanUndoButtonState];
+	//[self refresUndoState];
     [self.colorToolBar setToolBarShow:YES animation:NO];
 }
 
@@ -139,15 +140,21 @@
     if (!_drawPaths.count) { return; }
     [_drawPaths removeLastObject];
     [self drawLine];
-    [self refreshCanUndoButtonState];
 }
 
-- (void)refreshCanUndoButtonState {
+- (void)refresUndoState {
     
-	if (self.canUndoBlock) {
-		self.canUndoBlock(_drawPaths.count >=1 ? YES:NO);
+	if ([self canUndo]) {
+		[self.editor addTrajectoryName:NSStringFromClass([self class])];
 	}
-	self.produceChanges = _drawPaths.count;
+//	if (self.canUndoBlock) {
+//		self.canUndoBlock(_drawPaths.count >=1 ? YES:NO);
+//	}
+//	self.produceChanges = _drawPaths.count;
+}
+
+- (BOOL)produceChanges {
+	return _drawPaths.count;
 }
 
 - (BOOL)canUndo {
@@ -190,7 +197,7 @@
 	}
     
     if (sender.state == UIGestureRecognizerStateEnded) {
-        [self refreshCanUndoButtonState];
+        [self refresUndoState];
 		[self.editor hiddenToolBar:NO animation:YES];
     }
 }

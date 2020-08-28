@@ -26,4 +26,9 @@
 - (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation;
 - (void)hiddenBottomToolBar:(BOOL)hidden animation:(BOOL)animation;
 
+- (void)addTrajectoryName:(NSString *)name;
+- (void)removeLastTrajectory;
+- (void)removeLastTrajectoryName:(NSString *)name;
+- (void)removeAllTrajectory;
+
 @end

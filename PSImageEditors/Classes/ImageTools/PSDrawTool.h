@@ -11,7 +11,7 @@
     @public UIImageView *_drawingView;
 }
 
-@property (nonatomic, copy) void (^canUndoBlock) (BOOL canUndo);
+//@property (nonatomic, copy) void (^canUndoBlock) (BOOL canUndo);
 
 - (BOOL)canUndo;
 - (void)undo;

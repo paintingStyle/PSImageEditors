@@ -37,7 +37,7 @@ PSBottomToolBarDelegate> {
 @property (nonatomic, strong, readwrite) PSBottomToolBar *bootomToolBar;
 @property (nonatomic, assign) BOOL wilDismiss;
 @property (nonatomic, assign) BOOL initializeTools;
-
+@property (nonatomic, strong) NSMutableArray *trajectoryArray;
 
 @end
 
@@ -48,6 +48,7 @@ PSBottomToolBarDelegate> {
                    dataSource:(id<PSImageEditorDataSource>)dataSource {
     
     if (self = [super init]) {
+		_trajectoryArray = [NSMutableArray array];
 		_originalImage = [image ps_decode];
         self.delegate = delegate;
         self.dataSource = dataSource;
@@ -259,15 +260,15 @@ PSBottomToolBarDelegate> {
 - (void)dismiss {
 	
 	if (self.produceChanges) {
-		UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"是否放弃当前编辑的内容?"
+		UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"是否放弃当前图片操作"
 																				 message:nil
 																		  preferredStyle:UIAlertControllerStyleAlert];
 		
 
-		 UIAlertAction *confirmAction = [UIAlertAction actionWithTitle:@"继续标注" style:UIAlertActionStyleDefault handler:NULL];
+		 UIAlertAction *confirmAction = [UIAlertAction actionWithTitle:@"继续" style:UIAlertActionStyleDefault handler:NULL];
 		 [alertController addAction:confirmAction];
 
-		UIAlertAction *destructiveAction = [UIAlertAction actionWithTitle:@"放弃标注" style:UIAlertActionStyleDestructive
+		UIAlertAction *destructiveAction = [UIAlertAction actionWithTitle:@"放弃" style:UIAlertActionStyleDestructive
 																  handler:^(UIAlertAction * _Nonnull action) {
 			self.wilDismiss = YES;
 			if (self.presentingViewController
@@ -343,16 +344,17 @@ PSBottomToolBarDelegate> {
 			break;
 		case PSBottomToolBarEventUndo:
 		{
-			if (self.currentTool == self.drawTool) {
-				[self.drawTool undo];
-				self.bootomToolBar.canUndo = [self.drawTool canUndo];
-			}if (self.currentTool == self.texTool) {
-				[self.texTool undo];
-				self.bootomToolBar.canUndo = [self.texTool canUndo];
-			}else if (self.currentTool == self.mosaicTool) {
-				[self.mosaicTool undo];
-				self.bootomToolBar.canUndo = [self.mosaicTool canUndo];
-			}
+//			if (self.currentTool == self.drawTool) {
+//				[self.drawTool undo];
+//				self.bootomToolBar.canUndo = [self.drawTool canUndo];
+//			}if (self.currentTool == self.texTool) {
+//				[self.texTool undo];
+//				self.bootomToolBar.canUndo = [self.texTool canUndo];
+//			}else if (self.currentTool == self.mosaicTool) {
+//				[self.mosaicTool undo];
+//				self.bootomToolBar.canUndo = [self.mosaicTool canUndo];
+//			}
+			[self executeUndo];
 		}
 			break;
 		case PSBottomToolBarEventDone:
@@ -368,6 +370,61 @@ PSBottomToolBarDelegate> {
 			break;
 	}
 	if (!toolBar.isEditor) { self.currentTool = nil; }
+}
+
+- (void)executeUndo {
+	
+	if (!self.trajectoryArray.count) { return; }
+	
+	Class c = NSClassFromString(self.trajectoryArray.lastObject);
+	if (c == [self.drawTool class]) {
+		[self.drawTool undo];
+	}else if (c == [self.texTool class]) {
+		[self.texTool undo];
+	}else if (c == [self.mosaicTool class]) {
+		[self.mosaicTool undo];
+	}else {
+		NSLog(@"无效的 TrajectoryName");
+	}
+	
+	[self removeLastTrajectory];
+	[self updateBootomUndoBar];
+}
+
+- (void)addTrajectoryName:(NSString *)name {
+	
+	[self.trajectoryArray addObject:name];
+	[self updateBootomUndoBar];
+}
+
+- (void)removeLastTrajectory {
+	
+	[self.trajectoryArray removeLastObject];
+	[self updateBootomUndoBar];
+}
+
+- (void)removeLastTrajectoryName:(NSString *)name {
+	
+	NSArray *reverseObject = [[self.trajectoryArray reverseObjectEnumerator] allObjects];;
+	for (NSString *obj in reverseObject) {
+		NSInteger index = reverseObject.count -1 -[reverseObject indexOfObject:obj];
+		if ([obj isEqualToString:name]) {
+			[self.trajectoryArray removeObjectAtIndex:index];
+			break;
+		}
+	}
+	[self updateBootomUndoBar];
+}
+
+- (void)removeAllTrajectory {
+	
+	[self.trajectoryArray removeAllObjects];
+	[self updateBootomUndoBar];
+}
+
+- (void)updateBootomUndoBar {
+	
+	self.bootomToolBar.canUndo = self.trajectoryArray.count;
 }
 
 #pragma mark- ScrollView
@@ -461,6 +518,7 @@ PSBottomToolBarDelegate> {
 			[self.drawTool resetRect:cropRect];
 			[self.texTool resetRect:cropRect];
 			[self.mosaicTool resetRect:cropRect];
+			[self removeAllTrajectory];
 		};
 		_clippingTool.dismiss = ^(BOOL cancelled) {
 			@strongify(self);
@@ -476,12 +534,12 @@ PSBottomToolBarDelegate> {
         
 		@weakify(self);
         _drawTool = [[PSDrawTool alloc] initWithImageEditor:self withOption:[self drawToolOption]];
-		_drawTool.canUndoBlock = ^(BOOL canUndo) {
-			@strongify(self);
-			if (self.currentTool == _drawTool) {
-				self.bootomToolBar.canUndo = canUndo;
-			}
-		};
+//		_drawTool.canUndoBlock = ^(BOOL canUndo) {
+//			@strongify(self);
+//			if (self.currentTool == _drawTool) {
+//				self.bootomToolBar.canUndo = canUndo;
+//			}
+//		};
         _drawTool;
     }));
 }
@@ -491,12 +549,12 @@ PSBottomToolBarDelegate> {
     return LAZY_LOAD(_mosaicTool, ({
         @weakify(self);
         _mosaicTool = [[PSMosaicTool alloc] initWithImageEditor:self withOption:nil];
-		_mosaicTool.canUndoBlock = ^(BOOL canUndo) {
-			@strongify(self);
-			if (self.currentTool == _mosaicTool) {
-				self.bootomToolBar.canUndo = canUndo;
-			}
-		};
+//		_mosaicTool.canUndoBlock = ^(BOOL canUndo) {
+//			@strongify(self);
+//			if (self.currentTool == _mosaicTool) {
+//				self.bootomToolBar.canUndo = canUndo;
+//			}
+//		};
         _mosaicTool;
     }));
 }
@@ -506,12 +564,12 @@ PSBottomToolBarDelegate> {
     return LAZY_LOAD(_texTool, ({
         @weakify(self);
         _texTool = [[PSTexTool alloc] initWithImageEditor:self withOption:[self textToolOption]];
-		_texTool.updateUndoBlock = ^(BOOL undo) {
-			@strongify(self);
-			if (self.currentTool == _texTool) {
-				self.bootomToolBar.canUndo = undo;
-			}
-		};
+//		_texTool.updateUndoBlock = ^(BOOL undo) {
+//			@strongify(self);
+//			if (self.currentTool == _texTool) {
+//				self.bootomToolBar.canUndo = undo;
+//			}
+//		};
         _texTool;
     }));
 }

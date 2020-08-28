@@ -49,10 +49,9 @@ static NSString *kDefalutText = @"点击输入";
 			[obj removeFromSuperview];
 		}
 	}];
-	if (self.updateUndoBlock) {
-		self.updateUndoBlock(NO);
-	}
-	self.produceChanges = NO;
+//	if (self.updateUndoBlock) {
+//		self.updateUndoBlock(NO);
+//	}
 }
 
 - (UIImage *)textImage {
@@ -102,11 +101,18 @@ static NSString *kDefalutText = @"点击输入";
 		self.initializeTextItem = NO;
 	}else {
 		[PSMovingView setActiveEmoticonView:[self activeMovingView]];
-		if (self.updateUndoBlock) {
-			self.updateUndoBlock([self activeMovingView]);
-		}
+//		if (self.updateUndoBlock) {
+//			self.updateUndoBlock([self activeMovingView]);
+//		}
 	}
 	
+}
+
+- (void)refresUndoState {
+    
+	if ([self canUndo]) {
+		[self.editor addTrajectoryName:NSStringFromClass([self class])];
+	}
 }
 
 - (void)cleanup {
@@ -143,7 +149,7 @@ static NSString *kDefalutText = @"点击输入";
 	
 	PSStickerItem *item = [PSStickerItem mainWithAttributedText:attribString imageRect:self.editor.imageView.bounds];
 	PSMovingView *movingView = [[PSMovingView alloc] initWithItem:item];
-	movingView.bottomSafeDistance = CGRectGetHeight(self.editor.bottomToolBar.frame);
+	movingView.bottomSafeDistance = CGRectGetHeight(self.colorToolBar.frame);
 	movingView.imageView = self.editor.imageView;
 	movingView.center = center;
 	
@@ -172,9 +178,10 @@ static NSString *kDefalutText = @"点击输入";
 		}
 	}];
 	[movingView setDelete:^{
-		if (weakSelf.updateUndoBlock) {
-			weakSelf.updateUndoBlock(NO);
-		}
+		[weakSelf.editor removeLastTrajectoryName:NSStringFromClass([self class])];
+//		if (weakSelf.updateUndoBlock) {
+//			weakSelf.updateUndoBlock(NO);
+//		}
 	}];
 	
 	self.editor.scrollViewDidZoomBlock = ^(CGFloat zoomScale) {
@@ -186,9 +193,12 @@ static NSString *kDefalutText = @"点击输入";
 		}];
 	};
 	
-	if (self.updateUndoBlock) {
-		self.updateUndoBlock(YES);
-	}
+	
+	[self refresUndoState];
+	
+//	if (self.updateUndoBlock) {
+//		self.updateUndoBlock(YES);
+//	}
 }
 
 - (BOOL)canUndo {
@@ -197,7 +207,6 @@ static NSString *kDefalutText = @"点击输入";
 
 - (void)undo {
 	[[self activeMovingView] removeFromSuperview];
-	[PSMovingView setActiveEmoticonView:[self activeMovingView]];
 }
 
 - (void)presentTextViewWithView:(PSMovingView *)view {
@@ -227,9 +236,10 @@ static NSString *kDefalutText = @"点击输入";
 			[view removeFromSuperview];
 			[weakSelf.textView removeFromSuperview];
 			weakSelf.tapGesture.enabled = YES;
-			if (weakSelf.updateUndoBlock) {
-				weakSelf.updateUndoBlock([self activeMovingView]);
-			}
+			[weakSelf.editor removeLastTrajectory];
+//			if (weakSelf.updateUndoBlock) {
+//				weakSelf.updateUndoBlock([self activeMovingView]);
+//			}
 			return;
 		}
 		
