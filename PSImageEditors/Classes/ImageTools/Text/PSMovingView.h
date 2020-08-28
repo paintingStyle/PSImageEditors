@@ -31,8 +31,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGFloat screenScale;
 
 /** Delayed deactivated time */
-@property (nonatomic, assign) CGFloat deactivatedDelay;
+//@property (nonatomic, assign) CGFloat deactivatedDelay;
 
+@property (nonatomic, assign) CGFloat bottomSafeDistance;
+
+@property (nonatomic, weak) UIImageView *imageView;
 
 @property (nonatomic, readonly) UIView *view;
 @property (nonatomic, strong) 	PSStickerItem *item;
@@ -41,9 +44,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL isActive;
 
 
-@property (nonatomic, copy, nullable) void(^tapEnded)(PSMovingView *view);
-
+@property (nonatomic, copy, nullable) BOOL(^tapEnded)(PSMovingView *view, CGPoint point);
 @property (nonatomic, copy, nullable) void(^moveCenter)(UIGestureRecognizerState state);
+@property (nonatomic, copy, nullable) void(^delete)(void);
+
+- (CGFloat)transformScaleX;
+- (CGFloat)transformScaleY;
 
 @end
 

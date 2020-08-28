@@ -92,9 +92,6 @@
 	}];
 
 	// 设置默认选中颜色
-	self.redButton.isUse = YES;
-	self.currentColor = self.redButton.color;
-	
 	[self colorFullButtonDidClick:self.redButton];
 }
 
@@ -158,8 +155,7 @@
 	}];
 	
 	// 设置默认选中颜色
-	self.whiteButton.isUse = YES;
-	self.currentColor = self.whiteButton.color;
+	[self colorFullButtonDidClick:self.redButton];
 }
 
 - (BOOL)isWhiteColor {
@@ -173,7 +169,7 @@
 	_changeBgColorButton.selected = selected;
 }
 
-- (void)setCurrentColor:(UIColor *)currentColor {
+- (void)setCurrentColor:(UIColor *)currentColor { 
 	
 	_currentColor = currentColor;
 	for (PSColorFullButton *button in self.colorFullButtonViews.subviews) {

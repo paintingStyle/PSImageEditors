@@ -12,6 +12,7 @@
 #import "PSMovingView.h"
 #import "PSClippingTool.h"
 #import "PSExpandClickAreaButton.h"
+#import "UIView+PSImageEditors.h"
 
 @interface _PSImageEditorViewController ()
 <UIScrollViewDelegate,
@@ -30,9 +31,8 @@ PSBottomToolBarDelegate> {
 @property (nonatomic, strong) PSMosaicTool *mosaicTool;
 @property (nonatomic, strong) PSTexTool *texTool;
 @property (nonatomic, strong) PSClippingTool *clippingTool;
+@property (nonatomic, assign) NSInteger clippingBeforeIndex;
 
-
-@property (nonatomic, strong) UIButton *closeButton;
 @property (nonatomic, strong, readwrite) PSTopToolBar *topToolBar;
 @property (nonatomic, strong, readwrite) PSBottomToolBar *bootomToolBar;
 @property (nonatomic, assign) BOOL wilDismiss;
@@ -48,12 +48,7 @@ PSBottomToolBarDelegate> {
                    dataSource:(id<PSImageEditorDataSource>)dataSource {
     
     if (self = [super init]) {
-		_originalNavBarHidden = self.navigationController.navigationBar.hidden;
-		_originalStatusBarHidden = [UIApplication sharedApplication].statusBarHidden;
-		if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]){
-			_originalInteractivePopGestureRecognizer = self.navigationController.interactivePopGestureRecognizer.enabled;
-		}
-		_originalImage = [image ps_imageCompress];
+		_originalImage = [image ps_decode];
         self.delegate = delegate;
         self.dataSource = dataSource;
     }
@@ -65,6 +60,12 @@ PSBottomToolBarDelegate> {
 - (void)viewDidLoad {
     
     [super viewDidLoad];
+	
+	_originalNavBarHidden = self.navigationController.navigationBar.hidden;
+	_originalStatusBarHidden = [UIApplication sharedApplication].statusBarHidden;
+	if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]){
+		_originalInteractivePopGestureRecognizer = self.navigationController.interactivePopGestureRecognizer.enabled;
+	}
     [self configUI];
 }
 
@@ -140,42 +141,25 @@ PSBottomToolBarDelegate> {
 		return;
 	}
 	
-    UIImageView *imageView =  self.imageView;
+    UIImageView *imageView = self.imageView;
     UIImageView *drawingView =  self.drawTool->_drawingView;
     UIImage *mosaicImage = [self.mosaicTool mosaicImage];
+	UIImage *textImage = [self.texTool textImage];
     
-    UIGraphicsBeginImageContextWithOptions(imageView.image.size, NO, imageView.image.scale);
+	UIGraphicsBeginImageContext(imageView.image.size); // 统一为0，方便PC端查看
     // 图片
-    [imageView.image drawAtPoint:CGPointZero];
+	[imageView.image drawInRect:CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height)];
 	// 马赛克
-    [mosaicImage drawAtPoint:CGPointZero];
+	[mosaicImage drawInRect:CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height)];
 	// 画笔
     [drawingView.image drawInRect:CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height)];
     // 文字
-    for (UIView *view in self.view.subviews) {
-        if (![view isKindOfClass:[PSMovingView class]]) { continue; }
-        
-        PSMovingView *texItem = (PSMovingView *)view;
-        CGFloat rotation = [[texItem.layer valueForKeyPath:@"transform.rotation.z"] doubleValue];
-        CGFloat selfRw = imageView.bounds.size.width / imageView.image.size.width;
-        CGFloat selfRh = imageView.bounds.size.height / imageView.image.size.height;
-        
-        CGRect texItemRect = [texItem.superview convertRect:texItem.frame toView:self.imageView.superview];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            UIImage *textImg = [UIImage ps_screenshot:texItem];
-            textImg = [textImg ps_imageRotatedByRadians:rotation];
-            CGFloat sw = textImg.size.width / selfRw;
-            CGFloat sh = textImg.size.height / selfRh;
-            [textImg drawInRect:CGRectMake(texItemRect.origin.x/selfRw, texItemRect.origin.y/selfRh, sw, sh)];
-        });
-    }
+	[textImage drawInRect:CGRectMake(0, 0, imageView.image.size.width, imageView.image.size.height)];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         UIImage *tmp = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
-        UIImage *image = [UIImage imageWithCGImage:tmp.CGImage scale:[UIScreen mainScreen].scale orientation:UIImageOrientationUp];
-		if (callback) { callback(image); }
+		if (callback) { callback(tmp); }
     });
 }
 
@@ -274,13 +258,37 @@ PSBottomToolBarDelegate> {
 
 - (void)dismiss {
 	
-	self.wilDismiss = YES;
-	if (self.presentingViewController
-		&& self.navigationController.viewControllers.count == 1) {
-		[self dismissViewControllerAnimated:YES completion:nil];
-	} else {
-		[self.navigationController popViewControllerAnimated:YES];
+	if (self.produceChanges) {
+		UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"是否放弃当前编辑的内容?"
+																				 message:nil
+																		  preferredStyle:UIAlertControllerStyleAlert];
+		
+
+		 UIAlertAction *confirmAction = [UIAlertAction actionWithTitle:@"继续标注" style:UIAlertActionStyleDefault handler:NULL];
+		 [alertController addAction:confirmAction];
+
+		UIAlertAction *destructiveAction = [UIAlertAction actionWithTitle:@"放弃标注" style:UIAlertActionStyleDestructive
+																  handler:^(UIAlertAction * _Nonnull action) {
+			self.wilDismiss = YES;
+			if (self.presentingViewController
+				&& self.navigationController.viewControllers.count == 1) {
+				[self dismissViewControllerAnimated:NO completion:nil];
+			} else {
+				[self.navigationController popViewControllerAnimated:NO];
+			}
+		}];
+		 [alertController addAction:destructiveAction];
+		[self presentViewController:alertController animated:YES completion:nil];
+	}else {
+		self.wilDismiss = YES;
+		if (self.presentingViewController
+			&& self.navigationController.viewControllers.count == 1) {
+			[self dismissViewControllerAnimated:NO completion:nil];
+		} else {
+			[self.navigationController popViewControllerAnimated:NO];
+		}
 	}
+	
 }
 
 #pragma mark - PSTopToolBarDelegate
@@ -315,14 +323,17 @@ PSBottomToolBarDelegate> {
 	
 	switch (event) {
 		case PSBottomToolBarEventDraw:
+			self.clippingBeforeIndex = 0;
 			self.editorMode = PSImageEditorModeDraw;
 			self.currentTool = self.drawTool;
 			break;
 		case PSBottomToolBarEventText:
+			self.clippingBeforeIndex = 1;
 			self.editorMode = PSImageEditorModeText;
             self.currentTool = self.texTool;
 			break;
 		case PSBottomToolBarEventMosaic:
+			self.clippingBeforeIndex = 2;
 			self.editorMode = PSImageEditorModeMosaic;
             self.currentTool = self.mosaicTool;
 			break;
@@ -335,6 +346,9 @@ PSBottomToolBarDelegate> {
 			if (self.currentTool == self.drawTool) {
 				[self.drawTool undo];
 				self.bootomToolBar.canUndo = [self.drawTool canUndo];
+			}if (self.currentTool == self.texTool) {
+				[self.texTool undo];
+				self.bootomToolBar.canUndo = [self.texTool canUndo];
 			}else if (self.currentTool == self.mosaicTool) {
 				[self.mosaicTool undo];
 				self.bootomToolBar.canUndo = [self.mosaicTool canUndo];
@@ -364,21 +378,27 @@ PSBottomToolBarDelegate> {
 }
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView {
-	
+
 	if (self.scrollViewDidZoomBlock) {
 		self.scrollViewDidZoomBlock(scrollView.zoomScale);
 	}
-	
+
     CGFloat Ws = _scrollView.frame.size.width - _scrollView.contentInset.left - _scrollView.contentInset.right;
     CGFloat Hs = _scrollView.frame.size.height - _scrollView.contentInset.top - _scrollView.contentInset.bottom;
     CGFloat W = _imageView.superview.frame.size.width;
     CGFloat H = _imageView.superview.frame.size.height;
-    
+
     CGRect rct = _imageView.superview.frame;
     rct.origin.x = MAX((Ws-W)/2, 0);
     rct.origin.y = MAX((Hs-H)/2, 0);
     _imageView.superview.frame = rct;
 }
+
+- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale
+{
+	
+}
+
 
 #pragma mark - InitAndLayout
 
@@ -392,8 +412,10 @@ PSBottomToolBarDelegate> {
 	[self.view addSubview:self.bottomToolBar];
 	
 	[self.topToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
-		make.top.left.right.equalTo(self.view);
-		make.height.equalTo(@(PSTopToolBarHeight));
+		make.top.equalTo(self.view).offset(11+PS_SAFEAREA_TOP_DISTANCE);
+		make.left.equalTo(self.view);
+		make.size.equalTo(@44);
+        make.left.equalTo(@10);
 	}];
 	[self.bottomToolBar mas_makeConstraints:^(MASConstraintMaker *make) {
 		make.left.bottom.right.equalTo(self.view);
@@ -433,11 +455,16 @@ PSBottomToolBarDelegate> {
 		@weakify(self);
 		_clippingTool.clipedCompleteBlock = ^(UIImage *image, CGRect cropRect) {
 			@strongify(self);
+			[self.bootomToolBar selectIndex:self.clippingBeforeIndex];
 			self.imageView.image = image;
 			[self refreshImageView];
 			[self.drawTool resetRect:cropRect];
 			[self.texTool resetRect:cropRect];
 			[self.mosaicTool resetRect:cropRect];
+		};
+		_clippingTool.dismiss = ^(BOOL cancelled) {
+			@strongify(self);
+			[self.bootomToolBar selectIndex:self.clippingBeforeIndex];
 		};
         _clippingTool;
     }));
@@ -477,8 +504,14 @@ PSBottomToolBarDelegate> {
 - (PSTexTool *)texTool {
     
     return LAZY_LOAD(_texTool, ({
-        
+        @weakify(self);
         _texTool = [[PSTexTool alloc] initWithImageEditor:self withOption:[self textToolOption]];
+		_texTool.updateUndoBlock = ^(BOOL undo) {
+			@strongify(self);
+			if (self.currentTool == _texTool) {
+				self.bootomToolBar.canUndo = undo;
+			}
+		};
         _texTool;
     }));
 }
@@ -509,7 +542,8 @@ PSBottomToolBarDelegate> {
     return LAZY_LOAD(_imageView, ({
         
         _imageView = [[UIImageView alloc] initWithImage:_originalImage];
-		_imageView.clipsToBounds = YES;
+		_imageView.contentMode = UIViewContentModeScaleAspectFit;
+		//_imageView.clipsToBounds = YES;
         _imageView;
     }));
 }

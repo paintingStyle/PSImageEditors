@@ -122,7 +122,7 @@
 				  withRect:(CGRect)cropRect
 					 angle:(NSInteger)angle {
 	
-	UIImage *rectImage = image;//[self.editor.imageView.image ps_imageAtRect:cropRect];
+	UIImage *rectImage = image;
 	self.produceChanges = YES;
 	if (self.clipedCompleteBlock) { self.clipedCompleteBlock(rectImage, cropRect); }
 	
@@ -137,6 +137,16 @@
 	}else {
 		[cropViewController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 	}
+	
+	[self cleanup];
 }
 
+- (void)cropViewController:(nonnull TOCropViewController *)cropViewController
+		didFinishCancelled:(BOOL)cancelled {
+	
+	if (self.dismiss && cancelled) {
+		self.dismiss(cancelled);
+		[cropViewController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+	}
+}
 @end

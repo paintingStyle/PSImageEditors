@@ -22,6 +22,7 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
+	self.navigationController.navigationBar.hidden = YES;
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
@@ -45,7 +46,7 @@
 	self.imageView.image = image;
 	[editor dismiss];
 	
-	//UIImageWriteToSavedPhotosAlbum(image, self, nil, (__bridge void *)self);
+	UIImageWriteToSavedPhotosAlbum(image, self, nil, (__bridge void *)self);
 	
 	NSLog(@"%s",__func__);
 }
@@ -68,7 +69,7 @@
 
 - (CGFloat)imageEditorDrawPathWidth {
 	
-    return 5;
+    return 3;
 }
 
 - (UIFont *)imageEditorTextFont {

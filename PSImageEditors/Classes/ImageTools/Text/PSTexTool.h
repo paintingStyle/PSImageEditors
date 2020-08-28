@@ -8,9 +8,16 @@
 #import "PSImageToolBase.h"
 @class PSTexTool, PSTextView, PSTexToolItem;
 
-@interface PSTexTool : PSImageToolBase
+@interface PSTexTool : PSImageToolBase{
+    @public UIImageView *_drawingView;
+}
 
 @property (nonatomic, strong) PSTextView *textView;
+@property (nonatomic, copy) void (^updateUndoBlock) (BOOL undo);
+
+- (UIImage *)textImage;
+- (BOOL)canUndo;
+- (void)undo;
 
 @end
 

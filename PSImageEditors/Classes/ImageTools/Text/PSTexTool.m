@@ -10,8 +10,12 @@
 #import "PSBottomToolBar.h"
 #import "PSColorToolBar.h"
 #import "PSMovingView.h"
+#import "UIView+PSImageEditors.h"
 
 static const NSInteger kTextMaxLimitNumber = 100;
+static NSString *kDefalutText = @"点击输入";
+#define kDefalutFont [UIFont systemFontOfSize:18]
+#define kDefalutColor PSColorFromRGB(0xff1d12)
 
 @interface PSTexTool()
 
@@ -19,6 +23,7 @@ static const NSInteger kTextMaxLimitNumber = 100;
 @property (nonatomic, strong) UIFont *textFont;
 @property (nonatomic, strong) PSColorToolBar *colorToolBar;
 @property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
+@property (nonatomic, assign) BOOL initializeTextItem;
 
 @end
 
@@ -28,28 +33,47 @@ static const NSInteger kTextMaxLimitNumber = 100;
 
 - (void)initialize {
     [super initialize];
+	
+	if (!_drawingView) {
+	   self.initializeTextItem = YES;
+	  _drawingView = [[UIImageView alloc] initWithFrame:self.editor.imageView.bounds];
+	  [self.editor.imageView addSubview:_drawingView];
+	}
 }
 
 - (void)resetRect:(CGRect)rect {
 	
-	[self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+	_drawingView.frame = self.editor.imageView.bounds;
+	[_drawingView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
 		if ([obj isKindOfClass:[PSMovingView class]]) {
 			[obj removeFromSuperview];
 		}
 	}];
+	if (self.updateUndoBlock) {
+		self.updateUndoBlock(NO);
+	}
 	self.produceChanges = NO;
+}
+
+- (UIImage *)textImage {
+	
+	[PSMovingView setActiveEmoticonView:nil];
+	UIImage *image = [_drawingView captureImageAtFrame:_drawingView.bounds];
+	return image;
 }
 
 - (void)setup {
     
     [super setup];
     
+	_drawingView.userInteractionEnabled = YES;
+	self.editor.imageView.userInteractionEnabled = YES;
     self.textColor = self.option[kImageToolTextColorKey];
     self.textFont = self.option[kImageToolTextFontKey];
-    
+   
 	if (!self.tapGesture) {
 		 self.tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(drawingViewDidTap:)];
-		 [self.editor.view addGestureRecognizer:self.tapGesture];
+		 [_drawingView addGestureRecognizer:self.tapGesture];
 	 }
 	self.tapGesture.enabled = YES;
 	
@@ -64,12 +88,37 @@ static const NSInteger kTextMaxLimitNumber = 100;
 	   }];
    }
    [self.colorToolBar setToolBarShow:YES animation:NO];
+   [self setItemsEnabled:YES];
+	
+	if (self.initializeTextItem) {
+		NSDictionary *attrs = @{
+				NSBackgroundColorAttributeName:[UIColor clearColor],
+				NSForegroundColorAttributeName:kDefalutColor,
+				NSFontAttributeName:kDefalutFont,
+			};
+		[self addTextItemWithText:kDefalutText
+							withAttrs:attrs
+							withPoint:CGPointMake(_drawingView.bounds.size.width *0.5, _drawingView.bounds.size.height *0.5)];
+		self.initializeTextItem = NO;
+	}else {
+		[PSMovingView setActiveEmoticonView:[self activeMovingView]];
+		if (self.updateUndoBlock) {
+			self.updateUndoBlock([self activeMovingView]);
+		}
+	}
+	
 }
 
 - (void)cleanup {
     [super cleanup];
+	
+	_drawingView.userInteractionEnabled = NO;
+	self.editor.imageView.userInteractionEnabled = NO;
 	self.tapGesture.enabled = NO;
+	
+	[PSMovingView setActiveEmoticonView:nil];
 	[self.colorToolBar setToolBarShow:NO animation:NO];
+	[self setItemsEnabled:NO];
 }
 
 - (void)addTextItemWithText:(NSString *)text
@@ -77,7 +126,7 @@ static const NSInteger kTextMaxLimitNumber = 100;
 				  withPoint:(CGPoint)point {
 	
 	// 过滤颜色卡的点击范围
-	if (point.y > CGRectGetMinY(self.colorToolBar.frame)) { return; }
+	if (CGRectGetMinY(self.colorToolBar.frame) >0 && (point.y > CGRectGetMinY(self.colorToolBar.frame))) { return; }
 	
 	UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
 	UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
@@ -88,40 +137,30 @@ static const NSInteger kTextMaxLimitNumber = 100;
 	if (CGRectGetHeight(self.editor.imageView.frame) >PS_SCREEN_H)
 	{ center.y = self.editor.scrollView.contentOffset.y + PS_SCREEN_H *0.5; }
 
-	NSAttributedString *attribString = [[NSAttributedString alloc] initWithString:@"点击输入" attributes:@{NSFontAttributeName:font,
-																									   NSForegroundColorAttributeName:strokeColor,
-																									   NSBackgroundColorAttributeName:fillColor}];
+	NSAttributedString *attribString = [[NSAttributedString alloc] initWithString:text attributes:@{NSFontAttributeName:font,
+																									NSForegroundColorAttributeName:strokeColor,
+																									NSBackgroundColorAttributeName:fillColor}];
 	
-	PSStickerItem *item = [PSStickerItem mainWithAttributedText:attribString];
+	PSStickerItem *item = [PSStickerItem mainWithAttributedText:attribString imageRect:self.editor.imageView.bounds];
 	PSMovingView *movingView = [[PSMovingView alloc] initWithItem:item];
+	movingView.bottomSafeDistance = CGRectGetHeight(self.editor.bottomToolBar.frame);
+	movingView.imageView = self.editor.imageView;
 	movingView.center = center;
-
-	[self.editor.view addSubview:movingView];
-	[PSMovingView setActiveEmoticonView:movingView];
-
-	CGFloat screenScale = 1;
-	CGFloat minScale = 0.2;
-	CGFloat maxScale = 3;
-
-
-	//* 屏幕缩放率
-	movingView.screenScale = screenScale;
 	
-	/** 最小缩放率 */
-	CGFloat ratio = minScale;
-	movingView.minScale = MIN( (ratio * [UIScreen mainScreen].bounds.size.width) / movingView.view.frame.size.width, (ratio * [UIScreen mainScreen].bounds.size.height) / movingView.view.frame.size.height)/screenScale;
-	/** 最大缩放率 */
-	ratio = maxScale;
-	movingView.maxScale = MIN( (ratio * [UIScreen mainScreen].bounds.size.width) / movingView.view.frame.size.width, (ratio * [UIScreen mainScreen].bounds.size.height) / movingView.view.frame.size.height)/screenScale;
-	ratio = 0.5f;
-	CGFloat scale = MIN( (ratio * [UIScreen mainScreen].bounds.size.width) / movingView.view.frame.size.width, (ratio * [UIScreen mainScreen].bounds.size.height) / movingView.view.frame.size.height);
-	[movingView setScale:scale/screenScale];
+	[PSMovingView setActiveEmoticonView:movingView];
+	[_drawingView insertSubview:movingView belowSubview:self.editor.topToolBar];
 	
 	__weak typeof(self)weakSelf = self;
-	[movingView setTapEnded:^(PSMovingView * _Nonnull view) {
-		if (view.isActive) {
+	[movingView setTapEnded:^BOOL(PSMovingView * _Nonnull view, CGPoint point) {
+		// 优先处理关闭按钮
+		BOOL clickClose = point.x <= (CGRectGetMaxX(weakSelf.editor.topToolBar.frame) +10)
+						  && point.y <= (CGRectGetMaxY(weakSelf.editor.topToolBar.frame) +10);
+		if (clickClose) {
+			[weakSelf.editor dismiss];
+		}else if (view.isActive) {
 			[weakSelf presentTextViewWithView:view];
 		}
+		return !clickClose;
 	}];
 	[movingView setMoveCenter:^(UIGestureRecognizerState state) {
 		if (weakSelf.editor.editorMode != PSImageEditorModeText) { return; }
@@ -132,15 +171,33 @@ static const NSInteger kTextMaxLimitNumber = 100;
 			[weakSelf.colorToolBar setToolBarShow:NO animation:YES];
 		}
 	}];
+	[movingView setDelete:^{
+		if (weakSelf.updateUndoBlock) {
+			weakSelf.updateUndoBlock(NO);
+		}
+	}];
 	
 	self.editor.scrollViewDidZoomBlock = ^(CGFloat zoomScale) {
 		[weakSelf.editor.view.subviews enumerateObjectsUsingBlock:
 		 ^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
 			if ([obj isKindOfClass:[PSMovingView class]]) {
-				obj.transform = CGAffineTransformMakeScale(zoomScale, zoomScale);
+				[((PSMovingView *)obj) setScale:zoomScale];
 			}
 		}];
 	};
+	
+	if (self.updateUndoBlock) {
+		self.updateUndoBlock(YES);
+	}
+}
+
+- (BOOL)canUndo {
+	return [self activeMovingView];
+}
+
+- (void)undo {
+	[[self activeMovingView] removeFromSuperview];
+	[PSMovingView setActiveEmoticonView:[self activeMovingView]];
 }
 
 - (void)presentTextViewWithView:(PSMovingView *)view {
@@ -154,20 +211,36 @@ static const NSInteger kTextMaxLimitNumber = 100;
 	// 点击了激活的item，再次进入编辑模式
 	NSRange range = NSMakeRange(0, view.item.attributedText.string.length);
 	NSMutableDictionary *attrs = [view.item.attributedText attributesAtIndex:0 effectiveRange:&range];
-	self.textView.inputView.text = view.item.attributedText.string;
-	self.textView.attrs = attrs;
+	UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
+	UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
+	UIFont *font = kDefalutFont;
+	
+	self.textView.inputView.text = [view.item.attributedText.string isEqualToString:kDefalutText] ? @"":view.item.attributedText.string;
+	self.textView.attrs = @{NSFontAttributeName:font,
+							NSForegroundColorAttributeName:strokeColor,
+							NSBackgroundColorAttributeName:fillColor};
 
 	__weak typeof(self)weakSelf = self;
 	self.textView.dissmissBlock = ^(NSString *text, NSDictionary *attrs, BOOL done) {
 		
+		if (!done) {
+			[view removeFromSuperview];
+			[weakSelf.textView removeFromSuperview];
+			weakSelf.tapGesture.enabled = YES;
+			if (weakSelf.updateUndoBlock) {
+				weakSelf.updateUndoBlock([self activeMovingView]);
+			}
+			return;
+		}
+		
 		UIColor *fillColor = attrs[NSBackgroundColorAttributeName];
 		UIColor *strokeColor = attrs[NSForegroundColorAttributeName];
-		UIFont *font = [UIFont systemFontOfSize:18];
+		UIFont *font = kDefalutFont;
 
-		NSAttributedString *attribString = [[NSAttributedString alloc] initWithString:@"点击输入" attributes:@{NSFontAttributeName:font,
+		NSAttributedString *attribString = [[NSAttributedString alloc] initWithString:text attributes:@{NSFontAttributeName:font,
 																										   NSForegroundColorAttributeName:strokeColor,
 																										   NSBackgroundColorAttributeName:fillColor}];
-		PSStickerItem *item = [PSStickerItem mainWithAttributedText:attribString];
+		PSStickerItem *item = [PSStickerItem mainWithAttributedText:attribString imageRect:self.editor.imageView.bounds];
 		view.item = item;
 		[weakSelf.textView removeFromSuperview];
 		weakSelf.tapGesture.enabled = YES;
@@ -180,13 +253,28 @@ static const NSInteger kTextMaxLimitNumber = 100;
 - (void)drawingViewDidTap:(UITapGestureRecognizer *)tap {
 	
 	CGPoint point = [tap locationInView:tap.view];
-	
+	// 修正超长图文字的显示位置
+	if (CGRectGetHeight(self.editor.imageView.frame) >PS_SCREEN_H) { point.y = self.editor.scrollView.contentOffset.y + PS_SCREEN_H *0.5; }
+
 	NSDictionary *attrs = @{
-			NSBackgroundColorAttributeName:[UIColor clearColor],
-			NSForegroundColorAttributeName:self.colorToolBar.currentColor,
-			NSFontAttributeName:[UIFont systemFontOfSize:18],
-		};
-	[self addTextItemWithText:@"添加文字"
+		NSBackgroundColorAttributeName:[UIColor clearColor],
+		NSForegroundColorAttributeName:self.colorToolBar.currentColor,
+		NSFontAttributeName:kDefalutFont,
+	};
+	NSAttributedString *attribString = [[NSAttributedString alloc] initWithString:kDefalutText attributes:attrs];
+	PSStickerItem *item = [PSStickerItem mainWithAttributedText:attribString imageRect:self.editor.imageView.bounds];
+	CGRect itemRect = item.displayView.bounds;
+	CGFloat startCenterX = (itemRect.size.width *0.5) +11;
+	CGFloat endCenterX = CGRectGetWidth(_drawingView.frame)- ((itemRect.size.width +22) *0.5);
+
+	if (point.x <startCenterX) {
+		point = CGPointMake(startCenterX, point.y);
+	}
+	if (point.x >endCenterX) {
+		point = CGPointMake(endCenterX, point.y);
+	}
+	
+	[self addTextItemWithText:kDefalutText
 						withAttrs:attrs
 						withPoint:point];
 }
@@ -203,24 +291,19 @@ static const NSInteger kTextMaxLimitNumber = 100;
     }
 }
 
-- (PSMovingView *)activeItem {
-
-    __block PSMovingView *activeItem;
-    [self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([obj isKindOfClass:[PSMovingView class]]) {
-			if (((PSMovingView *)obj).isActive) {
-				activeItem = obj;
-				*stop = YES;
-			}
-		}
-    }];
-    return activeItem;
+- (void)setItemsEnabled:(BOOL)enabled {
+	
+	[_drawingView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+		   if ([obj isKindOfClass:[PSMovingView class]]) {
+			    obj.userInteractionEnabled = enabled;
+		   }
+	}];
 }
 
 - (BOOL)produceChanges {
 	
 	__block BOOL containsTexItem = NO;
-	[self.editor.view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+	[_drawingView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
 		if ([obj isKindOfClass:[PSMovingView class]]) {
 			containsTexItem = YES;
 			*stop = YES;
@@ -228,6 +311,19 @@ static const NSInteger kTextMaxLimitNumber = 100;
 	}];
 	
 	return containsTexItem;
+}
+
+- (PSMovingView *)activeMovingView {
+	
+	PSMovingView *activeMovingView = nil;
+	NSArray *subviews = _drawingView.subviews;
+	for (UIView *obj in subviews) {
+		if ([obj isKindOfClass:[PSMovingView class]]) {
+			activeMovingView = obj;
+		}
+	}
+	
+	return activeMovingView;
 }
 
 @end
@@ -296,7 +392,7 @@ static const NSInteger kTextMaxLimitNumber = 100;
         self.colorToolBar.delegate = self;
         self.colorToolBar.frame = CGRectMake(0, 0, PS_SCREEN_W, PSTextColorToolBarHeight);
         self.inputView.inputAccessoryView = self.colorToolBar;
-        
+		
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(keyboardWillShow:)
                                                      name:UIKeyboardWillShowNotification
@@ -333,7 +429,7 @@ static const NSInteger kTextMaxLimitNumber = 100;
 - (void)refreshTextViewDisplay {
     
     NSDictionary *attributes = nil;
-    UIColor *bgcolor = self.colorToolBar.currentColor ? :[UIColor redColor];
+    UIColor *bgcolor = self.colorToolBar.currentColor ? :kDefalutColor;
     UIColor *textColor = self.colorToolBar.currentColor ? :[UIColor whiteColor];
     UIFont *font = self.inputView.font ? :[UIFont systemFontOfSize:24.f weight:UIFontWeightRegular];
     
@@ -361,7 +457,7 @@ static const NSInteger kTextMaxLimitNumber = 100;
 }
 
 - (void)keyboardWillShow:(NSNotification *)notification {
-   
+	
     NSDictionary *userinfo = notification.userInfo;
     CGRect  keyboardRect              = [[userinfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     CGFloat keyboardAnimationDuration = [[userinfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
@@ -411,10 +507,17 @@ static const NSInteger kTextMaxLimitNumber = 100;
     NSDictionary *attrs = nil;
     if (self.inputView.text.length) {
         NSRange range = NSMakeRange(0, self.inputView.text.length);
-        attrs = [self.inputView.attributedText attributesAtIndex:0 effectiveRange:&range];
-    }
+		attrs = [self.inputView.attributedText attributesAtIndex:0 effectiveRange:&range];
+	}else {
+		attrs = @{
+			NSBackgroundColorAttributeName:[UIColor clearColor],
+			NSForegroundColorAttributeName:kDefalutColor,
+			NSFontAttributeName:kDefalutFont};
+	}
+	
     if (self.dissmissBlock) {
-        self.dissmissBlock(self.inputView.text, attrs, done);
+		NSString *text = self.inputView.text.length ? self.inputView.text:kDefalutText;
+        self.dissmissBlock(text, attrs, done);
     }
 }
 

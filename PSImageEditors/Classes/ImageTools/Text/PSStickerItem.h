@@ -7,6 +7,8 @@
 
 #import <UIKit/UIKit.h>
 
+static const NSInteger kLabelTag = 666666;
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface PSStickerItem : NSObject
@@ -17,11 +19,14 @@ NS_ASSUME_NONNULL_BEGIN
 /** text */
 @property (nonatomic, strong) NSAttributedString *attributedText;
 
+@property (nonatomic, assign) CGRect imageRect;
+
 /** display(image/text) */
-- (UIImage * __nullable)displayImage;
+//- (UIImage * __nullable)displayImage;
 
 /** main view */
-+ (instancetype)mainWithAttributedText:(NSAttributedString *)text;
++ (instancetype)mainWithAttributedText:(NSAttributedString *)text
+							 imageRect:(CGRect)imageRect;
 
 @end
 

@@ -21,7 +21,7 @@
     CGSize result = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, CFRangeMake(0, [self length]), NULL, size, NULL);
     CFRelease(framesetter);
 	
-    return result;
+    return CGSizeMake(ceilf(result.width), ceilf(result.height));
 }
 
 - (void)drawInContext:(CGContextRef)context withPosition:(CGPoint)p andHeight:(float)height andWidth:(float)width

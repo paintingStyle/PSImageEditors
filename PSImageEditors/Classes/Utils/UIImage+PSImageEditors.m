@@ -6,6 +6,8 @@
 //
 
 #import "UIImage+PSImageEditors.h"
+#import "PSMovingView.h"
+#import <AVFoundation/AVFoundation.h>
 
 #define kBitsPerComponent (8)
 #define kPixelChannelCount (4)
@@ -17,7 +19,7 @@
     
     NSString *bundleName = @"PSImageEditors.bundle";
     UIImage *image = [self imageWithName:name
-                        withBundleClass:NSClassFromString(@"PSPreviewViewController")
+                        withBundleClass:NSClassFromString(@"_PSImageEditorViewController")
                              bundleName:bundleName];
     return image;
 }
@@ -111,16 +113,23 @@
 	return resultImage;
 }
 
-+ (UIImage *)ps_screenshot:(UIView *)view {
++ (UIImage *)ps_screenshot:(UIView *)view imageRect:(CGRect)imageRect {
 	
 	CGSize targetSize = CGSizeZero;
 	
 	CGFloat transformScaleX = [[view.layer valueForKeyPath:@"transform.scale.x"] doubleValue];
 	CGFloat transformScaleY = [[view.layer valueForKeyPath:@"transform.scale.y"] doubleValue];
-	CGSize size = view.bounds.size;
-	targetSize = CGSizeMake(size.width * transformScaleX, size.height *  transformScaleY);
 	
-	UIGraphicsBeginImageContextWithOptions(targetSize, NO, [UIScreen mainScreen].scale);
+	if ([view isKindOfClass:[PSMovingView class]]) {
+		transformScaleX = ((PSMovingView *)view).transformScaleX;
+		transformScaleY = ((PSMovingView *)view).transformScaleY;
+	}
+
+	CGSize size = view.bounds.size;
+	targetSize = CGSizeMake(size.width * transformScaleX, size.height * transformScaleY);
+	
+	UIGraphicsBeginImageContext(targetSize);
+	//UIGraphicsBeginImageContextWithOptions(targetSize, NO, 0); // 统一为0，方便PC端查看
 	CGContextRef ctx = UIGraphicsGetCurrentContext();
 	CGContextSaveGState(ctx);
 	[view drawViewHierarchyInRect:CGRectMake(0, 0, targetSize.width, targetSize.height) afterScreenUpdates:NO];

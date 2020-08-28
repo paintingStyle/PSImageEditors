@@ -8,6 +8,7 @@
 #import "PSMovingView.h"
 
 #define kTextMargin 22
+#define KContentViewBorderWidth 2
 
 @interface PSMovingContentView : UIView <UIGestureRecognizerDelegate>
 
@@ -30,7 +31,6 @@
     }
     return NO;
 }
-
 
 @end
 
@@ -86,7 +86,7 @@
 
 - (void)autoDeactivated
 {
-    [self performSelector:@selector(setActiveEmoticonView:) withObject:nil afterDelay:self.deactivatedDelay];
+   // [self performSelector:@selector(setActiveEmoticonView:) withObject:nil afterDelay:self.deactivatedDelay];
 }
 
 - (void)setActiveEmoticonView:(PSMovingView *)view
@@ -96,8 +96,18 @@
 
 - (void)layoutSubviews {
 	[super layoutSubviews];
+}
+
+- (CGFloat)transformScaleX {
 	
-	LOG_FRAME(self.frame);
+	CGFloat transformScaleX = [[_contentView.layer valueForKeyPath:@"transform.scale.x"] doubleValue];
+	return transformScaleX;
+}
+
+- (CGFloat)transformScaleY {
+	
+	CGFloat transformScaleY = [[_contentView.layer valueForKeyPath:@"transform.scale.y"] doubleValue];
+	return transformScaleY;
 }
 
 - (instancetype)initWithItem:(PSStickerItem *)item
@@ -108,25 +118,17 @@
     }
     self = [super initWithFrame:CGRectMake(0, 0, view.frame.size.width+kTextMargin, view.frame.size.height+kTextMargin)];
     if (self){
-        _deactivatedDelay = 4.f;
+        //_deactivatedDelay = 4.f;
         _view = view;
         _item = item;
         _contentView = [[PSMovingContentView alloc] initWithFrame:view.bounds];
         _contentView.layer.borderColor = [[UIColor whiteColor] CGColor];
-        {
-            // shadow
-            _contentView.layer.shadowColor = [UIColor whiteColor].CGColor;
-            _contentView.layer.shadowOpacity = .5f;
-            _contentView.layer.shadowOffset = CGSizeMake(0, 0);
-            _contentView.layer.shadowRadius = 2.f;
-            
-            [self updateShadow];
-        }
+		_contentView.layer.borderWidth = KContentViewBorderWidth;
         
         _contentView.center = self.center;
         [_contentView addSubview:view];
         view.userInteractionEnabled = self.isActive;
-        view.frame = _contentView.bounds;
+		view.frame = _contentView.bounds;
         [self addSubview:_contentView];
         
         _deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -144,8 +146,8 @@
         _scale = 1.f;
         _screenScale = 1.f;
         _arg = 0;
-        _minScale = .2f;
-        _maxScale = 3.f;
+        _minScale = 1.0f;
+        _maxScale = 3.0f;
         
         [self initGestures];
         [self setActive:NO];
@@ -198,7 +200,7 @@
 
 - (void)updateShadow
 {
-    CGFloat shadowRadius = _contentView.layer.shadowRadius;
+	CGFloat shadowRadius = 5;
     
     UIBezierPath *path = [UIBezierPath bezierPath];
     path.lineJoinStyle = kCGLineJoinRound;
@@ -207,11 +209,13 @@
     UIBezierPath *topPath = [UIBezierPath bezierPathWithRect:CGRectMake(shadowRadius/2, -shadowRadius/2, _contentView.bounds.size.width-shadowRadius, shadowRadius)];
     UIBezierPath *rightPath = [UIBezierPath bezierPathWithRect:CGRectMake(_contentView.bounds.size.width-shadowRadius/2, shadowRadius, shadowRadius, _contentView.bounds.size.height-shadowRadius)];
     UIBezierPath *bottomPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, _contentView.bounds.size.height-shadowRadius/2, _contentView.bounds.size.width-shadowRadius, shadowRadius)];
+	
+	
     [path appendPath:topPath];
     [path appendPath:leftPath];
     [path appendPath:rightPath];
     [path appendPath:bottomPath];
-    
+	
     _contentView.layer.shadowPath = path.CGPath;
 }
 
@@ -246,9 +250,8 @@
     _isActive = active;
     _deleteButton.hidden = !active;
     _circleView.hidden = !active;
-    _contentView.layer.borderWidth = (active) ? 1/_scale/self.screenScale : 0;
+	_contentView.layer.borderWidth = (active) ? KContentViewBorderWidth/_scale/self.screenScale : 0;
     _contentView.layer.cornerRadius = (active) ? 3/_scale/self.screenScale : 0;
-    
     _contentView.layer.shadowColor = (active) ? [UIColor blackColor].CGColor : [UIColor clearColor].CGColor;
     
     _view.userInteractionEnabled = active;
@@ -261,15 +264,15 @@
 
 - (void)setScale:(CGFloat)scale rotation:(CGFloat)rotation
 {
-    if (rotation != MAXFLOAT) { //  3612167300380227
+    if (rotation != MAXFLOAT) { 
         _arg = rotation;
     }
-    _scale = MIN(MAX(scale, _minScale), _maxScale);
-    
+	_scale = MIN(MAX(scale, _minScale), _maxScale);
+	
     self.transform = CGAffineTransformIdentity;
     
     _contentView.transform = CGAffineTransformMakeScale(_scale, _scale);
-    
+	
     CGRect rct = self.frame;
     rct.origin.x += (rct.size.width - (_contentView.frame.size.width + kTextMargin)) / 2;
     rct.origin.y += (rct.size.height - (_contentView.frame.size.height + kTextMargin)) / 2;
@@ -278,15 +281,36 @@
     self.frame = rct;
     
     _contentView.center = CGPointMake(rct.size.width/2, rct.size.height/2);
-    _deleteButton.center = CGPointMake(_contentView.frame.origin.x-7, _contentView.frame.origin.y);
+    _deleteButton.center = CGPointMake(_contentView.frame.origin.x, _contentView.frame.origin.y);
     _circleView.center = CGPointMake(CGRectGetMaxX(_contentView.frame), CGRectGetMaxY(_contentView.frame));
     
     self.transform = CGAffineTransformMakeRotation(_arg);
 
+
+	// 解决UILabel字体模糊, 这里只处理单行文本
+	UILabel *label = [_view.subviews.lastObject viewWithTag:kLabelTag];
+	if (label.numberOfLines != 0) {
+		label.font = [UIFont systemFontOfSize:18 *_scale];
+		label.transform = CGAffineTransformMakeScale(1 / _scale, 1 / _scale);
+		label.sizeToFit;
+	}
+	
     if (_isActive) {
-        _contentView.layer.borderWidth = 1/_scale/self.screenScale;
+		_contentView.layer.borderWidth =  KContentViewBorderWidth/_scale/self.screenScale;
         _contentView.layer.cornerRadius = 3/_scale/self.screenScale;
     }
+}
+
+- (CGSize)sizeWithFont:(UIFont *)font
+			   maxSize:(CGSize)maxSize
+				  text:(NSString *)text {
+	
+	CGSize size = CGSizeZero;
+	if (text.length > 0) {
+		CGRect frame = [text boundingRectWithSize:maxSize options:NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:@{ NSFontAttributeName: font } context:nil];
+		size = CGSizeMake(frame.size.width, frame.size.height + 1);
+	}
+	return size;
 }
 
 - (void)setScreenScale:(CGFloat)screenScale
@@ -315,11 +339,19 @@
 {
     [self cancelDeactivated];
     [self removeFromSuperview];
+	if (self.delete) {
+		self.delete();
+	}
 }
 
 - (void)viewDidTap:(UITapGestureRecognizer*)sender
 {
-    if (self.tapEnded) self.tapEnded(self);
+	
+	CGPoint point = [sender locationInView:self.superview];
+	if (self.tapEnded) {
+		BOOL ended =  self.tapEnded(self, point);
+		if (!ended) { return; }
+	}
     [[self class] setActiveEmoticonView:self];
 }
 
@@ -327,7 +359,6 @@
 {
     
     CGPoint p = [sender translationInView:self.superview];
-    
     if(sender.state == UIGestureRecognizerStateBegan){
         [[self class] setActiveEmoticonView:self];
         _initialPoint = self.center;
@@ -336,14 +367,32 @@
     self.center = CGPointMake(_initialPoint.x + p.x, _initialPoint.y + p.y);
     
     if (sender.state == UIGestureRecognizerStateEnded) {
+		
+		// 超出紧贴边界
         CGRect rect = [self convertRect:_contentView.frame toView:self.superview];
-		BOOL isMoveCenter = !CGRectIntersectsRect(self.superview.frame, rect);
-        if (isMoveCenter) {
-            /** 超出边界线 重置会中间 */
-            [UIView animateWithDuration:0.25f animations:^{
-                self.center = [self.superview convertPoint:[UIApplication sharedApplication].keyWindow.center fromView:(UIView *)[UIApplication sharedApplication].keyWindow];
-            }];
-        }
+		CGRect r = self.frame;
+		
+		if (rect.origin.x < 0) {
+			CGFloat distacn = CGRectGetWidth(_circleView.frame) *0.5 +(7 *_scale);
+			r.origin.x = -(distacn);
+		}
+		if (rect.origin.x > CGRectGetWidth(self.superview.frame) -rect.size.width) {
+			CGFloat distacn = _scale <= 1.0 ? 0:(7 *_scale)-4;
+			r.origin.x = CGRectGetWidth(self.superview.frame) -rect.size.width + distacn;
+		}
+		if (rect.origin.y < PS_SAFEAREA_TOP_DISTANCE) {
+			CGFloat distacn = CGRectGetWidth(_circleView.frame) +(7 *_scale);
+			r.origin.y = PS_IPHONE_X_FUTURE_MODELS ? PS_SAFEAREA_TOP_DISTANCE -(7 *_scale) :distacn;
+		}
+		if (rect.origin.y > CGRectGetHeight(self.superview.frame) -rect.size.height -self.bottomSafeDistance) {
+			r.origin.y = CGRectGetHeight(self.superview.frame)-self.bottomSafeDistance- (7 *_scale);
+		}
+		
+		if (!CGRectEqualToRect(self.frame, r)) {
+			[UIView animateWithDuration:0.25f animations:^{
+				self.frame = r;
+			}];
+		}
         [self autoDeactivated];
     }
 	

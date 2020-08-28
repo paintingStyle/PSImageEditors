@@ -53,7 +53,7 @@
     [self.backButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.size.equalTo(@30);
         make.left.equalTo(@10);
-		make.top.equalTo(@(18+PS_SAFEAREA_TOP_DISTANCE));
+		make.centerY.equalTo(self);
     }];
 }
 
