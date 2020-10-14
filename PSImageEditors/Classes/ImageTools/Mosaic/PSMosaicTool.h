@@ -9,7 +9,6 @@
 
 @interface PSMosaicTool : PSImageToolBase
 
-//@property (nonatomic, copy) void (^canUndoBlock) (BOOL canUndo);
 
 - (void)undo;
 - (BOOL)canUndo;

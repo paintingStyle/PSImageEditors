@@ -25,6 +25,7 @@
 - (void)buildClipImageCallback:(void(^)(UIImage *clipedImage))callback;
 - (void)hiddenToolBar:(BOOL)hidden animation:(BOOL)animation;
 - (void)hiddenBottomToolBar:(BOOL)hidden animation:(BOOL)animation;
+- (void)refreshImageView;
 
 - (void)addTrajectoryName:(NSString *)name;
 - (void)removeLastTrajectory;

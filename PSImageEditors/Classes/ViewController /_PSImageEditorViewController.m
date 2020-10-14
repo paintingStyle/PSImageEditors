@@ -259,35 +259,12 @@ PSBottomToolBarDelegate> {
 
 - (void)dismiss {
 	
-	if (self.produceChanges) {
-		UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"是否放弃当前图片操作"
-																				 message:nil
-																		  preferredStyle:UIAlertControllerStyleAlert];
-		
-
-		 UIAlertAction *confirmAction = [UIAlertAction actionWithTitle:@"继续" style:UIAlertActionStyleDefault handler:NULL];
-		 [alertController addAction:confirmAction];
-
-		UIAlertAction *destructiveAction = [UIAlertAction actionWithTitle:@"放弃" style:UIAlertActionStyleDestructive
-																  handler:^(UIAlertAction * _Nonnull action) {
-			self.wilDismiss = YES;
-			if (self.presentingViewController
-				&& self.navigationController.viewControllers.count == 1) {
-				[self dismissViewControllerAnimated:NO completion:nil];
-			} else {
-				[self.navigationController popViewControllerAnimated:NO];
-			}
-		}];
-		 [alertController addAction:destructiveAction];
-		[self presentViewController:alertController animated:YES completion:nil];
-	}else {
-		self.wilDismiss = YES;
-		if (self.presentingViewController
-			&& self.navigationController.viewControllers.count == 1) {
-			[self dismissViewControllerAnimated:NO completion:nil];
-		} else {
-			[self.navigationController popViewControllerAnimated:NO];
-		}
+	self.wilDismiss = YES;
+	if (self.presentingViewController
+		&& self.navigationController.viewControllers.count == 1) {
+		[self dismissViewControllerAnimated:YES completion:nil];
+	} else {
+		[self.navigationController popViewControllerAnimated:YES];
 	}
 	
 }
@@ -298,7 +275,26 @@ PSBottomToolBarDelegate> {
     
     switch (event) {
         case PSTopToolBarEventCancel: {
-			[self dismiss];
+			
+			if (self.produceChanges) {
+				UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"是否放弃当前图片操作?"
+																						 message:nil
+																				  preferredStyle:UIAlertControllerStyleAlert];
+				
+
+				 UIAlertAction *confirmAction = [UIAlertAction actionWithTitle:@"继续" style:UIAlertActionStyleDefault handler:NULL];
+				 [alertController addAction:confirmAction];
+
+				UIAlertAction *destructiveAction = [UIAlertAction actionWithTitle:@"放弃" style:UIAlertActionStyleDestructive
+																		  handler:^(UIAlertAction * _Nonnull action) {
+					[self dismiss];
+				}];
+				 [alertController addAction:destructiveAction];
+				[self presentViewController:alertController animated:YES completion:nil];
+			}else {
+				[self dismiss];
+			}
+			
 			if (self.delegate && [self.delegate respondsToSelector:@selector(imageEditorDidCancel)]) {
 				[self.delegate imageEditorDidCancel];
 			}
@@ -344,16 +340,6 @@ PSBottomToolBarDelegate> {
 			break;
 		case PSBottomToolBarEventUndo:
 		{
-//			if (self.currentTool == self.drawTool) {
-//				[self.drawTool undo];
-//				self.bootomToolBar.canUndo = [self.drawTool canUndo];
-//			}if (self.currentTool == self.texTool) {
-//				[self.texTool undo];
-//				self.bootomToolBar.canUndo = [self.texTool canUndo];
-//			}else if (self.currentTool == self.mosaicTool) {
-//				[self.mosaicTool undo];
-//				self.bootomToolBar.canUndo = [self.mosaicTool canUndo];
-//			}
 			[self executeUndo];
 		}
 			break;
@@ -383,6 +369,8 @@ PSBottomToolBarDelegate> {
 		[self.texTool undo];
 	}else if (c == [self.mosaicTool class]) {
 		[self.mosaicTool undo];
+	}else if (c == [self.clippingTool class]) {
+		[self.clippingTool undo];
 	}else {
 		NSLog(@"无效的 TrajectoryName");
 	}
@@ -534,12 +522,6 @@ PSBottomToolBarDelegate> {
         
 		@weakify(self);
         _drawTool = [[PSDrawTool alloc] initWithImageEditor:self withOption:[self drawToolOption]];
-//		_drawTool.canUndoBlock = ^(BOOL canUndo) {
-//			@strongify(self);
-//			if (self.currentTool == _drawTool) {
-//				self.bootomToolBar.canUndo = canUndo;
-//			}
-//		};
         _drawTool;
     }));
 }
@@ -549,12 +531,6 @@ PSBottomToolBarDelegate> {
     return LAZY_LOAD(_mosaicTool, ({
         @weakify(self);
         _mosaicTool = [[PSMosaicTool alloc] initWithImageEditor:self withOption:nil];
-//		_mosaicTool.canUndoBlock = ^(BOOL canUndo) {
-//			@strongify(self);
-//			if (self.currentTool == _mosaicTool) {
-//				self.bootomToolBar.canUndo = canUndo;
-//			}
-//		};
         _mosaicTool;
     }));
 }
@@ -564,12 +540,6 @@ PSBottomToolBarDelegate> {
     return LAZY_LOAD(_texTool, ({
         @weakify(self);
         _texTool = [[PSTexTool alloc] initWithImageEditor:self withOption:[self textToolOption]];
-//		_texTool.updateUndoBlock = ^(BOOL undo) {
-//			@strongify(self);
-//			if (self.currentTool == _texTool) {
-//				self.bootomToolBar.canUndo = undo;
-//			}
-//		};
         _texTool;
     }));
 }
@@ -601,7 +571,6 @@ PSBottomToolBarDelegate> {
         
         _imageView = [[UIImageView alloc] initWithImage:_originalImage];
 		_imageView.contentMode = UIViewContentModeScaleAspectFit;
-		//_imageView.clipsToBounds = YES;
         _imageView;
     }));
 }

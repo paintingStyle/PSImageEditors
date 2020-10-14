@@ -3,7 +3,7 @@
 Pod::Spec.new do |s|
 	
     s.name         = "PSImageEditors"
-    s.version      = "0.2.4"
+    s.version      = "0.2.5"
     s.summary      = "一个简而至美的图片编辑器"
     s.homepage     = "https://github.com/paintingStyle/PSImageEditors"
     s.license      = "MIT"

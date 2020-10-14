@@ -13,18 +13,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PSStickerItem : NSObject
 
-/** image/gif */
 @property (nonatomic, strong) UIImage *image;
 
-/** text */
 @property (nonatomic, strong) NSAttributedString *attributedText;
 
 @property (nonatomic, assign) CGRect imageRect;
 
-/** display(image/text) */
-//- (UIImage * __nullable)displayImage;
-
-/** main view */
 + (instancetype)mainWithAttributedText:(NSAttributedString *)text
 							 imageRect:(CGRect)imageRect;
 

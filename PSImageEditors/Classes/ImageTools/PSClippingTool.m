@@ -8,8 +8,11 @@
 #import "PSClippingTool.h"
 #import "TOCropViewController.h"
 #import "UIImage+CropRotate.h"
+#import "PSCropViewController.h"
 
 @interface PSClippingTool()<TOCropViewControllerDelegate>
+
+@property (nonatomic, strong) NSMutableArray *imagesCache;
 
 @end
 
@@ -30,22 +33,23 @@
 
 #pragma mark - Method
 
+- (BOOL)canUndo {
+	return self.imagesCache.count;
+}
+
+- (void)undo {
+	
+	UIImage *image = self.imagesCache.lastObject;
+	self.editor.imageView.image = image;
+	[self.editor refreshImageView];
+}
+
 - (void)clippingWithImage:(UIImage *)image {
 	
-	TOCropViewController *cropController = [[TOCropViewController alloc] initWithCroppingStyle:
+	[self.imagesCache addObject:image];
+	
+	PSCropViewController *cropController = [[PSCropViewController alloc] initWithCroppingStyle:
 											TOCropViewCroppingStyleDefault image:image];
-	
-	
-	TOCropToolbar *toolbar = cropController.toolbar;
-	
-	[toolbar.doneTextButton setImage:[self doneImage] forState:UIControlStateNormal];
-	[toolbar.cancelTextButton setImage:[self cancelImage] forState:UIControlStateNormal];
-	[toolbar.doneTextButton setTitle:nil forState:UIControlStateNormal];
-	[toolbar.cancelTextButton setTitle:nil forState:UIControlStateNormal];
-	[toolbar.doneTextButton setTintColor:[UIColor whiteColor]];
-	[toolbar.cancelTextButton setTintColor:[UIColor whiteColor]];
-	
-	
 	cropController.aspectRatioPickerButtonHidden = YES;
 	cropController.delegate = self;
 	CGRect viewFrame = [self.editor.view convertRect:self.editor.imageView.frame
@@ -138,6 +142,12 @@
 		[cropViewController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 	}
 	
+	if (cropViewController.cropView.canBeReset) {
+		[self.editor addTrajectoryName:NSStringFromClass([self class])];
+	}else {
+		[self.imagesCache removeLastObject];
+	}
+	
 	[self cleanup];
 }
 
@@ -148,5 +158,17 @@
 		self.dismiss(cancelled);
 		[cropViewController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 	}
+	
+	if (cancelled) {
+		[self.imagesCache removeLastObject];
+	}
 }
+
+- (NSMutableArray *)imagesCache {
+	if (!_imagesCache) {
+		_imagesCache = [NSMutableArray array];
+	}
+	return _imagesCache;
+}
+
 @end

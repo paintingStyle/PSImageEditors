@@ -12,6 +12,8 @@
 @property (nonatomic, copy) void (^clipedCompleteBlock) (UIImage *image, CGRect cropRect);
 @property (nonatomic, copy) void (^dismiss) (BOOL cancelled);
 
+- (BOOL)canUndo;
+- (void)undo;
 
 @end
 

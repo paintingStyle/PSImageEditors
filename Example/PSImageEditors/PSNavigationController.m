@@ -7,7 +7,6 @@
 //
 
 #import "PSNavigationController.h"
-//#import <UIImage+PSImageEditors.h>
 
 #define UIColorFromRGBA(rgbValue, alphaValue) [UIColor \
 colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 \

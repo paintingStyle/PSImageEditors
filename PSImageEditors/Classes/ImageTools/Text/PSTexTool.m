@@ -49,9 +49,6 @@ static NSString *kDefalutText = @"点击输入";
 			[obj removeFromSuperview];
 		}
 	}];
-//	if (self.updateUndoBlock) {
-//		self.updateUndoBlock(NO);
-//	}
 }
 
 - (UIImage *)textImage {
@@ -101,9 +98,6 @@ static NSString *kDefalutText = @"点击输入";
 		self.initializeTextItem = NO;
 	}else {
 		[PSMovingView setActiveEmoticonView:[self activeMovingView]];
-//		if (self.updateUndoBlock) {
-//			self.updateUndoBlock([self activeMovingView]);
-//		}
 	}
 	
 }
@@ -179,9 +173,6 @@ static NSString *kDefalutText = @"点击输入";
 	}];
 	[movingView setDelete:^{
 		[weakSelf.editor removeLastTrajectoryName:NSStringFromClass([self class])];
-//		if (weakSelf.updateUndoBlock) {
-//			weakSelf.updateUndoBlock(NO);
-//		}
 	}];
 	
 	self.editor.scrollViewDidZoomBlock = ^(CGFloat zoomScale) {
@@ -195,10 +186,6 @@ static NSString *kDefalutText = @"点击输入";
 	
 	
 	[self refresUndoState];
-	
-//	if (self.updateUndoBlock) {
-//		self.updateUndoBlock(YES);
-//	}
 }
 
 - (BOOL)canUndo {
@@ -237,9 +224,6 @@ static NSString *kDefalutText = @"点击输入";
 			[weakSelf.textView removeFromSuperview];
 			weakSelf.tapGesture.enabled = YES;
 			[weakSelf.editor removeLastTrajectory];
-//			if (weakSelf.updateUndoBlock) {
-//				weakSelf.updateUndoBlock([self activeMovingView]);
-//			}
 			return;
 		}
 		
